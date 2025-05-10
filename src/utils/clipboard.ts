@@ -79,7 +79,54 @@ export async function getPaginatedClipboardEntries(
       ]
     )) as ClipboardEntry[];
   }
-  console.log("getPaginatedClipboardEntries", result);
+  return result;
+}
+
+export async function getAllClipboardEntries(
+  query: string
+): Promise<ClipboardEntry[]> {
+  let result;
+  if (!query) {
+    result = (await db.select(
+      "SELECT * FROM clipboard_entries ORDER BY timestamp DESC"
+    )) as ClipboardEntry[];
+  } else {
+    // Multi-word (tokenized) search: all words must be present in content or path, case-insensitive
+    const words = query.trim().split(/\s+/);
+    const likeClauses = words
+      .map(
+        () => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)"
+      )
+      .join(" AND ");
+    const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`]);
+    // For relevance, boost if all words match exactly, then if any word is a prefix, then if all are substrings
+    // (Simple: just use the first word for exact/prefix, rest for AND substrings)
+    const firstWord = words[0];
+    const startsWithQuery = `${firstWord}%`;
+    const likeQuery = `%${firstWord}%`;
+    result = (await db.select(
+      `SELECT *,
+        (CASE
+          WHEN content = ? COLLATE NOCASE OR path = ? COLLATE NOCASE THEN 3
+          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE THEN 2
+          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE THEN 1
+          ELSE 0
+        END) AS relevance
+      FROM clipboard_entries
+      WHERE ${likeClauses}
+      ORDER BY relevance DESC, timestamp DESC
+      LIMIT ? OFFSET ?`,
+      [
+        firstWord,
+        firstWord,
+        startsWithQuery,
+        startsWithQuery,
+        likeQuery,
+        likeQuery,
+        ...likeParams,
+      ]
+    )) as ClipboardEntry[];
+  }
   return result;
 }
 

@@ -1,8 +1,8 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import { HStack, Separator, VStack } from "@yamada-ui/react";
+import { HStack, Separator, usePrevious, VStack } from "@yamada-ui/react";
 import { SidebarList } from "../components/sidebar-list";
 import { DetailsPanel } from "../components/details-panel";
 import { TopBar } from "../components/top-bar";
@@ -98,24 +98,49 @@ function HomeComponent() {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const itemRefs = React.useRef<(HTMLLIElement | null)[]>([]);
 
-  const { data: results = [], refetch } = useQuery<ClipboardEntry[], Error>({
-    queryKey: ["clipboard-search", debouncedQuery],
-    queryFn: () => getPaginatedClipboardEntries(debouncedQuery),
-    enabled: true,
-  });
+  const LIMIT = 50;
 
-  const filteredResults = React.useMemo(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
+    useInfiniteQuery<ClipboardEntry[], Error>({
+      initialPageParam: 0,
+      queryKey: ["clipboard-search", debouncedQuery],
+      queryFn: ({ pageParam }) =>
+        getPaginatedClipboardEntries(
+          debouncedQuery,
+          LIMIT,
+          pageParam as number
+        ),
+      getNextPageParam: (lastPage, allPages) =>
+        lastPage.length === LIMIT ? allPages.length * LIMIT : undefined,
+      enabled: true,
+    });
+
+  // Flatten paginated results
+  const results = React.useMemo(
+    () => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []),
+    [data]
+  );
+
+  // Deduplicate and group entries by date, then flatten for selection
+  const grouped = React.useMemo(() => groupEntriesByDate(results), [results]);
+  const flatList = React.useMemo(() => {
+    const arr: (ClipboardEntry & { count: number; group: string })[] = [];
+    Object.entries(grouped).forEach(([date, items]) => {
+      items.forEach((item) => arr.push({ ...item, group: date }));
+    });
+    return arr;
+  }, [grouped]);
+
+  // Filter by type after deduplication
+  const filteredFlatList = React.useMemo(
     () =>
       typeFilter && typeFilter !== "all"
-        ? results.filter((entry) => entry.type === typeFilter)
-        : results,
-    [results, typeFilter]
+        ? flatList.filter((entry) => entry.type === typeFilter)
+        : flatList,
+    [flatList, typeFilter]
   );
 
-  const grouped = React.useMemo(
-    () => groupEntriesByDate(filteredResults),
-    [filteredResults]
-  );
+  const previousDataLength = usePrevious(flatList.length);
 
   const typeOptions: TypeFilter[] = React.useMemo(
     () => [
@@ -201,12 +226,12 @@ function HomeComponent() {
         const newIndex =
           direction === "up"
             ? Math.max(0, prev - 1)
-            : Math.min(filteredResults.length - 1, prev + 1);
+            : Math.min(filteredFlatList.length - 1, prev + 1);
         handleUpdateSelectedIndex(newIndex);
         return newIndex;
       });
     },
-    [filteredResults]
+    [filteredFlatList]
   );
 
   const handleKeyDown = React.useCallback(
@@ -214,10 +239,10 @@ function HomeComponent() {
       if (e.key === "Enter") {
         e.preventDefault();
         e.stopPropagation();
-        copyClipboardEntry(filteredResults[selectedIndex], () => {});
+        copyClipboardEntry(filteredFlatList[selectedIndex], () => {});
       }
     },
-    [filteredResults, selectedIndex]
+    [filteredFlatList, selectedIndex]
   );
 
   return (
@@ -244,13 +269,17 @@ function HomeComponent() {
         separator={<Separator orientation="vertical" />}
       >
         <SidebarList
-          grouped={grouped}
+          entries={filteredFlatList}
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
           selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
-          ref={undefined}
           itemRefs={itemRefs}
+          totalEntries={results.length}
+          previousDataLength={previousDataLength}
         />
-        <DetailsPanel selectedEntry={filteredResults[selectedIndex]} />
+        <DetailsPanel selectedEntry={filteredFlatList[selectedIndex]} />
       </HStack>
     </VStack>
   );

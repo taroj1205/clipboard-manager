@@ -13,6 +13,7 @@ import {
   IconButton,
   useNotice,
   Float,
+  Box,
 } from "@yamada-ui/react";
 import { CopyIcon, ImageIcon, TextIcon } from "@yamada-ui/lucide";
 import type { ClipboardEntry } from "../utils/clipboard";
@@ -101,6 +102,43 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
                 }
                 boxSize="xl"
               />
+            ) : selectedEntry.type === "color" ? (
+              <Center h="200px">
+                <Box
+                  position="relative"
+                  w="120px"
+                  h="120px"
+                  borderRadius="full"
+                  bg={selectedEntry.content}
+                  boxShadow="md"
+                  borderWidth="2px"
+                  borderColor="gray.300"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  role="group"
+                >
+                  <IconButton
+                    aria-label="Copy Color"
+                    icon={<CopyIcon />}
+                    size="lg"
+                    variant="solid"
+                    colorScheme="blackAlpha"
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    opacity={0}
+                    transform="translate(-50%, -50%)"
+                    _groupHover={{
+                      opacity: 1,
+                    }}
+                    onClick={() => {
+                      copyClipboardEntry(selectedEntry, notice);
+                    }}
+                    title="Copy Color"
+                  />
+                </Box>
+              </Center>
             ) : (
               <Text>{selectedEntry.content}</Text>
             )}

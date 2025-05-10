@@ -6,30 +6,127 @@ import {
   ListItem,
   HStack,
   Badge,
-  ScrollArea,
+  InfiniteScrollArea,
   useNotice,
   Spacer,
+  ColorSwatch,
+  Loading,
+  ScrollArea,
+  EmptyState,
+  EmptyStateIndicator,
+  EmptyStateTitle,
+  EmptyStateDescription,
 } from "@yamada-ui/react";
-import { ClipboardEntry } from "../utils/clipboard";
+import {
+  ClipboardEntry,
+  getPaginatedClipboardEntries,
+  copyClipboardEntry,
+} from "../utils/clipboard";
 import { ClipboardImage } from "./clipboard-image";
-import { copyClipboardEntry } from "../utils/clipboard";
 import { FileIcon, ImageIcon } from "@yamada-ui/lucide";
 
 interface SidebarListProps {
-  grouped: Record<string, (ClipboardEntry & { count: number })[]>;
+  entries: ClipboardEntry[];
+  fetchNextPage: () => void;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
   selectedIndex: number | null;
   setSelectedIndex: (index: number) => void;
   itemRefs: React.MutableRefObject<(HTMLLIElement | null)[]>;
+  previousDataLength: number | undefined;
+  totalEntries: number;
+}
+
+// Grouping helper (copy from index.tsx)
+function groupEntriesByDate(
+  entries: (ClipboardEntry & { count?: number })[]
+): Record<string, (ClipboardEntry & { count: number })[]> {
+  const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
+  const dedupedMap = new Map<
+    string,
+    { entry: ClipboardEntry; count: number }
+  >();
+  for (const entry of entries) {
+    const key = `${entry.type}::${entry.content}`;
+    if (dedupedMap.has(key)) {
+      dedupedMap.get(key)!.count++;
+    } else {
+      dedupedMap.set(key, { entry, count: 1 });
+    }
+  }
+  for (const { entry, count } of dedupedMap.values()) {
+    const date = new Date(entry.timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    let groupKey: string;
+    if (date.toDateString() === today.toDateString()) {
+      groupKey = "Today";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      groupKey = "Yesterday";
+    } else {
+      groupKey = date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
+    if (!groups[groupKey]) {
+      groups[groupKey] = [];
+    }
+    groups[groupKey].push({ ...entry, count });
+  }
+  for (const key in groups) {
+    groups[key].sort((a, b) => b.timestamp - a.timestamp);
+  }
+  return groups;
 }
 
 export const SidebarList = React.memo(
   React.forwardRef<HTMLDivElement, SidebarListProps>(
-    ({ grouped, selectedIndex, setSelectedIndex, itemRefs }, ref) => {
-      let index = 0;
+    (
+      {
+        entries,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        selectedIndex,
+        setSelectedIndex,
+        itemRefs,
+        previousDataLength,
+        totalEntries,
+      },
+      ref
+    ) => {
       const notice = useNotice();
 
+      // Group entries by date
+      const grouped = React.useMemo(
+        () => groupEntriesByDate(entries),
+        [entries]
+      );
+
+      // Flat list for index mapping
+      const flatList = React.useMemo(() => {
+        const arr: (ClipboardEntry & { count: number; group: string })[] = [];
+        Object.entries(grouped).forEach(([date, items]) => {
+          items.forEach((item) => arr.push({ ...item, group: date }));
+        });
+        return arr;
+      }, [grouped]);
+
+      // Refs for keyboard navigation
+      flatList.forEach((_, i) => {
+        itemRefs.current[i] = itemRefs.current[i] || null;
+      });
+
+      // Show EmptyState only if there are no entries at all and not loading
+      const isTrulyEmpty = flatList.length === 0 && !isFetchingNextPage;
+
       return (
-        <ScrollArea
+        <InfiniteScrollArea
+          as={ScrollArea}
           w="full"
           minW="sm"
           maxW="sm"
@@ -37,102 +134,140 @@ export const SidebarList = React.memo(
           overflowY="auto"
           overflowX="hidden"
           ref={ref}
+          onLoad={({ finish }) => {
+            console.log(totalEntries, previousDataLength);
+            if (
+              totalEntries % 50 === 0 &&
+              previousDataLength !== totalEntries
+            ) {
+              console.log("fetching next page");
+              fetchNextPage();
+            } else {
+              if (!hasNextPage) finish();
+            }
+          }}
+          loading={<Loading fontSize="lg" />}
         >
-          {Object.entries(grouped).map(([date, entries]) => (
-            <VStack key={date} align="stretch" gap="xs">
-              <Text
-                fontWeight="bold"
-                fontSize="sm"
-                p="sm"
-                position="sticky"
-                top={0}
-                zIndex="sticky"
-                bg="blackAlpha.100"
-                backdropFilter="blur(10px)"
-                rounded="md"
-              >
-                {date}
-              </Text>
-              <List>
-                {entries.map((entry) => {
-                  const isSelected = index === selectedIndex;
-                  const currentIndex = index;
-                  const refProp = (el: HTMLLIElement | null) => {
-                    itemRefs.current[currentIndex] = el;
-                  };
-                  index++;
-                  return (
-                    <ListItem
-                      ref={refProp}
-                      key={entry.timestamp + entry.content}
-                      bg={isSelected ? "whiteAlpha.300" : undefined}
-                      borderRadius="md"
-                      transitionProperty="background"
-                      transitionDuration="fast"
-                      px="2"
-                      py="1"
-                      cursor="pointer"
-                      onClick={() => setSelectedIndex(currentIndex)}
-                      onDoubleClick={() => copyClipboardEntry(entry, notice)}
-                      tabIndex={0}
-                      _hover={{ bg: "whiteAlpha.400" }}
-                    >
-                      <HStack gap="sm">
-                        {entry.type === "image" ? (
-                          <ImageIcon fontSize="16px" />
-                        ) : (
-                          <FileIcon fontSize="16px" />
-                        )}
-                        {entry.type === "image" && entry.path ? (
-                          <ClipboardImage
-                            src={
-                              Array.isArray(entry.path)
-                                ? entry.path[0]
-                                : entry.path
-                            }
-                            alt={entry.content ?? "Clipboard entry"}
-                            maxH="20px"
-                          />
-                        ) : (
-                          <Text lineClamp={1} fontSize="md">
-                            {entry.content}
-                          </Text>
-                        )}
-                        <Spacer />
-                        {entry.count > 1 && (
+          {isTrulyEmpty ? (
+            <EmptyState size="md">
+              <EmptyStateIndicator>
+                <FileIcon fontSize="40px" />
+              </EmptyStateIndicator>
+              <EmptyStateTitle>No clipboard entries</EmptyStateTitle>
+              <EmptyStateDescription>
+                Your clipboard history is empty. Copy something to get started!
+              </EmptyStateDescription>
+            </EmptyState>
+          ) : (
+            Object.entries(grouped).map(([date, entries]) => (
+              <VStack key={date} align="stretch" gap="xs">
+                <Text
+                  fontWeight="bold"
+                  fontSize="sm"
+                  p="sm"
+                  position="sticky"
+                  top={0}
+                  zIndex="sticky"
+                  bg="blackAlpha.100"
+                  backdropFilter="blur(10px)"
+                  rounded="md"
+                >
+                  {date}
+                </Text>
+                <List>
+                  {entries.map((entry, idx) => {
+                    // Find the flat index for selection
+                    const flatIndex = flatList.findIndex(
+                      (e) =>
+                        e.timestamp === entry.timestamp &&
+                        e.content === entry.content
+                    );
+                    // Only render if flatIndex is in range
+                    if (flatIndex === -1 || flatIndex >= flatList.length)
+                      return null;
+                    const isSelected = flatIndex === selectedIndex;
+                    const refProp = (el: HTMLLIElement | null) => {
+                      itemRefs.current[flatIndex] = el;
+                    };
+                    return (
+                      <ListItem
+                        ref={refProp}
+                        key={entry.timestamp + entry.content}
+                        bg={isSelected ? "whiteAlpha.300" : undefined}
+                        borderRadius="md"
+                        transitionProperty="background"
+                        transitionDuration="fast"
+                        px="2"
+                        py="1"
+                        cursor="pointer"
+                        onClick={() => setSelectedIndex(flatIndex)}
+                        onDoubleClick={() => copyClipboardEntry(entry, notice)}
+                        tabIndex={0}
+                        _hover={{ bg: "whiteAlpha.400" }}
+                      >
+                        <HStack gap="sm">
+                          {entry.type === "image" ? (
+                            <ImageIcon fontSize="16px" />
+                          ) : entry.type === "color" ? (
+                            <ColorSwatch
+                              h="16px"
+                              w="16px"
+                              color={entry.content}
+                            />
+                          ) : (
+                            <FileIcon fontSize="16px" />
+                          )}
+                          {entry.type === "image" && entry.path ? (
+                            <ClipboardImage
+                              src={
+                                Array.isArray(entry.path)
+                                  ? entry.path[0]
+                                  : entry.path
+                              }
+                              alt={entry.content ?? "Clipboard entry"}
+                              maxH="20px"
+                            />
+                          ) : (
+                            <Text lineClamp={1} fontSize="md">
+                              {entry.content}
+                            </Text>
+                          )}
+                          <Spacer />
+                          {entry.count > 1 && (
+                            <Badge
+                              colorScheme="red"
+                              fontSize="xs"
+                              title="Copy count"
+                            >
+                              x{entry.count}
+                            </Badge>
+                          )}
                           <Badge
-                            colorScheme="red"
-                            fontSize="xs"
-                            title="Copy count"
+                            colorScheme={
+                              entry.type === "text"
+                                ? "purple"
+                                : entry.type === "image"
+                                ? "blue"
+                                : entry.type === "color"
+                                ? "yellow"
+                                : "gray"
+                            }
                           >
-                            x{entry.count}
+                            {entry.type.charAt(0).toUpperCase() +
+                              entry.type.slice(1)}
                           </Badge>
-                        )}
-                        <Badge
-                          colorScheme={
-                            entry.type === "text"
-                              ? "purple"
-                              : entry.type === "image"
-                              ? "blue"
-                              : entry.type === "color"
-                              ? "yellow"
-                              : "gray"
-                          }
-                        >
-                          {entry.type.charAt(0).toUpperCase() +
-                            entry.type.slice(1)}
-                        </Badge>
-                      </HStack>
-                      <Text fontSize="xs" color="gray.400">
-                        {new Date(entry.timestamp).toLocaleString()}
-                      </Text>
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </VStack>
-          ))}
-        </ScrollArea>
+                        </HStack>
+                        <Text fontSize="xs" color="gray.400">
+                          {new Date(entry.timestamp).toLocaleString()}
+                        </Text>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              </VStack>
+            ))
+          )}
+        </InfiniteScrollArea>
       );
     }
   )
