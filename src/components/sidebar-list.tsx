@@ -17,11 +17,7 @@ import {
   EmptyStateTitle,
   EmptyStateDescription,
 } from "@yamada-ui/react";
-import {
-  ClipboardEntry,
-  getPaginatedClipboardEntries,
-  copyClipboardEntry,
-} from "../utils/clipboard";
+import { ClipboardEntry, copyClipboardEntry } from "../utils/clipboard";
 import { ClipboardImage } from "./clipboard-image";
 import { FileIcon, ImageIcon } from "@yamada-ui/lucide";
 
@@ -175,7 +171,7 @@ export const SidebarList = React.memo(
                   {date}
                 </Text>
                 <List>
-                  {entries.map((entry, idx) => {
+                  {entries.map((entry) => {
                     // Find the flat index for selection
                     const flatIndex = flatList.findIndex(
                       (e) =>

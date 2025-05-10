@@ -179,7 +179,7 @@ export async function copyClipboardEntry(
   }) => void
 ) {
   if (entry.type === "image" && entry.path) {
-    let imagePath = Array.isArray(entry.path) ? entry.path[0] : entry.path;
+    // let imagePath = Array.isArray(entry.path) ? entry.path[0] : entry.path;
     try {
       await writeImageBinary(entry.content as unknown as number[]);
       notice({

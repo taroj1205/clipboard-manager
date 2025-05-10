@@ -1,7 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { invoke } from "@tauri-apps/api/core";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { HStack, Separator, usePrevious, VStack } from "@yamada-ui/react";
 import { SidebarList } from "../components/sidebar-list";
 import { DetailsPanel } from "../components/details-panel";

@@ -1,4 +1,3 @@
-import * as React from "react";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { UIProvider } from "@yamada-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

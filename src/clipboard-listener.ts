@@ -2,7 +2,6 @@ import {
   onClipboardUpdate,
   hasText,
   hasImage,
-  hasFiles,
   readText,
   readImageBase64,
 } from "tauri-plugin-clipboard-api";
