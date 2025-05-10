@@ -2,9 +2,27 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": ["popup"],
   "permissions": [
     "core:default",
-    "opener:default"
+    "opener:default",
+    "clipboard:allow-has-files",
+    "clipboard:allow-has-image",
+    "clipboard:allow-has-text",
+    "clipboard:read-all",
+    "sql:default",
+    "sql:allow-execute",
+    "fs:default",
+    "fs:allow-write-file",
+    "fs:allow-read-file",
+    "fs:allow-app-write",
+    "fs:allow-app-read",
+    "clipboard:allow-write-text",
+    "clipboard:allow-write-image-binary",
+    "core:window:allow-hide",
+    {
+      "identifier": "fs:scope",
+      "allow": [{ "path": "$RESOURCE/assets/*" }]
+    }
   ]
 }

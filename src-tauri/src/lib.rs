@@ -1,76 +1,159 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-use dirs;
-use once_cell::sync::Lazy;
-use seekstorm::index::IndexArc;
-use seekstorm::{commit::Commit, highlighter::*, index::*, search::*};
+// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::env;
-use std::path::Path;
-use std::sync::Arc;
-use tokio::sync::RwLock;
+use std::sync::{Arc, Mutex};
+use tauri::Manager;
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+};
+use tauri_plugin_sql;
 
-mod clipboard;
-pub use clipboard::*;
+#[cfg(target_os = "windows")]
+use window_vibrancy::apply_acrylic;
+#[cfg(target_os = "macos")]
+use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
-static CLIPBOARD_INDEX: Lazy<IndexArc> = Lazy::new(|| {
-    // Use LOCAL_DATA_DIR if set, otherwise fall back to the user's config directory
-    let config_dir = env::var("LOCAL_DATA_DIR").ok().or_else(|| {
-        dirs::config_dir().map(|p| p.to_string_lossy().to_string())
-    }).expect("Could not determine config directory. Set LOCAL_DATA_DIR or ensure a config directory is available.");
-    let bundle_identifier =
-        env::var("BUNDLE_IDENTIFIER").unwrap_or_else(|_| "com.clipboard-manager.app".to_string());
-    let index_path = Path::new(&config_dir)
-        .join(&bundle_identifier)
-        .join("clipboard_index");
-    let schema_json = r#"[
-        {"field":"content","field_type":"Text","stored":true,"indexed":true},
-        {"field":"type","field_type":"String","stored":true,"indexed":true},
-        {"field":"timestamp","field_type":"Timestamp","stored":true,"indexed":false},
-        {"field":"app","field_type":"String","stored":true,"indexed":false},
-        {"field":"ocr_text","field_type":"Text","stored":true,"indexed":false},
-        {"field":"color","field_type":"String","stored":true,"indexed":false}
-    ]"#;
-    let schema: Vec<seekstorm::index::SchemaField> = serde_json::from_str(schema_json).unwrap();
-    let meta = seekstorm::index::IndexMetaObject {
-        id: 0,
-        name: "clipboard_index".to_string(),
-        similarity: seekstorm::index::SimilarityType::Bm25f,
-        tokenizer: seekstorm::index::TokenizerType::AsciiAlphabetic,
-        stemmer: seekstorm::index::StemmerType::None,
-        stop_words: seekstorm::index::StopwordType::None,
-        frequent_words: seekstorm::index::FrequentwordType::English,
-        access_type: seekstorm::index::AccessType::Mmap,
-    };
-    let serialize_schema = true;
-    let segment_number_bits1 = 11;
-    let index = create_index(
-        &index_path,
-        meta,
-        &schema,
-        serialize_schema,
-        &Vec::new(),
-        segment_number_bits1,
-        false,
-    )
-    .unwrap();
-    Arc::new(RwLock::new(index))
-});
+mod db;
+use db::MIGRATION;
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+mod api;
+
+#[tauri::command(rename_all = "snake_case")]
+fn message(message: String) {
+    println!("{}", message);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Initialize SeekStorm index at startup
-    tauri::Builder::default()
-        .setup(|_app| Ok(()))
-        .plugin(tauri_plugin_opener::init())
+    let migrations = vec![MIGRATION];
+
+    let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations("sqlite:clipboard.db", migrations)
+                .build(),
+        );
+    #[cfg(desktop)]
+    {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            let _ = app
+                .get_webview_window("popup")
+                .expect("no popup window")
+                .set_focus();
+        }));
+    }
+    builder
+        .plugin(tauri_plugin_clipboard::init())
+        .setup(|app| {
+            #[cfg(desktop)]
+            {
+                use tauri_plugin_global_shortcut::{Code, Modifiers, ShortcutState};
+
+                let _ = api::clipboard::start_monitor(app.handle().clone());
+
+                use tauri_plugin_autostart::MacosLauncher;
+
+                let _ = app.handle().plugin(tauri_plugin_autostart::init(
+                    MacosLauncher::LaunchAgent,
+                    Some(vec![]),
+                ));
+
+                api::window::center_webview_window(&app.get_webview_window("popup").unwrap());
+
+                app.handle().plugin(
+                    tauri_plugin_global_shortcut::Builder::new()
+                        .with_shortcuts(["alt+v"])?
+                        .with_handler(|app, shortcut, event| {
+                            if event.state == ShortcutState::Pressed {
+                                if shortcut.matches(Modifiers::ALT, Code::KeyV) {
+                                    api::window::toggle_app_window(app);
+                                }
+                            }
+                        })
+                        .build(),
+                )?;
+            }
+
+            let window = app.get_webview_window("popup").unwrap();
+
+            #[cfg(target_os = "macos")]
+            apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
+                .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+
+            #[cfg(target_os = "windows")]
+            apply_acrylic(&window, Some((255, 255, 255, 255)))
+                .expect("Unsupported platform! 'apply_acrylic' is only supported on Windows");
+
+            let app_handle = Arc::new(Mutex::new(app.handle().clone()));
+            let autostart_i =
+                MenuItem::with_id(app, "autostart", "Enable Autostart", true, None::<&str>)?;
+            let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&autostart_i, &quit_i])?;
+
+            let _tray = TrayIconBuilder::new()
+                .on_menu_event(move |menu_app, event| {
+                    let app_handle = app_handle.lock().unwrap();
+                    match event.id.as_ref() {
+                        "quit" => {
+                            menu_app.exit(0);
+                        }
+                        "autostart" => {
+                            use tauri_plugin_autostart::ManagerExt;
+                            let autostart_manager = app_handle.autolaunch();
+                            match autostart_manager.is_enabled() {
+                                Ok(true) => {
+                                    let _ = autostart_manager.disable();
+                                    let _ = autostart_i.set_text("Enable Autostart");
+                                }
+                                Ok(false) => {
+                                    let _ = autostart_manager.enable();
+                                    let _ = autostart_i.set_text("Disable Autostart");
+                                }
+                                Err(e) => {
+                                    eprintln!("Error checking autostart status: {:?}", e);
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                })
+                .on_tray_icon_event(|tray, event| match event {
+                    TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } => {
+                        let app = tray.app_handle();
+                        if let Some(window) = app.get_webview_window("popup") {
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        }
+                    }
+                    _ => {}
+                })
+                .menu(&menu)
+                .show_menu_on_left_click(true)
+                .icon(app.default_window_icon().unwrap().clone())
+                .build(app)?;
+
+            Ok(())
+        })
+        .on_window_event(|app, event| {
+            #[cfg(not(dev))]
+            if let tauri::WindowEvent::Focused(false) = event {
+                if let Some(window) = app.get_webview_window("popup") {
+                    let _ = window.hide();
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
-            greet,
-            add_clipboard_entry,
-            search_clipboard_entries,
-            delete_clipboard_entry
+            message,
+            api::file::read_file,
+            api::file::write_file,
+            api::window::get_current_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -24,7 +24,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <UIProvider>
+    <UIProvider colorMode="dark">
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>

@@ -13,18 +13,39 @@
 - [x] 9. Set up persistent clipboard storage (infinite history)
 - [x] Backend: Implement instant search support (SeekStorm API, Tauri commands)
 - [x] 10. Implement instant search UI (search input, results list, instant updates)
-- [ ] 11. Implement image clipboard support and OCR (multi-language)
-- [ ] 12. Store and search by application name/exe and extracted text
-- [ ] 13. Implement global shortcut (Alt+V, customizable) to open/close window
-- [ ] 14. Add filtering by clipboard type (image, color, text, etc.)
-- [ ] 15. Detect and preview color codes (hsl, hex, rgba, etc.)
-- [ ] 16. UI: Search input and filter options on top
-- [ ] 17. UI: Infinite scroll list (left), active index result (right) with info (date, type, copy count, first copied, app name)
-- [ ] 18. List navigation: mouse wheel, up/down arrow keys
-- [ ] 19. Show icons for each type using @yamada-ui/lucide
-- [ ] 20. Copy on enter/double-click, and copy button in details
-- [ ] 21. Image preview in list and details, show extracted text for images
-- [ ] 22. Polish for beautiful, native, lightweight feel
+- [x] 11. Implement image clipboard support and OCR (multi-format, Tesseract, etc.)
+- [x] 12. Persist clipboard entries to disk using SeekStorm
+- [x] 13. Print preview of first 10 words on save
+- [x] 14. Use paginated clipboard entry fetching in frontend
+- [x] 15. Fix linter error: replaced iter_doc_ids with search-based enumeration for all clipboard documents
+- [ ] 16. Detect and preview color codes (hsl, hex, rgba, etc.)
+- [ ] 17. Store and search by application name/exe and extracted text
+- [ ] 18. Implement global shortcut (Alt+V, customizable) to open/close window
+- [x] 19. Add filtering by clipboard type (image, color, text, etc.)
+- [x] 20. Show icons for each type using @yamada-ui/lucide
+- [x] 21. Copy on enter/double-click, and copy button in details
+- [x] 22. Image preview in list and details, show extracted text for images
+- [x] 23. Polish for beautiful, native, lightweight feel
+- [x] 24. Register and initialize the clipboard plugin in the Tauri builder (fix panic) — Added .plugin(tauri_plugin_clipboard::init()) to the builder chain in src-tauri/src/lib.rs
+- [x] 25. Implement automatic clipboard entry addition in the frontend using a utility at src/utils/clipboard.ts that calls the Tauri command
+- [x] 26. Implement automatic clipboard monitoring in the frontend and add new entries using the clipboard utility
+- [x] 11.1. Install tesseract.js and set up OCR extraction in clipboard-listener.ts
+- [x] 11.2. When an image is copied, use OCR to extract text and save it in the clipboard entry content
+- [x] tesseract.js dependency installed
+- [x] Show image in details panel if clipboard entry is of type 'image', using Image from @yamada-ui/react and selectedEntry.path as src
+- [x] Fix linter error in `src/clipboard-listener.ts` by using the correct `BaseDirectory` usage for subdirectories when saving images.
+- [x] Fix 'Not allowed to load local resource' error by using Tauri's convertFileSrc for image paths
+- [x] Add edit database entry function in src/utils/clipboard.ts
+- [x] Update clipboard entry workflow: add entry to DB before extracting text, then update entry after extraction
+- [x] Update tauri.conf.json to support asset protocol for image loading in the webview, including CSP and assetProtocol settings.
+- [x] Ensure clipboard image data is saved as proper PNG format in `src/clipboard-listener.ts` before writing to file.
+  - If the data from `readImageBase64` is not a valid PNG, convert it to PNG using a browser API or a library.
+  - Update the file writing logic to handle this.
+  - Test that the saved file is a valid PNG and can be opened by standard image viewers.
+    - [x] Done: Now checks for PNG base64 header and uses canvas to convert to PNG if needed before saving.
+- [x] 27. Support copying sidebar list item on Enter key or double-click (text or image)
+- [x] Deduplicate clipboard entries by content, showing only the latest entry for each unique content.
+- [x] Display the count of occurrences for each unique clipboard entry in the sidebar and details panel.
 
 ---
 
@@ -89,39 +110,173 @@ _Check off each step above as you complete it. Update this file to track your pr
 
 ---
 
-**Task:** Fix compilation errors in `src-tauri/src/clipboard.rs` related to unresolved imports and missing methods for the `seekstorm` crate. **(Done)**
+**Task:**  
+Utilize `React.memo`, `useMemo`, and `useCallback` in the components and routes under `src/routes` and `src/components` to optimize rendering and performance.
 
 **Subtasks:**
 
-1. Investigate and resolve the unresolved import of `Value` from `seekstorm::index`. **(Done)**
-2. Replace or refactor usage of `index_documents`, `search`, and `delete_documents` methods, as they do not exist on the `Index` type. **(Done)**
-3. Remove unused imports as indicated by the warnings. **(Done)**
-4. Ensure the clipboard functionality (add, search, delete) works with the available `seekstorm` API. **(Done)**
-5. Rebuild and verify that the code compiles without errors. **(Done)**
+1. Audit all components and routes for current usage of `memo`, `useMemo`, and `useCallback`.
+2. Add `React.memo` to components that can benefit from shallow prop comparison.
+3. Use `useMemo` for expensive computations or derived values that depend on props/state.
+4. Use `useCallback` for callback props that are passed to memoized children.
+5. Avoid unnecessary memoization in static or trivial components.
 
 **Progress:**
 
-- Backend supports instant search and all clipboard operations via SeekStorm and Tauri commands.
-- Frontend instant search UI (search input, results list, instant updates) is implemented in `src/routes/index.tsx` and working. Further UI polish, filtering, and advanced features are next.
-- Next: Add filtering by clipboard type (image, color, text, etc.) in the UI.
-
-## Prevent Tauri app from restarting on clipboard_index changes
-
-- [ ] Add a `.taurignore` file in `src-tauri` to ignore the `clipboard_index` directory and its contents, so the Tauri dev watcher does not trigger a restart when clipboard data changes.
-- [ ] Document this in TASKS.md and verify that the watcher no longer restarts the app on clipboard_index changes.
+- [x] Audited all files in `src/routes` and `src/components` for current usage.
+- [x] `TopBar` already uses `React.memo`.
+- [x] Added `React.memo` to `SidebarList` and `DetailsPanel`.
+- [x] Used `useMemo` for `filteredResults`, `grouped`, and `typeOptions` in `HomeComponent`.
+- [x] Used `useCallback` for `setQuery`, `setTypeFilter`, and `setSelectedIndex` in `HomeComponent`.
+- [x] Skipped memoization for static/about/root routes.
 
 ---
 
-## New Task: Use Environment Variables for Clipboard Index Path in Rust
+**All relevant memoization optimizations have been applied.**
 
-- [ ] Update `src-tauri/src/lib.rs` to use environment variables for `configDir` and `bundleIdentifier` in the clipboard index path instead of hardcoded placeholders.
-- [ ] Ensure the Rust backend reads these variables using `std::env::var`.
-- [ ] Document the required environment variables in the README or here.
-- [ ] Test that the index is created in the correct location based on the environment.
+---
+
+**New Task:**
+
+- ~~Update `src/components/details-panel.tsx` to use `DataList`, `DataListItem`, `DataListTerm`, and `DataListDescription` from `@yamada-ui/react` for a table-like details layout, as per the user's request and example.~~
+  - Complete: The details panel now uses DataList and related components for a table-like display.
+
+## Task: Ensure UI Updates After Clipboard Entry Insert
+
+### Goal
+
+When a new clipboard entry is inserted in `clipboard-listener.ts`, the UI components (`SidebarList`, `DetailsPanel`, and the main page in `index.tsx`) should update automatically to reflect the new entry.
+
+### Steps
+
+1. **Clipboard Listener:**
+
+   - After inserting a new clipboard entry, trigger a mechanism to notify the UI of the update. **(Done)**
+
+2. **UI Update Mechanism:**
+
+   - Use a state management or event system (e.g., React Query's `invalidateQueries`, a global event, or a context) to refresh the clipboard entries in the UI. **(Done)**
+
+3. **Update `index.tsx`:**
+
+   - Ensure the query fetching clipboard entries is refetched when a new entry is added. **(Done)**
+
+4. **SidebarList & DetailsPanel:**
+   - Confirm these components reactively update when the clipboard entries change. **(Done)**
+
+---
 
 **Progress:**
 
-- Located the line in `src-tauri/src/lib.rs` that needs updating.
-- Investigated current environment variable usage (none found yet in Rust backend).
-- Updated the code to use `std::env::var` for these values and handle errors gracefully.
-- Next: Document the required environment variables and test that the index is created in the correct location.
+- [x] 1. Add a notification/event after DB insert in `clipboard-listener.ts`.
+- [x] 2. Invalidate or refetch clipboard entries in the UI.
+- [x] 3. Ensure `SidebarList` and `DetailsPanel` update with new data.
+
+**Result:**
+
+- The UI now updates automatically after a clipboard entry is inserted, using a custom event and React Query refetch.
+
+## Completed Tasks
+
+### Fix Image Rendering in Clipboard Manager
+
+- Updated `src/clipboard-listener.ts` to save only the base64 image data (without the data URL prefix) when writing clipboard images to disk.
+- Updated `src/components/clipboard-image.tsx` to convert the Uint8Array returned by `readFile` to a base64 string and prepend the `data:image/png;base64,` prefix before rendering the image.
+- This ensures that images copied to the clipboard are now rendered correctly in the UI.
+
+### Fix Image Saving to Write Binary PNG Data
+
+- Updated the Tauri backend (`src-tauri/src/api/file.rs`) so that when saving a `.png` file, it decodes the base64 string and writes the binary PNG data to disk. This ensures the file is a valid PNG image and can be rendered by the frontend.
+
+## New Task: Add Copy Buttons to Details Panel
+
+### Goal
+
+Enhance the details panel to allow users to:
+
+- Copy the content of the selected clipboard entry (if type is image, copy as image; otherwise, copy as text).
+- If the entry is an image, add an icon button to copy the OCR text (content) as text.
+
+### Steps
+
+1. Add a copy button to the details panel for all entry types.
+2. If the entry is an image, add an icon button to copy the OCR text (content) as text.
+3. Use the appropriate clipboard API for text and image copying (Tauri clipboard plugin for images, Clipboard API for text).
+4. Use Yamada UI's `Button` and `IconButton` components for the UI.
+5. Use a suitable icon from `@yamada-ui/lucide` for the copy actions.
+6. Test the feature for both text and image entries.
+
+**Progress:**
+
+- [ ] Add copy button for all entry types
+- [ ] Add OCR copy icon button for images
+- [ ] Use correct clipboard APIs for each type
+- [ ] Use Yamada UI Button/IconButton and icons
+- [ ] Test and polish UI/UX
+
+## New Task: Improve Clipboard Search Ranking by Relevance
+
+### Goal
+
+When a user searches the clipboard history, results should be ordered by how well they match the query, not just by timestamp. The most relevant (most matching) entries should appear first.
+
+### Steps
+
+1. Update the SQL query in `getPaginatedClipboardEntries` to rank results by relevance to the query string.
+2. Use SQLite's FTS (Full-Text Search) or a custom relevance formula (e.g., position of match, number of occurrences, exact match boost).
+3. If FTS is not available, implement a basic relevance score in the SQL query (e.g., exact match > starts with > contains > timestamp).
+4. Test with various queries to ensure the most relevant results appear first.
+5. Update documentation and mark this task as complete when done.
+
+**Progress:**
+
+- [ ] 1. Update SQL query for relevance ranking
+- [ ] 2. Use FTS or custom relevance formula
+- [ ] 3. Ensure search is case-insensitive (e.g., searching for 'tHis Text' matches 'THIS IS A TEXT')
+- [ ] 4. Support multi-word (tokenized) search (e.g., searching for 'bg gray' matches 'bg="gray.700"')
+- [ ] 5. Test and validate improved ranking
+- [ ] 6. Update documentation
+
+# Tasks
+
+- [x] Refactor `src-tauri/src/lib.rs` to:
+  - Add tray menu with autostart and quit options
+  - Add autostart support (macOS/Windows)
+  - Add global shortcut (alt+v) to toggle popup window
+  - Add window toggling logic
+  - Add support for vibrancy/mica effects
+  - Add database migration logic
+  - Add clipboard monitoring
+  - Add invoke handlers for new APIs
+  - Add window event to hide on unfocus (except in dev)
+
+---
+
+Progress:
+
+- Implementation complete. All requested features have been added to `src-tauri/src/lib.rs` and supporting files.
+
+### Tasks
+
+1. **Fix Rust Compilation Error in `center_window_on_current_monitor`**
+   - ✅ Refactored to use `tauri::Window` as the argument for Tauri command compatibility.
+2. **Fix Rust Warnings**
+   - ✅ Removed unused imports in `src/lib.rs`.
+   - ✅ Updated deprecated usage of `.menu_on_left_click(true)` to `.show_menu_on_left_click(true)`.
+3. **Auto-focus Input in `index.tsx` When Window Gains Focus**
+   - ✅ Added a ref to the main input in `TopBar` and focused it when the Tauri window gains focus using the Tauri window API.
+
+**All tasks completed.**
+
+- [x] Handle up/down arrow keys in TopBar input to update selectedIndex in HomeComponent (src/routes/index.tsx)
+- [x] Make SidebarList scroll to the selected index when it changes and is not in view.
+- [x] Move scroll-to-selected-item logic from SidebarList (useEffect) to index.tsx, so scrolling is handled in the parent component.
+- [x] Adjust scroll-to-selected-item logic to scroll the selected item into view with an additional 50px offset.
+- [x] Update scroll-to-selected-item logic: if selected index is less than 6, scroll to the top of the list.
+
+## Completed
+
+- Refactored copy logic for clipboard entries (text and image) into a shared utility function `copyClipboardEntry` in `src/utils/clipboard.ts`.
+- Updated `src/components/details-panel.tsx` and `src/components/sidebar-list.tsx` to use the new utility function for copy actions.
+- Moved `uint8ArrayToBase64` to `src/utils/clipboard.ts` and updated `src/components/clipboard-image.tsx` to import it from there.
+- Removed duplicate code and improved maintainability.
