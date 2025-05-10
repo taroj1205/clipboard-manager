@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app";
 import { initClipboardListener } from "./clipboard-listener";
+import { UIProvider } from "@yamada-ui/react";
 
 initClipboardListener();
 
@@ -11,7 +12,9 @@ if (rootEl) {
   const root = ReactDOM.createRoot(rootEl);
   root.render(
     <React.StrictMode>
-      <App />
+      <UIProvider colorMode="dark">
+        <App />
+      </UIProvider>
     </React.StrictMode>
   );
 }

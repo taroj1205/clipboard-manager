@@ -128,6 +128,7 @@ export const SidebarList = React.memo(
           maxW="sm"
           maxH="calc(100vh - 70px)"
           overflowY="auto"
+          gap="0"
           overflowX="hidden"
           ref={ref}
           onLoad={({ finish }) => {

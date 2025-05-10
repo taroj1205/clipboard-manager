@@ -30,3 +30,13 @@
 - [x] Auto-focus input in TopBar when window gains focus
 - [x] Add tray menu, autostart, global shortcut, vibrancy, and window toggling in Tauri backend
 - [x] Fix Rust compilation errors and warnings
+
+# Tasks
+
+- [x] Install and initialize pnpm changeset for versioning and changelog management
+- [x] Create .github and .github/workflows directories for GitHub Actions workflow
+- [x] Set up a GitHub Actions workflow to build the app and create a release when a changeset PR is merged, with release notes and version set automatically
+  - [ ] (Optional) Add NPM_TOKEN secret if publishing to npm is required
+- [x] Update release workflow: remove npm publish, use `pnpm tauri build` for building
+- [x] Initialize Biome for linting and formatting
+- [x] Add CI workflow: check types, build, and run biome linter
