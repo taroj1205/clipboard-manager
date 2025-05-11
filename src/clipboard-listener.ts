@@ -13,7 +13,7 @@ import {
 } from "./utils/clipboard";
 
 import { invoke } from "@tauri-apps/api/core";
-import { BaseDirectory } from "@tauri-apps/api/path";
+import { BaseDirectory, pictureDir } from "@tauri-apps/api/path";
 import { writeFile } from "@tauri-apps/plugin-fs";
 
 let prevText = "";
@@ -21,7 +21,7 @@ let prevImage = "";
 
 function isColorCode(text: string): boolean {
   return /^(#[0-9A-Fa-f]{3,8}|rgb\(.*\)|rgba\(.*\)|hsl\(.*\)|hsla\(.*\))$/.test(
-    text.trim(),
+    text.trim()
   );
 }
 
@@ -71,7 +71,10 @@ export function initClipboardListener() {
           });
           // Extract text asynchronously and update entry
           try {
-            const ocrText = await extractTextFromImage(image);
+            const picturePath = await pictureDir();
+            const ocrText = await extractTextFromImage(
+              `${picturePath}/${filename}`
+            );
             if (ocrText) {
               await editClipboardEntry(now, { content: ocrText });
             }
