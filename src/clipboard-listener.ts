@@ -21,7 +21,7 @@ let prevImage = "";
 
 function isColorCode(text: string): boolean {
   return /^(#[0-9A-Fa-f]{3,8}|rgb\(.*\)|rgba\(.*\)|hsl\(.*\)|hsla\(.*\))$/.test(
-    text.trim()
+    text.trim(),
   );
 }
 
@@ -73,7 +73,7 @@ export function initClipboardListener() {
           try {
             const picturePath = await pictureDir();
             const ocrText = await extractTextFromImage(
-              `${picturePath}/${filename}`
+              `${picturePath}/${filename}`,
             );
             if (ocrText) {
               await editClipboardEntry(now, { content: ocrText });
