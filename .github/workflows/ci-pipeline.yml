@@ -62,7 +62,7 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Type check
-        run: pnpm tsc --noEmit
+        run: pnpm exec tsc --noEmit
 
       - name: Biome check
         run: pnpm lint
@@ -101,12 +101,6 @@ jobs:
             node_modules
             ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Type check
-        run: pnpm tsc --noEmit
-
-      - name: Biome check
-        run: pnpm lint
 
       - name: Build
         run: pnpm run tauri build
