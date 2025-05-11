@@ -102,5 +102,8 @@ jobs:
             ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Build
         run: pnpm run tauri build
