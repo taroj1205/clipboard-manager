@@ -27,7 +27,7 @@ interface DetailsPanelProps {
 
 export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
   ({ selectedEntry }) => {
-    const notice = useNotice();
+    const notice = useNotice({ isClosable: true, closeStrategy: "both" });
 
     if (!selectedEntry) {
       return (

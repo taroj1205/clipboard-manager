@@ -98,7 +98,7 @@ export const SidebarList = React.memo(
       },
       ref,
     ) => {
-      const notice = useNotice();
+      const notice = useNotice({ isClosable: true, closeStrategy: "both" });
 
       // Group entries by date
       const grouped = React.useMemo(
