@@ -99,6 +99,8 @@ function HomeComponent() {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const itemRefs = React.useRef<(HTMLLIElement | null)[]>([]);
 
+  localStorage.setItem("ui-color-mode", "dark");
+
   const LIMIT = 50;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
@@ -253,6 +255,7 @@ function HomeComponent() {
       p="sm"
       separator={<Separator />}
       onKeyDown={handleKeyDown}
+      color="white"
     >
       <TopBar
         query={query}

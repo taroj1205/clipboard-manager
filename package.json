@@ -28,6 +28,7 @@
     "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@changesets/cli": "^2.29.3",
     "@emotion/babel-plugin": "^11.13.5",
     "@emotion/react": "^11.14.0",
