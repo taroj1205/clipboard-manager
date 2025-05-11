@@ -10,7 +10,7 @@ import Tesseract from "tesseract.js";
 import { addClipboardEntry, editClipboardEntry } from "./utils/clipboard";
 
 import { invoke } from "@tauri-apps/api/core";
-import { join, resourceDir } from "@tauri-apps/api/path";
+import { join, pictureDir } from "@tauri-apps/api/path";
 
 let prevText = "";
 let prevImage = "";
@@ -51,12 +51,12 @@ export function initClipboardListener() {
       if (image && image !== prevImage) {
         prevImage = image;
         // save image to file
-        const filename = `assets/${now}.png`;
+        const filename = `clipboard-manager/${now}.png`;
 
         console.log("Image saved to file");
         try {
-          const resourceDirPath = await resourceDir();
-          const filePath = await join(resourceDirPath, filename);
+          const pictureDirPath = await pictureDir();
+          const filePath = await join(pictureDirPath, filename);
           await invoke("write_file", {
             path: filePath,
             data: image,
