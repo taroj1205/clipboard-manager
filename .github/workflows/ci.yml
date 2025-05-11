@@ -27,6 +27,11 @@ jobs:
         with:
           version: 8
 
+      - name: Ensure pnpm is available
+        run: |
+          corepack enable || echo "corepack not available or already enabled"
+          pnpm --version
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
