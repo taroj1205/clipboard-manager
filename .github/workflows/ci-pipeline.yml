@@ -62,7 +62,7 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Type check
-        run: pnpm exec tsc --noEmit
+        run: pnpm tsc --noEmit
 
       - name: Biome check
         run: pnpm lint
