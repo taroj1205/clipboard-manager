@@ -75,3 +75,11 @@ In the dev server, all styles work, but after building the app, no styles are ap
 - [ ] Add a babel.config.js with the @emotion plugin.
 - [ ] Update rsbuild.config.ts to ensure Babel plugin is picked up.
 - [ ] Rebuild and verify styles in production build.
+
+## In Progress
+
+- [ ] Update CI workflow to install system dependencies (`libglib2.0-dev`) for Tauri builds on Ubuntu runners.
+
+## Troubleshooting Notes
+
+- If you see an error about `glib-2.0` not being found during a Tauri build in CI, install the `libglib2.0-dev` package on Ubuntu. This provides the required `glib-2.0.pc` file and headers for the build.
