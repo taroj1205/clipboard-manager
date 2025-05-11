@@ -40,3 +40,38 @@
 - [x] Update release workflow: remove npm publish, use `pnpm tauri build` for building
 - [x] Initialize Biome for linting and formatting
 - [x] Add CI workflow: check types, build, and run biome linter
+- [ ] Fix CSP issues in tauri.conf.json
+
+## Issue
+
+**Problem:**  
+In the dev server, all styles work, but after building the app, no styles are applied.
+
+## Investigation Steps
+
+- [x] Check if CSS is being bundled in production.
+- [x] Check for missing CSS loaders or plugins.
+- [x] Check for differences between dev and prod config.
+- [x] Check for errors or warnings during build.
+- [x] Check the output HTML for missing or incorrect CSS links.
+- [x] Check if UI library requires CSS import.
+- [x] Check if styles are inline (CSS-in-JS).
+- [x] Check if Emotion (used by Yamada UI) is being handled correctly in production.
+
+---
+
+## Progress & Findings
+
+- You are using **@yamada-ui/react**, which is built on top of Emotion (CSS-in-JS).
+- In dev, Emotion injects styles at runtime, but in production, some build tools (like Rspack/Rsbuild) may not handle Emotion's SSR or style injection correctly out of the box.
+- **No Emotion or Babel plugin configuration is present in your setup.**
+- This is a common issue with Rspack/Rsbuild and Emotion/Chakra/Mantine/etc. when not using the correct Babel plugin or loader for production.
+
+---
+
+## Solution (In Progress)
+
+- [ ] Add @emotion/babel-plugin as a dev dependency.
+- [ ] Add a babel.config.js with the @emotion plugin.
+- [ ] Update rsbuild.config.ts to ensure Babel plugin is picked up.
+- [ ] Rebuild and verify styles in production build.

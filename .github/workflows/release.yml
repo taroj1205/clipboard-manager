@@ -4,14 +4,8 @@ on:
   push:
     branches:
       - main
-    # Only run if the commit is a changeset version commit
-    # (by default, changeset version commit message starts with 'Version Packages')
     paths:
-      - ".changeset/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "src/**"
-      - "src-tauri/**"
+      - "CHANGELOG.md"
 
 jobs:
   build:
@@ -40,9 +34,6 @@ jobs:
       - name: Version packages with Changesets
         id: changesets
         run: pnpm changeset version
-
-      - name: Sync Tauri version
-        run: node sync-tauri-version.mjs
 
       - name: Build app (Tauri)
         run: pnpm tauri build
@@ -85,17 +76,6 @@ jobs:
         id: changesets
         run: pnpm changeset version
 
-      - name: Sync Tauri version
-        run: node sync-tauri-version.mjs
-
-      - name: Commit and push version sync
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add src-tauri/Cargo.toml src-tauri/tauri.conf.json
-          git commit -m "chore: sync tauri version" || echo "No changes to commit"
-          git push
-
       - name: Download all installers
         uses: actions/download-artifact@v4
         with:
@@ -109,5 +89,6 @@ jobs:
           body: |
             ${{ steps.changesets.outputs.released_notes || 'Automated release' }}
           files: installers/**/*
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

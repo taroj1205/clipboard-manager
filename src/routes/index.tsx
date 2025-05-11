@@ -12,8 +12,10 @@ import {
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
+import { ErrorComponent } from "../components/error-component";
 export const Route = createFileRoute("/")({
   component: HomeComponent,
+  errorComponent: ErrorComponent,
 });
 
 // ClipboardEntry type matching backend

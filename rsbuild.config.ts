@@ -5,12 +5,25 @@ import { TanStackRouterRspack } from "@tanstack/router-plugin/rspack";
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [pluginReact()],
+  plugins: [
+    pluginReact({
+      swcReactOptions: {
+        importSource: "@emotion/react",
+      },
+    }),
+  ],
   tools: {
     rspack: {
       plugins: [
         TanStackRouterRspack({ target: "react", autoCodeSplitting: true }),
       ],
+    },
+    swc: {
+      jsc: {
+        experimental: {
+          plugins: [["@swc/plugin-emotion", {}]],
+        },
+      },
     },
   },
   server: {

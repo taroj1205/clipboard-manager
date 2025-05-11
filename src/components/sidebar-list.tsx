@@ -165,8 +165,8 @@ export const SidebarList = React.memo(
                   position="sticky"
                   top={0}
                   zIndex="sticky"
-                  bg="blackAlpha.100"
-                  backdropFilter="blur(10px)"
+                  bg="transparentize(black, 90%)"
+                  backdropFilter="blur(50px)"
                   rounded="md"
                 >
                   {date}

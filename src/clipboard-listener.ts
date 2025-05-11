@@ -32,7 +32,13 @@ type ActiveWindowProps = {
 export function initClipboardListener() {
   onClipboardUpdate(async () => {
     const now = Date.now();
-    const window = (await invoke("get_current_window")) as ActiveWindowProps;
+    let window: ActiveWindowProps;
+    try {
+      window = (await invoke("get_current_window")) as ActiveWindowProps;
+    } catch (err) {
+      console.error("Failed to get current window:", err);
+      return;
+    }
     // const windowTitle = window.title;
     const windowExe =
       window.process_path.split(/[/\\]/).pop() || window.process_path;
@@ -48,33 +54,37 @@ export function initClipboardListener() {
         const filename = `assets/${now}.png`;
 
         console.log("Image saved to file");
-        const resourceDirPath = await resourceDir();
-        const filePath = await join(resourceDirPath, filename);
-        await invoke("write_file", {
-          path: filePath,
-          data: image,
-          app: windowExe,
-        });
-        // Add entry with placeholder content
-        await addClipboardEntry({
-          content: "[Extracting text...]",
-          type: "image",
-          timestamp: now,
-          path: filePath,
-          app: windowExe,
-        });
-        emit("clipboard-entry-added");
-        // Extract text asynchronously and update entry
         try {
-          console.log("Tesseract.recognize");
-          const result = await Tesseract.recognize(
-            `data:image/png;base64,${image}`,
-            "eng"
-          );
-          const ocrText = result.data.text.trim();
-          await editClipboardEntry(now, { content: ocrText || "[Image]" });
+          const resourceDirPath = await resourceDir();
+          const filePath = await join(resourceDirPath, filename);
+          await invoke("write_file", {
+            path: filePath,
+            data: image,
+            app: windowExe,
+          });
+          // Add entry with placeholder content
+          await addClipboardEntry({
+            content: "[Extracting text...]",
+            type: "image",
+            timestamp: now,
+            path: filePath,
+            app: windowExe,
+          });
+          emit("clipboard-entry-added");
+          // Extract text asynchronously and update entry
+          try {
+            console.log("Tesseract.recognize");
+            const result = await Tesseract.recognize(
+              `data:image/png;base64,${image}`,
+              "eng"
+            );
+            const ocrText = result.data.text.trim();
+            await editClipboardEntry(now, { content: ocrText || "[Image]" });
+          } catch (err) {
+            console.error("OCR failed", err);
+          }
         } catch (err) {
-          console.error("OCR failed", err);
+          console.error("Failed to save image:", err);
         }
       }
     } else if (await hasText()) {
@@ -82,13 +92,17 @@ export function initClipboardListener() {
       if (text && text !== prevText) {
         prevText = text;
         const type = isColorCode(text) ? "color" : "text";
-        await addClipboardEntry({
-          content: text,
-          type,
-          timestamp: now,
-          app: windowExe,
-        });
-        emit("clipboard-entry-added");
+        try {
+          await addClipboardEntry({
+            content: text,
+            type,
+            timestamp: now,
+            app: windowExe,
+          });
+          emit("clipboard-entry-added");
+        } catch (err) {
+          console.error("Failed to add clipboard entry:", err);
+        }
       }
     }
   });
