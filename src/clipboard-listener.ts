@@ -1,7 +1,9 @@
 import {
+  hasHTML,
   hasImage,
   hasText,
   onClipboardUpdate,
+  readHtml,
   readImageBase64,
   readText,
 } from "tauri-plugin-clipboard-api";
@@ -18,6 +20,7 @@ import { writeFile } from "@tauri-apps/plugin-fs";
 
 let prevText = "";
 let prevImage = "";
+let prevHTML = "";
 
 function isColorCode(text: string): boolean {
   return /^(#[0-9A-Fa-f]{3,8}|rgb\(.*\)|rgba\(.*\)|hsl\(.*\)|hsla\(.*\))$/.test(
@@ -83,6 +86,24 @@ export function initClipboardListener() {
           }
         } catch (err) {
           console.error("Failed to save image:", err);
+        }
+      }
+    } else if (await hasHTML()) {
+      const html = await readHtml();
+      const text = await readText();
+      if (html && html !== prevHTML) {
+        prevHTML = html;
+        const type = isColorCode(text) ? "color" : "html";
+        try {
+          await addClipboardEntry({
+            content: text,
+            type,
+            timestamp: now,
+            app: windowExe,
+            html,
+          });
+        } catch (err) {
+          console.error("Failed to add clipboard entry:", err);
         }
       }
     } else if (await hasText()) {

@@ -10,14 +10,15 @@ export interface ClipboardEntry {
   timestamp: number;
   app?: string;
   path?: string | string[];
+  html?: string;
 }
 
-const db = await Database.load("sqlite:clipboard_history.db");
+const db = await Database.load("sqlite:clipboard.db");
 
 export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
   console.log("addClipboardEntry", entry);
   await db.execute(
-    "INSERT INTO clipboard_entries (content, type, timestamp, app, path) VALUES (?, ?, ?, ?, ?)",
+    "INSERT INTO clipboard_entries (content, type, timestamp, app, path, html) VALUES (?, ?, ?, ?, ?, ?)",
     [
       entry.content,
       entry.type,
@@ -28,6 +29,7 @@ export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
           ? JSON.stringify(entry.path)
           : entry.path
         : null,
+      entry.html,
     ],
   );
   emit("clipboard-entry-updated");
@@ -157,6 +159,10 @@ export async function editClipboardEntry(
     values.push(
       Array.isArray(updates.path) ? JSON.stringify(updates.path) : updates.path,
     );
+  }
+  if (updates.html !== undefined) {
+    fields.push("html = ?");
+    values.push(updates.html);
   }
   if (fields.length === 0) return;
   values.push(timestamp);

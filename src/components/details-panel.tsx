@@ -42,6 +42,8 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
   ({ selectedEntry }) => {
     const notice = useNotice({ isClosable: true, closeStrategy: "both" });
 
+    console.log(selectedEntry);
+
     const os = useOS();
 
     const { background } = useLoading();
@@ -209,8 +211,21 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
                   />
                 </Box>
               </Center>
+            ) : selectedEntry.type === "html" && selectedEntry.html ? (
+              <Text
+                whiteSpace="pre-wrap"
+                wordBreak="break-word"
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+                dangerouslySetInnerHTML={{ __html: selectedEntry.html }}
+              />
             ) : (
-              <Text>{selectedEntry.content}</Text>
+              <Text
+                whiteSpace="pre-wrap"
+                wordBreak="break-word"
+                data-html={selectedEntry.html}
+              >
+                {selectedEntry.content}
+              </Text>
             )}
           </ScrollArea>
         </GridItem>
