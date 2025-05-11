@@ -1,19 +1,21 @@
-import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { HStack, Separator, usePrevious, VStack } from "@yamada-ui/react";
-import { SidebarList } from "../components/sidebar-list";
+import { createFileRoute } from "@tanstack/react-router";
+import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { HStack, Separator, VStack, usePrevious } from "@yamada-ui/react";
+import * as React from "react";
 import { DetailsPanel } from "../components/details-panel";
+import { SidebarList } from "../components/sidebar-list";
 import { TopBar } from "../components/top-bar";
 import {
   copyClipboardEntry,
   getPaginatedClipboardEntries,
 } from "../utils/clipboard";
-import { listen } from "@tauri-apps/api/event";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 
+import { ErrorComponent } from "../components/error-component";
 export const Route = createFileRoute("/")({
   component: HomeComponent,
+  errorComponent: ErrorComponent,
 });
 
 // ClipboardEntry type matching backend
@@ -36,7 +38,7 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 }
 
 function groupEntriesByDate(
-  entries: ClipboardEntry[]
+  entries: ClipboardEntry[],
 ): Record<string, (ClipboardEntry & { count: number })[]> {
   const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
   // Deduplicate by content+type, keep latest, and count occurrences
@@ -46,8 +48,9 @@ function groupEntriesByDate(
   >();
   for (const entry of entries) {
     const key = `${entry.type}::${entry.content}`;
-    if (dedupedMap.has(key)) {
-      dedupedMap.get(key)!.count++;
+    const existing = dedupedMap.get(key);
+    if (existing) {
+      existing.count++;
     } else {
       dedupedMap.set(key, { entry, count: 1 });
     }
@@ -97,6 +100,8 @@ function HomeComponent() {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const itemRefs = React.useRef<(HTMLLIElement | null)[]>([]);
 
+  localStorage.setItem("ui-color-mode", "dark");
+
   const LIMIT = 50;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
@@ -107,7 +112,7 @@ function HomeComponent() {
         getPaginatedClipboardEntries(
           debouncedQuery,
           LIMIT,
-          pageParam as number
+          pageParam as number,
         ),
       getNextPageParam: (lastPage, allPages) =>
         lastPage.length === LIMIT ? allPages.length * LIMIT : undefined,
@@ -117,16 +122,18 @@ function HomeComponent() {
   // Flatten paginated results
   const results = React.useMemo(
     () => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []),
-    [data]
+    [data],
   );
 
   // Deduplicate and group entries by date, then flatten for selection
   const grouped = React.useMemo(() => groupEntriesByDate(results), [results]);
   const flatList = React.useMemo(() => {
     const arr: (ClipboardEntry & { count: number; group: string })[] = [];
-    Object.entries(grouped).forEach(([date, items]) => {
-      items.forEach((item) => arr.push({ ...item, group: date }));
-    });
+    for (const [date, items] of Object.entries(grouped)) {
+      for (const item of items) {
+        arr.push({ ...item, group: date });
+      }
+    }
     return arr;
   }, [grouped]);
 
@@ -136,7 +143,7 @@ function HomeComponent() {
       typeFilter && typeFilter !== "all"
         ? flatList.filter((entry) => entry.type === typeFilter)
         : flatList,
-    [flatList, typeFilter]
+    [flatList, typeFilter],
   );
 
   const previousDataLength = usePrevious(flatList.length);
@@ -148,13 +155,13 @@ function HomeComponent() {
       { label: "Image", value: "image" },
       { label: "Color", value: "color" },
     ],
-    []
+    [],
   );
 
   const setQuery = React.useCallback((q: string) => setQueryRaw(q), []);
   const setTypeFilter = React.useCallback(
     (type: TypeFilter["value"]) => setTypeFilterRaw(type),
-    []
+    [],
   );
 
   const handleUpdateSelectedIndex = React.useCallback((index: number) => {
@@ -192,7 +199,7 @@ function HomeComponent() {
       setSelectedIndexRaw(index);
       handleUpdateSelectedIndex(index);
     },
-    [handleUpdateSelectedIndex]
+    [handleUpdateSelectedIndex],
   );
 
   const focusInput = React.useCallback(() => {
@@ -203,7 +210,7 @@ function HomeComponent() {
     inputRef.current?.blur();
   }, []);
 
-  listen("clipboard-entry-added", () => {
+  listen("clipboard-entry-updated", () => {
     setSelectedIndex(0);
     refetch();
   });
@@ -230,7 +237,7 @@ function HomeComponent() {
         return newIndex;
       });
     },
-    [filteredFlatList]
+    [filteredFlatList, handleUpdateSelectedIndex],
   );
 
   const handleKeyDown = React.useCallback(
@@ -241,7 +248,7 @@ function HomeComponent() {
         copyClipboardEntry(filteredFlatList[selectedIndex], () => {});
       }
     },
-    [filteredFlatList, selectedIndex]
+    [filteredFlatList, selectedIndex],
   );
 
   return (
@@ -251,6 +258,7 @@ function HomeComponent() {
       p="sm"
       separator={<Separator />}
       onKeyDown={handleKeyDown}
+      color="white"
     >
       <TopBar
         query={query}

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { readFile } from "@tauri-apps/plugin-fs";
-import { ImageProps, Image } from "@yamada-ui/react";
-import { FC, memo } from "react";
+import { BaseDirectory, readFile } from "@tauri-apps/plugin-fs";
+import { Image, type ImageProps } from "@yamada-ui/react";
+import { type FC, memo } from "react";
 import { uint8ArrayToBase64 } from "../utils/clipboard";
 
 type ClipboardImageProps = ImageProps & {
@@ -13,15 +13,13 @@ export const ClipboardImage: FC<ClipboardImageProps> = memo((props) => {
 
   const { data } = useQuery({
     queryKey: ["clipboard-image", src],
-    queryFn: () => readFile(src),
+    queryFn: () => readFile(src, { baseDir: BaseDirectory.Picture }),
   });
 
   let imageSrc = undefined;
   if (data) {
-    imageSrc = `data:image/png;base64,${uint8ArrayToBase64(
-      data as Uint8Array
-    )}`;
+    imageSrc = `data:image/png;base64,${uint8ArrayToBase64(data)}`;
   }
 
-  return <Image src={imageSrc} objectFit="contain" {...rest} />;
+  return <Image src={imageSrc} w="full" h="full" objectFit="cover" {...rest} />;
 });

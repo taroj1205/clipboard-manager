@@ -1,25 +1,38 @@
-import * as React from "react";
+import { pictureDir } from "@tauri-apps/api/path";
 import {
-  Text,
+  CopyIcon,
+  ImageIcon,
+  RefreshCwIcon,
+  TextIcon,
+} from "@yamada-ui/lucide";
+import {
   Badge,
+  Box,
+  ButtonGroup,
   Center,
   DataList,
+  DataListDescription,
   DataListItem,
   DataListTerm,
-  DataListDescription,
-  ScrollArea,
   Grid,
   GridItem,
   IconButton,
+  ScrollArea,
+  Text,
+  isArray,
+  useLoading,
   useNotice,
-  Float,
-  Box,
+  useOS,
 } from "@yamada-ui/react";
-import { CopyIcon, ImageIcon, TextIcon } from "@yamada-ui/lucide";
-import type { ClipboardEntry } from "../utils/clipboard";
-import { ClipboardImage } from "./clipboard-image";
+import * as React from "react";
 import { writeText } from "tauri-plugin-clipboard-api";
-import { copyClipboardEntry } from "../utils/clipboard";
+import type { ClipboardEntry } from "../utils/clipboard";
+import {
+  copyClipboardEntry,
+  editClipboardEntry,
+  extractTextFromImage,
+} from "../utils/clipboard";
+import { ClipboardImage } from "./clipboard-image";
 
 interface DetailsPanelProps {
   selectedEntry: (ClipboardEntry & { count?: number }) | null;
@@ -27,7 +40,11 @@ interface DetailsPanelProps {
 
 export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
   ({ selectedEntry }) => {
-    const notice = useNotice();
+    const notice = useNotice({ isClosable: true, closeStrategy: "both" });
+
+    const os = useOS();
+
+    const { background } = useLoading();
 
     if (!selectedEntry) {
       return (
@@ -44,18 +61,59 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
       selectedEntry.content &&
       selectedEntry.content !== "[Extracting text...]";
 
+    const handleReloadOCR = async () => {
+      if (selectedEntry?.type !== "image" || !selectedEntry.content) return;
+      try {
+        console.log("Reloading OCR");
+        background.start();
+        // Try to extract base64 from file path if content is a file path
+        const imagePath = isArray(selectedEntry.path)
+          ? selectedEntry.path[0]
+          : selectedEntry.path;
+
+        if (!imagePath) {
+          notice({
+            title: "OCR Reload Failed",
+            description: "No image path found",
+            status: "error",
+          });
+          background.finish();
+          return;
+        }
+
+        const pictureDirPath = await pictureDir();
+
+        const text = await extractTextFromImage(
+          `${pictureDirPath}/${imagePath}`,
+        );
+        if (text !== "") {
+          await editClipboardEntry(selectedEntry.timestamp, {
+            content: text,
+          });
+          notice({
+            title: "OCR Reloaded!",
+            description: "Text re-extracted from image.",
+            status: "success",
+          });
+        }
+        background.finish();
+      } catch (e) {
+        notice({
+          title: "OCR Reload Failed",
+          description: String(e),
+          status: "error",
+        });
+        background.finish();
+      }
+    };
+
     return (
-      <Grid gridTemplateRows="1fr auto" p="sm" gap="sm" w="full">
+      <Grid gridTemplateRows="1fr auto" px="sm" gap="sm" w="full">
         <GridItem position="relative">
-          <Float
-            gap="xs"
-            placement="start-end"
-            right={ocrCopyable ? "xl" : "md"}
-            top="sm"
-          >
+          <ButtonGroup gap="sm" top="xs" right="xs" position="absolute">
             <IconButton
               size="sm"
-              variant="ghost"
+              variant="surface"
               icon={
                 selectedEntry.type === "image" ? <ImageIcon /> : <CopyIcon />
               }
@@ -63,32 +121,44 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
                 await copyClipboardEntry(selectedEntry, notice);
               }}
             />
-            {ocrCopyable && (
+            {os === "windows" &&
+              ocrCopyable &&
+              selectedEntry.content !== selectedEntry.path && (
+                <IconButton
+                  aria-label="Copy OCR Text"
+                  icon={<TextIcon />}
+                  size="sm"
+                  variant="surface"
+                  onClick={async () => {
+                    try {
+                      await writeText(selectedEntry.content);
+                      notice({
+                        title: "OCR text copied!",
+                        description: "OCR text copied!",
+                        status: "success",
+                      });
+                    } catch (e) {
+                      notice({
+                        title: "Failed to copy OCR text",
+                        description: "Failed to copy OCR text",
+                        status: "error",
+                      });
+                    }
+                  }}
+                  title="Copy OCR Text"
+                />
+              )}
+            {os === "windows" && selectedEntry.type === "image" && (
               <IconButton
-                aria-label="Copy OCR Text"
-                icon={<TextIcon />}
+                aria-label="Reload OCR"
+                icon={<RefreshCwIcon />}
                 size="sm"
-                variant="ghost"
-                onClick={async () => {
-                  try {
-                    await writeText(selectedEntry.content);
-                    notice({
-                      title: "OCR text copied!",
-                      description: "OCR text copied!",
-                      status: "success",
-                    });
-                  } catch (e) {
-                    notice({
-                      title: "Failed to copy OCR text",
-                      description: "Failed to copy OCR text",
-                      status: "error",
-                    });
-                  }
-                }}
-                title="Copy OCR Text"
+                variant="surface"
+                onClick={handleReloadOCR}
+                title="Reload OCR Text"
               />
             )}
-          </Float>
+          </ButtonGroup>
           <ScrollArea
             maxH="calc(100vh - 70px - 160px)"
             maxW="calc(100vw - 25px - sm)"
@@ -116,7 +186,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
-                  role="group"
+                  className="group"
                 >
                   <IconButton
                     aria-label="Copy Color"
@@ -160,10 +230,10 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
                     selectedEntry.type === "text"
                       ? "purple"
                       : selectedEntry.type === "image"
-                      ? "blue"
-                      : selectedEntry.type === "color"
-                      ? "yellow"
-                      : "gray"
+                        ? "blue"
+                        : selectedEntry.type === "color"
+                          ? "yellow"
+                          : "gray"
                   }
                 >
                   {selectedEntry.type.charAt(0).toUpperCase() +
@@ -187,7 +257,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
         </GridItem>
       </Grid>
     );
-  }
+  },
 );
 
 DetailsPanel.displayName = "DetailsPanel";

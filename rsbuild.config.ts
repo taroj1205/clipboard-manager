@@ -2,22 +2,34 @@ import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { TanStackRouterRspack } from "@tanstack/router-plugin/rspack";
 
-// @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [pluginReact()],
+  plugins: [
+    pluginReact({
+      swcReactOptions: {
+        importSource: "@emotion/react",
+      },
+    }),
+  ],
   tools: {
     rspack: {
       plugins: [
         TanStackRouterRspack({ target: "react", autoCodeSplitting: true }),
       ],
     },
+    swc: {
+      jsc: {
+        experimental: {
+          plugins: [["@swc/plugin-emotion", {}]],
+        },
+      },
+    },
   },
   server: {
     port: 1420,
     strictPort: true,
-    host: host || false,
+    host,
   },
   dev: {
     client: host

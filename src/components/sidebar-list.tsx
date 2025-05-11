@@ -1,25 +1,25 @@
-import * as React from "react";
+import { FileIcon, ImageIcon } from "@yamada-ui/lucide";
 import {
-  VStack,
-  Text,
-  List,
-  ListItem,
-  HStack,
   Badge,
-  InfiniteScrollArea,
-  useNotice,
-  Spacer,
   ColorSwatch,
-  Loading,
-  ScrollArea,
   EmptyState,
+  EmptyStateDescription,
   EmptyStateIndicator,
   EmptyStateTitle,
-  EmptyStateDescription,
+  HStack,
+  InfiniteScrollArea,
+  List,
+  ListItem,
+  Loading,
+  ScrollArea,
+  Spacer,
+  Text,
+  VStack,
+  useNotice,
 } from "@yamada-ui/react";
-import { ClipboardEntry, copyClipboardEntry } from "../utils/clipboard";
+import * as React from "react";
+import { type ClipboardEntry, copyClipboardEntry } from "../utils/clipboard";
 import { ClipboardImage } from "./clipboard-image";
-import { FileIcon, ImageIcon } from "@yamada-ui/lucide";
 
 interface SidebarListProps {
   entries: ClipboardEntry[];
@@ -35,7 +35,7 @@ interface SidebarListProps {
 
 // Grouping helper (copy from index.tsx)
 function groupEntriesByDate(
-  entries: (ClipboardEntry & { count?: number })[]
+  entries: (ClipboardEntry & { count?: number })[],
 ): Record<string, (ClipboardEntry & { count: number })[]> {
   const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
   const dedupedMap = new Map<
@@ -45,7 +45,10 @@ function groupEntriesByDate(
   for (const entry of entries) {
     const key = `${entry.type}::${entry.content}`;
     if (dedupedMap.has(key)) {
-      dedupedMap.get(key)!.count++;
+      const existing = dedupedMap.get(key);
+      if (existing) {
+        existing.count++;
+      }
     } else {
       dedupedMap.set(key, { entry, count: 1 });
     }
@@ -93,22 +96,24 @@ export const SidebarList = React.memo(
         previousDataLength,
         totalEntries,
       },
-      ref
+      ref,
     ) => {
-      const notice = useNotice();
+      const notice = useNotice({ isClosable: true, closeStrategy: "both" });
 
       // Group entries by date
       const grouped = React.useMemo(
         () => groupEntriesByDate(entries),
-        [entries]
+        [entries],
       );
 
       // Flat list for index mapping
       const flatList = React.useMemo(() => {
         const arr: (ClipboardEntry & { count: number; group: string })[] = [];
-        Object.entries(grouped).forEach(([date, items]) => {
-          items.forEach((item) => arr.push({ ...item, group: date }));
-        });
+        for (const [date, items] of Object.entries(grouped)) {
+          for (const item of items) {
+            arr.push({ ...item, group: date });
+          }
+        }
         return arr;
       }, [grouped]);
 
@@ -128,6 +133,7 @@ export const SidebarList = React.memo(
           maxW="sm"
           maxH="calc(100vh - 70px)"
           overflowY="auto"
+          gap="0"
           overflowX="hidden"
           ref={ref}
           onLoad={({ finish }) => {
@@ -162,11 +168,9 @@ export const SidebarList = React.memo(
                   fontSize="sm"
                   p="sm"
                   position="sticky"
+                  bg="transparentize(black, 70%)"
                   top={0}
-                  zIndex="sticky"
-                  bg="blackAlpha.100"
-                  backdropFilter="blur(10px)"
-                  rounded="md"
+                  roundedTop="md"
                 >
                   {date}
                 </Text>
@@ -176,7 +180,7 @@ export const SidebarList = React.memo(
                     const flatIndex = flatList.findIndex(
                       (e) =>
                         e.timestamp === entry.timestamp &&
-                        e.content === entry.content
+                        e.content === entry.content,
                     );
                     // Only render if flatIndex is in range
                     if (flatIndex === -1 || flatIndex >= flatList.length)
@@ -243,10 +247,10 @@ export const SidebarList = React.memo(
                               entry.type === "text"
                                 ? "purple"
                                 : entry.type === "image"
-                                ? "blue"
-                                : entry.type === "color"
-                                ? "yellow"
-                                : "gray"
+                                  ? "blue"
+                                  : entry.type === "color"
+                                    ? "yellow"
+                                    : "gray"
                             }
                           >
                             {entry.type.charAt(0).toUpperCase() +
@@ -265,8 +269,8 @@ export const SidebarList = React.memo(
           )}
         </InfiniteScrollArea>
       );
-    }
-  )
+    },
+  ),
 );
 
 SidebarList.displayName = "SidebarList";

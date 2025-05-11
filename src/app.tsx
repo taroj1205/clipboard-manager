@@ -1,9 +1,7 @@
-import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { UIProvider } from "@yamada-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
 
 import { routeTree } from "./routeTree.gen";
-import "./styles.css";
 
 // Set up a Router instance
 const router = createRouter({
@@ -23,11 +21,9 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <UIProvider colorMode="dark">
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </UIProvider>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   );
 };
 

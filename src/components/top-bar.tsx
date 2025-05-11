@@ -1,6 +1,6 @@
+import { HStack, Input, Option, Select } from "@yamada-ui/react";
 import * as React from "react";
-import { Input, HStack, Select, Option } from "@yamada-ui/react";
-import { TypeFilter } from "../routes";
+import type { TypeFilter } from "../routes";
 
 interface TopBarProps {
   query: string;
@@ -15,7 +15,7 @@ export const TopBar = React.memo(
   React.forwardRef<HTMLInputElement, TopBarProps>(
     (
       { query, setQuery, typeFilter, setTypeFilter, typeOptions, onArrowKey },
-      ref
+      ref,
     ) => {
       return (
         <HStack gap="0">
@@ -51,8 +51,8 @@ export const TopBar = React.memo(
           </Select>
         </HStack>
       );
-    }
-  )
+    },
+  ),
 );
 
 TopBar.displayName = "TopBar";
