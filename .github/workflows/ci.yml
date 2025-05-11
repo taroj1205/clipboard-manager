@@ -43,5 +43,14 @@ jobs:
       - name: Build
         run: pnpm run tauri build
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Biome check
         run: pnpm lint

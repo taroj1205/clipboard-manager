@@ -2,60 +2,60 @@ import Database from "@tauri-apps/plugin-sql";
 import { writeImageBinary, writeText } from "tauri-plugin-clipboard-api";
 
 export interface ClipboardEntry {
-  content: string;
-  type: string;
-  timestamp: number;
-  app?: string;
-  path?: string | string[];
+	content: string;
+	type: string;
+	timestamp: number;
+	app?: string;
+	path?: string | string[];
 }
 
 const db = await Database.load("sqlite:clipboard_history.db");
 
 export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
-  console.log("addClipboardEntry", entry);
-  await db.execute(
-    "INSERT INTO clipboard_entries (content, type, timestamp, app, path) VALUES (?, ?, ?, ?, ?)",
-    [
-      entry.content,
-      entry.type,
-      entry.timestamp,
-      entry.app,
-      entry.path
-        ? Array.isArray(entry.path)
-          ? JSON.stringify(entry.path)
-          : entry.path
-        : null,
-    ]
-  );
+	console.log("addClipboardEntry", entry);
+	await db.execute(
+		"INSERT INTO clipboard_entries (content, type, timestamp, app, path) VALUES (?, ?, ?, ?, ?)",
+		[
+			entry.content,
+			entry.type,
+			entry.timestamp,
+			entry.app,
+			entry.path
+				? Array.isArray(entry.path)
+					? JSON.stringify(entry.path)
+					: entry.path
+				: null,
+		],
+	);
 }
 
 export async function getPaginatedClipboardEntries(
-  query: string,
-  limit = 50,
-  offset = 0
+	query: string,
+	limit = 50,
+	offset = 0,
 ): Promise<ClipboardEntry[]> {
-  let result;
-  if (!query) {
-    result = (await db.select(
-      "SELECT * FROM clipboard_entries ORDER BY timestamp DESC LIMIT ? OFFSET ?",
-      [limit, offset]
-    )) as ClipboardEntry[];
-  } else {
-    // Multi-word (tokenized) search: all words must be present in content or path, case-insensitive
-    const words = query.trim().split(/\s+/);
-    const likeClauses = words
-      .map(
-        () => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)"
-      )
-      .join(" AND ");
-    const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`]);
-    // For relevance, boost if all words match exactly, then if any word is a prefix, then if all are substrings
-    // (Simple: just use the first word for exact/prefix, rest for AND substrings)
-    const firstWord = words[0];
-    const startsWithQuery = `${firstWord}%`;
-    const likeQuery = `%${firstWord}%`;
-    result = (await db.select(
-      `SELECT *,
+	let result: ClipboardEntry[];
+	if (!query) {
+		result = (await db.select(
+			"SELECT * FROM clipboard_entries ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+			[limit, offset],
+		)) as ClipboardEntry[];
+	} else {
+		// Multi-word (tokenized) search: all words must be present in content or path, case-insensitive
+		const words = query.trim().split(/\s+/);
+		const likeClauses = words
+			.map(
+				() => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)",
+			)
+			.join(" AND ");
+		const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`]);
+		// For relevance, boost if all words match exactly, then if any word is a prefix, then if all are substrings
+		// (Simple: just use the first word for exact/prefix, rest for AND substrings)
+		const firstWord = words[0];
+		const startsWithQuery = `${firstWord}%`;
+		const likeQuery = `%${firstWord}%`;
+		result = (await db.select(
+			`SELECT *,
         (CASE
           WHEN content = ? COLLATE NOCASE OR path = ? COLLATE NOCASE THEN 3
           WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE THEN 2
@@ -66,46 +66,46 @@ export async function getPaginatedClipboardEntries(
       WHERE ${likeClauses}
       ORDER BY relevance DESC, timestamp DESC
       LIMIT ? OFFSET ?`,
-      [
-        firstWord,
-        firstWord,
-        startsWithQuery,
-        startsWithQuery,
-        likeQuery,
-        likeQuery,
-        ...likeParams,
-        limit,
-        offset,
-      ]
-    )) as ClipboardEntry[];
-  }
-  return result;
+			[
+				firstWord,
+				firstWord,
+				startsWithQuery,
+				startsWithQuery,
+				likeQuery,
+				likeQuery,
+				...likeParams,
+				limit,
+				offset,
+			],
+		)) as ClipboardEntry[];
+	}
+	return result;
 }
 
 export async function getAllClipboardEntries(
-  query: string
+	query: string,
 ): Promise<ClipboardEntry[]> {
-  let result;
-  if (!query) {
-    result = (await db.select(
-      "SELECT * FROM clipboard_entries ORDER BY timestamp DESC"
-    )) as ClipboardEntry[];
-  } else {
-    // Multi-word (tokenized) search: all words must be present in content or path, case-insensitive
-    const words = query.trim().split(/\s+/);
-    const likeClauses = words
-      .map(
-        () => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)"
-      )
-      .join(" AND ");
-    const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`]);
-    // For relevance, boost if all words match exactly, then if any word is a prefix, then if all are substrings
-    // (Simple: just use the first word for exact/prefix, rest for AND substrings)
-    const firstWord = words[0];
-    const startsWithQuery = `${firstWord}%`;
-    const likeQuery = `%${firstWord}%`;
-    result = (await db.select(
-      `SELECT *,
+	let result: ClipboardEntry[];
+	if (!query) {
+		result = (await db.select(
+			"SELECT * FROM clipboard_entries ORDER BY timestamp DESC",
+		)) as ClipboardEntry[];
+	} else {
+		// Multi-word (tokenized) search: all words must be present in content or path, case-insensitive
+		const words = query.trim().split(/\s+/);
+		const likeClauses = words
+			.map(
+				() => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)",
+			)
+			.join(" AND ");
+		const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`]);
+		// For relevance, boost if all words match exactly, then if any word is a prefix, then if all are substrings
+		// (Simple: just use the first word for exact/prefix, rest for AND substrings)
+		const firstWord = words[0];
+		const startsWithQuery = `${firstWord}%`;
+		const likeQuery = `%${firstWord}%`;
+		result = (await db.select(
+			`SELECT *,
         (CASE
           WHEN content = ? COLLATE NOCASE OR path = ? COLLATE NOCASE THEN 3
           WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE THEN 2
@@ -116,99 +116,99 @@ export async function getAllClipboardEntries(
       WHERE ${likeClauses}
       ORDER BY relevance DESC, timestamp DESC
       LIMIT ? OFFSET ?`,
-      [
-        firstWord,
-        firstWord,
-        startsWithQuery,
-        startsWithQuery,
-        likeQuery,
-        likeQuery,
-        ...likeParams,
-      ]
-    )) as ClipboardEntry[];
-  }
-  return result;
+			[
+				firstWord,
+				firstWord,
+				startsWithQuery,
+				startsWithQuery,
+				likeQuery,
+				likeQuery,
+				...likeParams,
+			],
+		)) as ClipboardEntry[];
+	}
+	return result;
 }
 
 export async function editClipboardEntry(
-  timestamp: number,
-  updates: Partial<ClipboardEntry>
+	timestamp: number,
+	updates: Partial<ClipboardEntry>,
 ): Promise<void> {
-  const fields = [];
-  const values = [];
-  if (updates.content !== undefined) {
-    fields.push("content = ?");
-    values.push(updates.content);
-  }
-  if (updates.type !== undefined) {
-    fields.push("type = ?");
-    values.push(updates.type);
-  }
-  if (updates.app !== undefined) {
-    fields.push("app = ?");
-    values.push(updates.app);
-  }
-  if (updates.path !== undefined) {
-    fields.push("path = ?");
-    values.push(
-      Array.isArray(updates.path) ? JSON.stringify(updates.path) : updates.path
-    );
-  }
-  if (fields.length === 0) return;
-  values.push(timestamp);
-  await db.execute(
-    `UPDATE clipboard_entries SET ${fields.join(", ")} WHERE timestamp = ?`,
-    values
-  );
+	const fields = [];
+	const values = [];
+	if (updates.content !== undefined) {
+		fields.push("content = ?");
+		values.push(updates.content);
+	}
+	if (updates.type !== undefined) {
+		fields.push("type = ?");
+		values.push(updates.type);
+	}
+	if (updates.app !== undefined) {
+		fields.push("app = ?");
+		values.push(updates.app);
+	}
+	if (updates.path !== undefined) {
+		fields.push("path = ?");
+		values.push(
+			Array.isArray(updates.path) ? JSON.stringify(updates.path) : updates.path,
+		);
+	}
+	if (fields.length === 0) return;
+	values.push(timestamp);
+	await db.execute(
+		`UPDATE clipboard_entries SET ${fields.join(", ")} WHERE timestamp = ?`,
+		values,
+	);
 }
 
 export function uint8ArrayToBase64(bytes: Uint8Array): string {
-  let binary = "";
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return window.btoa(binary);
+	let binary = "";
+	for (let i = 0; i < bytes.length; i++) {
+		binary += String.fromCharCode(bytes[i]);
+	}
+	return window.btoa(binary);
 }
 
 export async function copyClipboardEntry(
-  entry: ClipboardEntry,
-  notice: (args: {
-    title: string;
-    description: string;
-    status: "success" | "error";
-  }) => void
+	entry: ClipboardEntry,
+	notice: (args: {
+		title: string;
+		description: string;
+		status: "success" | "error";
+	}) => void,
 ) {
-  if (entry.type === "image" && entry.path) {
-    // let imagePath = Array.isArray(entry.path) ? entry.path[0] : entry.path;
-    try {
-      await writeImageBinary(entry.content as unknown as number[]);
-      notice({
-        title: "Image copied!",
-        description: "Image copied to clipboard",
-        status: "success",
-      });
-    } catch (e) {
-      console.error(e);
-      notice({
-        title: "Failed to copy image",
-        description: "Failed to copy image",
-        status: "error",
-      });
-    }
-  } else {
-    try {
-      await writeText(entry.content);
-      notice({
-        title: "Copied!",
-        description: "Copied to clipboard",
-        status: "success",
-      });
-    } catch (e) {
-      notice({
-        title: "Failed to copy",
-        description: "Failed to copy",
-        status: "error",
-      });
-    }
-  }
+	if (entry.type === "image" && entry.path) {
+		// let imagePath = Array.isArray(entry.path) ? entry.path[0] : entry.path;
+		try {
+			await writeImageBinary(entry.content as unknown as number[]);
+			notice({
+				title: "Image copied!",
+				description: "Image copied to clipboard",
+				status: "success",
+			});
+		} catch (e) {
+			console.error(e);
+			notice({
+				title: "Failed to copy image",
+				description: "Failed to copy image",
+				status: "error",
+			});
+		}
+	} else {
+		try {
+			await writeText(entry.content);
+			notice({
+				title: "Copied!",
+				description: "Copied to clipboard",
+				status: "success",
+			});
+		} catch (e) {
+			notice({
+				title: "Failed to copy",
+				description: "Failed to copy",
+				status: "error",
+			});
+		}
+	}
 }
