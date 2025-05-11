@@ -78,14 +78,15 @@ In the dev server, all styles work, but after building the app, no styles are ap
 
 ## In Progress
 
-- [ ] Verify CI workflow after adding `libgtk-3-dev` (for GDK/GTK support) to system dependencies on Ubuntu runners.
-- [ ] Update CI workflow to install system dependencies (`libglib2.0-dev`, `libgtk-3-dev`) for Tauri builds on Ubuntu runners.
+- [ ] Verify CI workflow after adding `libwebkit2gtk-4.1-dev` (for JavaScriptCoreGTK support) to system dependencies on Ubuntu runners.
+- [x] Update CI workflow to install system dependencies (`libglib2.0-dev`, `libgtk-3-dev`, `libwebkit2gtk-4.1-dev`) for Tauri builds on Ubuntu runners.
 
 ## Completed
 
-- [x] Update CI workflow to install system dependencies (`libglib2.0-dev`, `libgtk-3-dev`) for Tauri builds on Ubuntu runners.
+- [x] Update CI workflow to install system dependencies (`libglib2.0-dev`, `libgtk-3-dev`, `libwebkit2gtk-4.1-dev`) for Tauri builds on Ubuntu runners.
 
 ## Troubleshooting Notes
 
 - If you see an error about `glib-2.0` not being found during a Tauri build in CI, install the `libglib2.0-dev` package on Ubuntu. This provides the required `glib-2.0.pc` file and headers for the build.
 - If you see an error about `gdk-3.0` not being found, install the `libgtk-3-dev` package on Ubuntu. This provides the required `gdk-3.0.pc` and GTK 3 development files.
+- If you see an error about `javascriptcoregtk-4.1` not being found, install the `libwebkit2gtk-4.1-dev` package on Ubuntu. This provides the required `javascriptcoregtk-4.1.pc` and WebKitGTK development files.
