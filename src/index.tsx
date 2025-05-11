@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app";
 import { initClipboardListener } from "./clipboard-listener";
-import { extendTheme, UIProvider } from "@yamada-ui/react";
+import { ColorModeScript, extendTheme, UIProvider } from "@yamada-ui/react";
 
 initClipboardListener();
 
@@ -23,6 +23,7 @@ if (rootEl) {
 
   root.render(
     <React.StrictMode>
+      <ColorModeScript initialColorMode="dark" />
       <UIProvider colorMode="dark" theme={theme}>
         <App />
       </UIProvider>
