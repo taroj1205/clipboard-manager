@@ -30,6 +30,7 @@
 - [x] Auto-focus input in TopBar when window gains focus
 - [x] Add tray menu, autostart, global shortcut, vibrancy, and window toggling in Tauri backend
 - [x] Fix Rust compilation errors and warnings
+- [x] Make 'let window = app.get_webview_window("popup").unwrap();' only run on macOS or Windows to avoid unused variable warnings and platform-specific issues.
 
 # Tasks
 

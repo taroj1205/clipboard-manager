@@ -77,6 +77,9 @@ pub fn run() {
                 )?;
             }
 
+            #[cfg(target_os = "macos")]
+            let window = app.get_webview_window("popup").unwrap();
+            #[cfg(target_os = "windows")]
             let window = app.get_webview_window("popup").unwrap();
 
             #[cfg(target_os = "macos")]
