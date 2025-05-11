@@ -30,7 +30,7 @@ export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
           : entry.path
         : null,
       entry.html,
-    ]
+    ],
   );
   emit("clipboard-entry-updated");
 }
@@ -38,20 +38,20 @@ export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
 export async function getPaginatedClipboardEntries(
   query: string,
   limit = 50,
-  offset = 0
+  offset = 0,
 ): Promise<ClipboardEntry[]> {
   let result: ClipboardEntry[];
   if (!query) {
     result = (await db.select(
       "SELECT * FROM clipboard_entries ORDER BY timestamp DESC LIMIT ? OFFSET ?",
-      [limit, offset]
+      [limit, offset],
     )) as ClipboardEntry[];
   } else {
     // Multi-word (tokenized) search: all words must be present in content or path, case-insensitive
     const words = query.trim().split(/\s+/);
     const likeClauses = words
       .map(
-        () => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)"
+        () => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)",
       )
       .join(" AND ");
     const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`]);
@@ -82,26 +82,26 @@ export async function getPaginatedClipboardEntries(
         ...likeParams,
         limit,
         offset,
-      ]
+      ],
     )) as ClipboardEntry[];
   }
   return result;
 }
 
 export async function getAllClipboardEntries(
-  query: string
+  query: string,
 ): Promise<ClipboardEntry[]> {
   let result: ClipboardEntry[];
   if (!query) {
     result = (await db.select(
-      "SELECT * FROM clipboard_entries ORDER BY timestamp DESC"
+      "SELECT * FROM clipboard_entries ORDER BY timestamp DESC",
     )) as ClipboardEntry[];
   } else {
     // Multi-word (tokenized) search: all words must be present in content or path, case-insensitive
     const words = query.trim().split(/\s+/);
     const likeClauses = words
       .map(
-        () => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)"
+        () => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)",
       )
       .join(" AND ");
     const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`]);
@@ -130,7 +130,7 @@ export async function getAllClipboardEntries(
         likeQuery,
         likeQuery,
         ...likeParams,
-      ]
+      ],
     )) as ClipboardEntry[];
   }
   return result;
@@ -138,7 +138,7 @@ export async function getAllClipboardEntries(
 
 export async function editClipboardEntry(
   timestamp: number,
-  updates: Partial<ClipboardEntry>
+  updates: Partial<ClipboardEntry>,
 ): Promise<void> {
   const fields = [];
   const values = [];
@@ -157,7 +157,7 @@ export async function editClipboardEntry(
   if (updates.path !== undefined) {
     fields.push("path = ?");
     values.push(
-      Array.isArray(updates.path) ? JSON.stringify(updates.path) : updates.path
+      Array.isArray(updates.path) ? JSON.stringify(updates.path) : updates.path,
     );
   }
   if (updates.html !== undefined) {
@@ -168,7 +168,7 @@ export async function editClipboardEntry(
   values.push(timestamp);
   await db.execute(
     `UPDATE clipboard_entries SET ${fields.join(", ")} WHERE timestamp = ?`,
-    values
+    values,
   );
   emit("clipboard-entry-updated");
 }
@@ -197,7 +197,7 @@ export async function copyClipboardEntry(
     title: string;
     description: string;
     status: "success" | "error";
-  }) => void
+  }) => void,
 ) {
   if (entry.type === "image" && entry.path) {
     // let imagePath = Array.isArray(entry.path) ? entry.path[0] : entry.path;
@@ -242,7 +242,7 @@ export async function copyClipboardEntry(
  * @returns The extracted text, or an empty string if OCR fails
  */
 export async function extractTextFromImage(
-  imagePathOrBase64: string
+  imagePathOrBase64: string,
 ): Promise<string> {
   const platform = useOS();
   if (platform === "windows") {

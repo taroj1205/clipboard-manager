@@ -86,7 +86,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
         const pictureDirPath = await pictureDir();
 
         const text = await extractTextFromImage(
-          `${pictureDirPath}/${imagePath}`
+          `${pictureDirPath}/${imagePath}`,
         );
         if (text !== "") {
           await editClipboardEntry(selectedEntry.timestamp, {
@@ -245,10 +245,10 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
                     selectedEntry.type === "text"
                       ? "purple"
                       : selectedEntry.type === "image"
-                      ? "blue"
-                      : selectedEntry.type === "color"
-                      ? "yellow"
-                      : "gray"
+                        ? "blue"
+                        : selectedEntry.type === "color"
+                          ? "yellow"
+                          : "gray"
                   }
                 >
                   {selectedEntry.type.charAt(0).toUpperCase() +
@@ -272,7 +272,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
         </GridItem>
       </Grid>
     );
-  }
+  },
 );
 
 DetailsPanel.displayName = "DetailsPanel";
