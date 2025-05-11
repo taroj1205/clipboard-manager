@@ -36,3 +36,6 @@ active-win-pos-rs = "0.8.3"
 tauri-plugin-autostart = "2"
 tauri-plugin-global-shortcut = "2.0.0"
 tauri-plugin-single-instance = "2"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+win_ocr = "0.1.1"

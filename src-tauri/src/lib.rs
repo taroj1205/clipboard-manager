@@ -20,6 +20,8 @@ use db::MIGRATION;
 
 mod api;
 
+mod ocr;
+
 #[tauri::command(rename_all = "snake_case")]
 fn message(message: String) {
     println!("{}", message);
@@ -155,6 +157,7 @@ pub fn run() {
             api::file::read_file,
             api::file::write_file,
             api::window::get_current_window,
+            ocr::ocr_image,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

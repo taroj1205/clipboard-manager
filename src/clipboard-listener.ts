@@ -1,4 +1,3 @@
-import { emit } from "@tauri-apps/api/event";
 import {
   hasImage,
   hasText,
@@ -6,11 +5,16 @@ import {
   readImageBase64,
   readText,
 } from "tauri-plugin-clipboard-api";
-import Tesseract from "tesseract.js";
-import { addClipboardEntry, editClipboardEntry } from "./utils/clipboard";
+import {
+  addClipboardEntry,
+  base64ToUint8Array,
+  editClipboardEntry,
+  extractTextFromImage,
+} from "./utils/clipboard";
 
 import { invoke } from "@tauri-apps/api/core";
-import { join, pictureDir } from "@tauri-apps/api/path";
+import { BaseDirectory } from "@tauri-apps/api/path";
+import { writeFile } from "@tauri-apps/plugin-fs";
 
 let prevText = "";
 let prevImage = "";
@@ -55,31 +59,22 @@ export function initClipboardListener() {
 
         console.log("Image saved to file");
         try {
-          const pictureDirPath = await pictureDir();
-          const filePath = await join(pictureDirPath, filename);
-          await invoke("write_file", {
-            path: filePath,
-            data: image,
-            app: windowExe,
+          await writeFile(filename, base64ToUint8Array(image), {
+            baseDir: BaseDirectory.Picture,
           });
-          // Add entry with placeholder content
           await addClipboardEntry({
-            content: "[Extracting text...]",
+            content: filename,
             type: "image",
             timestamp: now,
-            path: filePath,
+            path: filename,
             app: windowExe,
           });
-          emit("clipboard-entry-added");
           // Extract text asynchronously and update entry
           try {
-            console.log("Tesseract.recognize");
-            const result = await Tesseract.recognize(
-              `data:image/png;base64,${image}`,
-              "eng",
-            );
-            const ocrText = result.data.text.trim();
-            await editClipboardEntry(now, { content: ocrText || "[Image]" });
+            const ocrText = await extractTextFromImage(image);
+            if (ocrText) {
+              await editClipboardEntry(now, { content: ocrText });
+            }
           } catch (err) {
             console.error("OCR failed", err);
           }
@@ -99,7 +94,6 @@ export function initClipboardListener() {
             timestamp: now,
             app: windowExe,
           });
-          emit("clipboard-entry-added");
         } catch (err) {
           console.error("Failed to add clipboard entry:", err);
         }

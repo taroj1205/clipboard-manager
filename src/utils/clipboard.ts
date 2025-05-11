@@ -1,4 +1,7 @@
+import { invoke } from "@tauri-apps/api/core";
+import { emit } from "@tauri-apps/api/event";
 import Database from "@tauri-apps/plugin-sql";
+import { useOS } from "@yamada-ui/react";
 import { writeImageBinary, writeText } from "tauri-plugin-clipboard-api";
 
 export interface ClipboardEntry {
@@ -27,6 +30,7 @@ export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
         : null,
     ],
   );
+  emit("clipboard-entry-added");
 }
 
 export async function getPaginatedClipboardEntries(
@@ -160,6 +164,7 @@ export async function editClipboardEntry(
     `UPDATE clipboard_entries SET ${fields.join(", ")} WHERE timestamp = ?`,
     values,
   );
+  emit("clipboard-entry-updated");
 }
 
 export function uint8ArrayToBase64(bytes: Uint8Array): string {
@@ -168,6 +173,16 @@ export function uint8ArrayToBase64(bytes: Uint8Array): string {
     binary += String.fromCharCode(bytes[i]);
   }
   return window.btoa(binary);
+}
+
+export function base64ToUint8Array(base64: string): Uint8Array {
+  const binaryString = window.atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
 }
 
 export async function copyClipboardEntry(
@@ -210,5 +225,32 @@ export async function copyClipboardEntry(
         status: "error",
       });
     }
+  }
+}
+
+/**
+ * Extracts text from an image using platform-specific OCR.
+ * On Windows, uses the Tauri win_ocr backend and requires an image path.
+ * On other platforms, uses Tesseract.js and requires a base64 image string.
+ * @param imagePathOrBase64 The image path (Windows) or base64-encoded image string (other platforms)
+ * @returns The extracted text, or an empty string if OCR fails
+ */
+export async function extractTextFromImage(
+  imagePathOrBase64: string,
+): Promise<string> {
+  const platform = useOS();
+  if (platform === "windows") {
+    try {
+      // On Windows, pass the image path to the Tauri command
+      const text = await invoke<string>("ocr_image", {
+        imagePath: imagePathOrBase64,
+      });
+      return text.trim();
+    } catch (err) {
+      console.error("OCR failed (win_ocr)", err);
+      return "";
+    }
+  } else {
+    return "OCR not supported on this platform";
   }
 }
