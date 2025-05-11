@@ -9,24 +9,24 @@ initClipboardListener();
 const rootEl = document.getElementById("root");
 
 if (rootEl) {
-	const root = ReactDOM.createRoot(rootEl);
+  const root = ReactDOM.createRoot(rootEl);
 
-	const theme = extendTheme({
-		styles: {
-			globalStyle: {
-				body: {
-					bg: "blackAlpha.600",
-				},
-			},
-		},
-	})();
+  const theme = extendTheme({
+    styles: {
+      globalStyle: {
+        body: {
+          bg: "blackAlpha.600",
+        },
+      },
+    },
+  })();
 
-	root.render(
-		<React.StrictMode>
-			<ColorModeScript initialColorMode="dark" />
-			<UIProvider colorMode="dark" theme={theme}>
-				<App />
-			</UIProvider>
-		</React.StrictMode>,
-	);
+  root.render(
+    <React.StrictMode>
+      <ColorModeScript initialColorMode="dark" />
+      <UIProvider colorMode="dark" theme={theme}>
+        <App />
+      </UIProvider>
+    </React.StrictMode>,
+  );
 }

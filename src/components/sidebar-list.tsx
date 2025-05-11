@@ -35,7 +35,7 @@ interface SidebarListProps {
 
 // Grouping helper (copy from index.tsx)
 function groupEntriesByDate(
-  entries: (ClipboardEntry & { count?: number })[]
+  entries: (ClipboardEntry & { count?: number })[],
 ): Record<string, (ClipboardEntry & { count: number })[]> {
   const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
   const dedupedMap = new Map<
@@ -96,14 +96,14 @@ export const SidebarList = React.memo(
         previousDataLength,
         totalEntries,
       },
-      ref
+      ref,
     ) => {
       const notice = useNotice();
 
       // Group entries by date
       const grouped = React.useMemo(
         () => groupEntriesByDate(entries),
-        [entries]
+        [entries],
       );
 
       // Flat list for index mapping
@@ -180,7 +180,7 @@ export const SidebarList = React.memo(
                     const flatIndex = flatList.findIndex(
                       (e) =>
                         e.timestamp === entry.timestamp &&
-                        e.content === entry.content
+                        e.content === entry.content,
                     );
                     // Only render if flatIndex is in range
                     if (flatIndex === -1 || flatIndex >= flatList.length)
@@ -247,10 +247,10 @@ export const SidebarList = React.memo(
                               entry.type === "text"
                                 ? "purple"
                                 : entry.type === "image"
-                                ? "blue"
-                                : entry.type === "color"
-                                ? "yellow"
-                                : "gray"
+                                  ? "blue"
+                                  : entry.type === "color"
+                                    ? "yellow"
+                                    : "gray"
                             }
                           >
                             {entry.type.charAt(0).toUpperCase() +
@@ -269,8 +269,8 @@ export const SidebarList = React.memo(
           )}
         </InfiniteScrollArea>
       );
-    }
-  )
+    },
+  ),
 );
 
 SidebarList.displayName = "SidebarList";
