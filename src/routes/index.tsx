@@ -8,6 +8,7 @@ import { DetailsPanel } from "../components/details-panel";
 import { SidebarList } from "../components/sidebar-list";
 import { TopBar } from "../components/top-bar";
 import {
+  type ClipboardEntry,
   copyClipboardEntry,
   getPaginatedClipboardEntries,
 } from "../utils/clipboard";
@@ -17,16 +18,6 @@ export const Route = createFileRoute("/")({
   component: HomeComponent,
   errorComponent: ErrorComponent,
 });
-
-// ClipboardEntry type matching backend
-interface ClipboardEntry {
-  content: string;
-  type: string;
-  timestamp: number;
-  app?: string;
-  ocr_text?: string;
-  color?: string;
-}
 
 function useDebouncedValue<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = React.useState(value);
@@ -38,7 +29,7 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 }
 
 function groupEntriesByDate(
-  entries: ClipboardEntry[],
+  entries: ClipboardEntry[]
 ): Record<string, (ClipboardEntry & { count: number })[]> {
   const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
   // Deduplicate by content+type, keep latest, and count occurrences
@@ -104,25 +95,27 @@ function HomeComponent() {
 
   const LIMIT = 50;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useInfiniteQuery<ClipboardEntry[], Error>({
-      initialPageParam: 0,
-      queryKey: ["clipboard-search", debouncedQuery],
-      queryFn: ({ pageParam }) =>
-        getPaginatedClipboardEntries(
-          debouncedQuery,
-          LIMIT,
-          pageParam as number,
-        ),
-      getNextPageParam: (lastPage, allPages) =>
-        lastPage.length === LIMIT ? allPages.length * LIMIT : undefined,
-      enabled: true,
-    });
+  const {
+    data,
+    fetchNextPage,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery<ClipboardEntry[], Error>({
+    initialPageParam: 0,
+    queryKey: ["clipboard-search", debouncedQuery],
+    queryFn: ({ pageParam }) =>
+      getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === LIMIT ? allPages.length * LIMIT : undefined,
+    enabled: true,
+  });
 
   // Flatten paginated results
   const results = React.useMemo(
     () => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []),
-    [data],
+    [data]
   );
 
   // Deduplicate and group entries by date, then flatten for selection
@@ -143,7 +136,7 @@ function HomeComponent() {
       typeFilter && typeFilter !== "all"
         ? flatList.filter((entry) => entry.type === typeFilter)
         : flatList,
-    [flatList, typeFilter],
+    [flatList, typeFilter]
   );
 
   const previousDataLength = usePrevious(flatList.length);
@@ -155,13 +148,13 @@ function HomeComponent() {
       { label: "Image", value: "image" },
       { label: "Color", value: "color" },
     ],
-    [],
+    []
   );
 
   const setQuery = React.useCallback((q: string) => setQueryRaw(q), []);
   const setTypeFilter = React.useCallback(
     (type: TypeFilter["value"]) => setTypeFilterRaw(type),
-    [],
+    []
   );
 
   const handleUpdateSelectedIndex = React.useCallback((index: number) => {
@@ -199,7 +192,7 @@ function HomeComponent() {
       setSelectedIndexRaw(index);
       handleUpdateSelectedIndex(index);
     },
-    [handleUpdateSelectedIndex],
+    [handleUpdateSelectedIndex]
   );
 
   const focusInput = React.useCallback(() => {
@@ -237,7 +230,7 @@ function HomeComponent() {
         return newIndex;
       });
     },
-    [filteredFlatList, handleUpdateSelectedIndex],
+    [filteredFlatList, handleUpdateSelectedIndex]
   );
 
   const handleKeyDown = React.useCallback(
@@ -248,7 +241,7 @@ function HomeComponent() {
         copyClipboardEntry(filteredFlatList[selectedIndex], () => {});
       }
     },
-    [filteredFlatList, selectedIndex],
+    [filteredFlatList, selectedIndex]
   );
 
   return (
@@ -280,13 +273,16 @@ function HomeComponent() {
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
+          isLoading={isLoading}
           selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
           itemRefs={itemRefs}
           totalEntries={results.length}
           previousDataLength={previousDataLength}
         />
-        <DetailsPanel selectedEntry={filteredFlatList[selectedIndex]} />
+        {filteredFlatList.length > 0 && (
+          <DetailsPanel selectedEntry={filteredFlatList[selectedIndex]} />
+        )}
       </HStack>
     </VStack>
   );

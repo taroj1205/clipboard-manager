@@ -11,11 +11,13 @@ pub const MIGRATION: Migration = Migration {
             type TEXT NOT NULL,
             timestamp INTEGER NOT NULL,
             app TEXT,
-            path TEXT
+            path TEXT,
+            html TEXT
         );
         CREATE INDEX IF NOT EXISTS idx_clipboard_timestamp ON clipboard_entries (timestamp DESC);
         CREATE INDEX IF NOT EXISTS idx_clipboard_content ON clipboard_entries (content);
         CREATE INDEX IF NOT EXISTS idx_clipboard_path ON clipboard_entries (path);
+        CREATE INDEX IF NOT EXISTS idx_clipboard_html ON clipboard_entries (html);
     ",
     kind: MigrationKind::Up,
 };
