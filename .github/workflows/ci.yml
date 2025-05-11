@@ -6,6 +6,10 @@ on:
       - main
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     runs-on: ${{ matrix.os }}
@@ -22,15 +26,11 @@ jobs:
           node-version: 22
           cache: "pnpm"
 
-      - name: Install pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
-
-      - name: Ensure pnpm is available
-        run: |
-          corepack enable || echo "corepack not available or already enabled"
-          pnpm --version
+          version: latest
+          run_install: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -39,7 +39,7 @@ jobs:
         run: pnpm tsc --noEmit
 
       - name: Build
-        run: pnpm run build
+        run: pnpm run tauri build
 
       - name: Biome check
-        run: pnpm dlx @biomejs/biome check .
+        run: pnpm lint

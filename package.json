@@ -8,7 +8,8 @@
     "dev": "rsbuild start",
     "build": "tsc && rsbuild build",
     "preview": "rsbuild preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "lint": "biome check ./src"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.75.7",
