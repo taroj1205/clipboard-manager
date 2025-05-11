@@ -91,3 +91,17 @@ In the dev server, all styles work, but after building the app, no styles are ap
 - If you see an error about `glib-2.0` not being found during a Tauri build in CI, install the `libglib2.0-dev` package on Ubuntu. This provides the required `glib-2.0.pc` file and headers for the build.
 - If you see an error about `gdk-3.0` not being found, install the `libgtk-3-dev` package on Ubuntu. This provides the required `gdk-3.0.pc` and GTK 3 development files.
 - If you see an error about `javascriptcoregtk-4.1` not being found, install the `libwebkit2gtk-4.1-dev` package on Ubuntu. This provides the required `javascriptcoregtk-4.1.pc` and WebKitGTK development files.
+
+- [x] Investigate Biome's config for line ending options.
+- [x] Update `biome.json` if possible.
+- [x] Add `.editorconfig` for line ending enforcement.
+- [ ] Document solution in TASKS.md.
+
+---
+
+## Solution: Enforcing Consistent Line Endings
+
+- Biome does not currently expose a line ending option in biome.json. To ensure consistent formatting across OS, an `.editorconfig` file has been added to enforce `end_of_line = lf` for all files.
+- All contributors should ensure their editor respects `.editorconfig` (most modern editors do by default).
+- If you have existing files with CRLF endings, you can convert them to LF using your editor or a tool like `dos2unix`.
+- After normalizing line endings, run `pnpm lint --fix` (or your Biome formatter command) to ensure all files are formatted consistently.
