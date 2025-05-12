@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - changeset-release/main
+      - main
     paths:
       - "CHANGELOG.md"
 
