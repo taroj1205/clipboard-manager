@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - main
+      - changeset-release/main
     paths:
       - "CHANGELOG.md"
 
@@ -105,13 +105,23 @@ jobs:
         with:
           path: installers
 
+      - name: Get version
+        id: version
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Get latest release notes
+        id: release-notes
+        run: |
+          echo "release-notes=$(node -p "require('./CHANGELOG.md').split('\n').filter(line => line.startsWith('##')).join('\n')")" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.changesets.outputs.released_version || github.sha }}
-          name: Release v${{ steps.changesets.outputs.released_version || github.sha }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
           body: |
-            ${{ steps.changesets.outputs.released_notes || 'Automated release' }}
+            ${{ steps.release-notes.outputs.release-notes || 'Automated release' }}
           files: installers/**/*
           draft: true
         env:

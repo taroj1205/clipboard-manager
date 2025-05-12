@@ -25,15 +25,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 8
+          version: latest
+          run_install: false
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Check for changesets
         id: check-changesets
