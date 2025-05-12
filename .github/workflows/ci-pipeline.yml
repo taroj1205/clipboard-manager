@@ -1,10 +1,16 @@
 name: CI
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "src/**"
+      - "src-tauri/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/**"
 
 jobs:
   check:
