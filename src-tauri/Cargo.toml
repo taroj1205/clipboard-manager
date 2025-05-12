@@ -1,6 +1,6 @@
 [package]
 name = "clipboard-manager"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Tauri App"
 authors = [ "Shintaro Jokagi" ]
 edition = "2021"
