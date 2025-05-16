@@ -141,15 +141,7 @@ export const SidebarList = React.memo(
         >
           {Object.entries(grouped).map(([date, entries]) => (
             <VStack key={date} align="stretch" gap="xs">
-              <Text
-                fontWeight="bold"
-                fontSize="sm"
-                p="sm"
-                position="sticky"
-                bg="transparentize(black, 70%)"
-                top={0}
-                roundedTop="md"
-              >
+              <Text fontWeight="bold" fontSize="sm" p="sm" top={0} roundedTop="md">
                 {date}
               </Text>
               <List>
