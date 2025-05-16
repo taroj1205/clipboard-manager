@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
 // }
 
 function groupEntriesByDate(
-  entries: ClipboardEntry[],
+  entries: ClipboardEntry[]
 ): Record<string, (ClipboardEntry & { count: number })[]> {
   const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
   // Deduplicate by content+type, keep latest, and count occurrences
@@ -117,7 +117,7 @@ function HomeComponent() {
   // Flatten paginated results
   const results = React.useMemo(
     () => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []),
-    [data],
+    [data]
   );
 
   // Deduplicate and group entries by date, then flatten for selection
@@ -138,7 +138,7 @@ function HomeComponent() {
       typeFilter && typeFilter !== "all"
         ? flatList.filter((entry) => entry.type === typeFilter)
         : flatList,
-    [flatList, typeFilter],
+    [flatList, typeFilter]
   );
 
   const previousDataLength = usePrevious(flatList.length);
@@ -150,7 +150,7 @@ function HomeComponent() {
       { label: "Image", value: "image" },
       { label: "Color", value: "color" },
     ],
-    [],
+    []
   );
 
   const setQuery = React.useCallback((q: string) => {
@@ -159,7 +159,7 @@ function HomeComponent() {
   }, []);
   const setTypeFilter = React.useCallback(
     (type: TypeFilter["value"]) => setTypeFilterRaw(type),
-    [],
+    []
   );
 
   const handleUpdateSelectedIndex = React.useCallback((index: number) => {
@@ -197,13 +197,13 @@ function HomeComponent() {
       setSelectedIndexRaw(index);
       handleUpdateSelectedIndex(index);
     },
-    [handleUpdateSelectedIndex],
+    [handleUpdateSelectedIndex]
   );
 
   const focusInput = React.useCallback(() => {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       inputRef.current?.focus();
-    }, 100);
+    });
   }, []);
 
   const blurInput = React.useCallback(() => {
@@ -236,7 +236,7 @@ function HomeComponent() {
         return newIndex;
       });
     },
-    [filteredFlatList, handleUpdateSelectedIndex],
+    [filteredFlatList, handleUpdateSelectedIndex]
   );
 
   useEventListener("keydown", (ev) => {
@@ -267,33 +267,7 @@ function HomeComponent() {
       !ev.ctrlKey &&
       !ev.metaKey &&
       !ev.altKey &&
-      !ev.shiftKey &&
-      ev.key !== "Enter" &&
-      ev.key !== "Escape" &&
-      ev.key !== "Tab" &&
-      ev.key !== "Backspace" &&
-      ev.key !== "Delete" &&
-      ev.key !== "ArrowUp" &&
-      ev.key !== "ArrowDown" &&
-      ev.key !== "ArrowLeft" &&
-      ev.key !== "ArrowRight" &&
-      ev.key !== "Home" &&
-      ev.key !== "End" &&
-      ev.key !== "PageUp" &&
-      ev.key !== "PageDown" &&
-      ev.key !== "Insert" &&
-      ev.key !== "F1" &&
-      ev.key !== "F2" &&
-      ev.key !== "F3" &&
-      ev.key !== "F4" &&
-      ev.key !== "F5" &&
-      ev.key !== "F6" &&
-      ev.key !== "F7" &&
-      ev.key !== "F8" &&
-      ev.key !== "F9" &&
-      ev.key !== "F10" &&
-      ev.key !== "F11" &&
-      ev.key !== "F12"
+      !ev.shiftKey
     ) {
       ev.preventDefault();
       ev.stopPropagation();
