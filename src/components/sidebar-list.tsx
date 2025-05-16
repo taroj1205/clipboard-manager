@@ -39,10 +39,7 @@ function groupEntriesByDate(
   entries: (ClipboardEntry & { count?: number })[],
 ): Record<string, (ClipboardEntry & { count: number })[]> {
   const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
-  const dedupedMap = new Map<
-    string,
-    { entry: ClipboardEntry; count: number }
-  >();
+  const dedupedMap = new Map<string, { entry: ClipboardEntry; count: number }>();
   for (const entry of entries) {
     const key = `${entry.type}::${entry.content}`;
     if (dedupedMap.has(key)) {
@@ -86,25 +83,13 @@ function groupEntriesByDate(
 export const SidebarList = React.memo(
   React.forwardRef<HTMLDivElement, SidebarListProps>(
     (
-      {
-        entries,
-        fetchNextPage,
-        hasNextPage,
-        selectedIndex,
-        setSelectedIndex,
-        itemRefs,
-        previousDataLength,
-        totalEntries,
-      },
+      { entries, fetchNextPage, hasNextPage, selectedIndex, setSelectedIndex, itemRefs, previousDataLength, totalEntries },
       ref,
     ) => {
       const notice = useNotice({ isClosable: true, closeStrategy: "both" });
 
       // Group entries by date
-      const grouped = React.useMemo(
-        () => groupEntriesByDate(entries),
-        [entries],
-      );
+      const grouped = React.useMemo(() => groupEntriesByDate(entries), [entries]);
 
       // Flat list for index mapping
       const flatList = React.useMemo(() => {
@@ -129,9 +114,7 @@ export const SidebarList = React.memo(
               <FileIcon fontSize="40px" />
             </EmptyStateIndicator>
             <EmptyStateTitle>No clipboard entries</EmptyStateTitle>
-            <EmptyStateDescription>
-              Your clipboard history is empty. Copy something to get started!
-            </EmptyStateDescription>
+            <EmptyStateDescription>Your clipboard history is empty. Copy something to get started!</EmptyStateDescription>
           </EmptyState>
         );
       }
@@ -148,12 +131,7 @@ export const SidebarList = React.memo(
           overflowX="hidden"
           ref={ref}
           onLoad={({ finish }) => {
-            console.log(totalEntries, previousDataLength);
-            if (
-              totalEntries % 50 === 0 &&
-              previousDataLength !== totalEntries
-            ) {
-              console.log("fetching next page");
+            if (totalEntries % 50 === 0 && previousDataLength !== totalEntries) {
               fetchNextPage();
             } else {
               if (!hasNextPage) finish();
@@ -177,14 +155,9 @@ export const SidebarList = React.memo(
               <List>
                 {entries.map((entry) => {
                   // Find the flat index for selection
-                  const flatIndex = flatList.findIndex(
-                    (e) =>
-                      e.timestamp === entry.timestamp &&
-                      e.content === entry.content,
-                  );
+                  const flatIndex = flatList.findIndex((e) => e.timestamp === entry.timestamp && e.content === entry.content);
                   // Only render if flatIndex is in range
-                  if (flatIndex === -1 || flatIndex >= flatList.length)
-                    return null;
+                  if (flatIndex === -1 || flatIndex >= flatList.length) return null;
                   const isSelected = flatIndex === selectedIndex;
                   const refProp = (el: HTMLLIElement | null) => {
                     itemRefs.current[flatIndex] = el;
@@ -209,21 +182,13 @@ export const SidebarList = React.memo(
                         {entry.type === "image" ? (
                           <ImageIcon fontSize="16px" />
                         ) : entry.type === "color" ? (
-                          <ColorSwatch
-                            h="16px"
-                            w="16px"
-                            color={entry.content}
-                          />
+                          <ColorSwatch h="16px" w="16px" color={entry.content} />
                         ) : (
                           <FileIcon fontSize="16px" />
                         )}
                         {entry.type === "image" && entry.path ? (
                           <ClipboardImage
-                            src={
-                              Array.isArray(entry.path)
-                                ? entry.path[0]
-                                : entry.path
-                            }
+                            src={Array.isArray(entry.path) ? entry.path[0] : entry.path}
                             alt={entry.content ?? "Clipboard entry"}
                             maxH="20px"
                           />
@@ -234,11 +199,7 @@ export const SidebarList = React.memo(
                         )}
                         <Spacer />
                         {entry.count > 1 && (
-                          <Badge
-                            colorScheme="red"
-                            fontSize="xs"
-                            title="Copy count"
-                          >
+                          <Badge colorScheme="red" fontSize="xs" title="Copy count">
                             x{entry.count}
                           </Badge>
                         )}
@@ -253,8 +214,7 @@ export const SidebarList = React.memo(
                                   : "gray"
                           }
                         >
-                          {entry.type.charAt(0).toUpperCase() +
-                            entry.type.slice(1)}
+                          {entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}
                         </Badge>
                       </HStack>
                       <Text fontSize="xs" color="gray.400">

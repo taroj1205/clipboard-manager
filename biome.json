@@ -12,7 +12,9 @@
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "useEditorconfig": true
+    "useEditorconfig": true,
+    "lineEnding": "lf",
+    "lineWidth": 128
   },
   "organizeImports": {
     "enabled": true
@@ -20,7 +22,10 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "suspicious": {
+        "noConsoleLog": "error"
+      }
     }
   },
   "javascript": {
