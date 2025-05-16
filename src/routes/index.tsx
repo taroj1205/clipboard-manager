@@ -72,12 +72,14 @@ function groupEntriesByDate(entries: ClipboardEntry[]): Record<string, (Clipboar
 
 export interface TypeFilter {
   label: string;
-  value: "all" | "text" | "image" | "color";
+  value: "all" | "text" | "image" | "color" | "html";
 }
+
+const allowedTypes: TypeFilter["value"][] = ["all", "text", "image", "color", "html"];
 
 function HomeComponent() {
   const [query, setQueryRaw] = React.useState("");
-  const [typeFilter, setTypeFilterRaw] = React.useState<TypeFilter["value"]>("all");
+  const [typeFilter, setTypeFilterRaw] = React.useState<TypeFilter["value"][]>(["all"]);
   const [selectedIndex, setSelectedIndexRaw] = React.useState<number>(0);
   const debouncedQuery = React.useDeferredValue(query);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -92,7 +94,7 @@ function HomeComponent() {
     Error
   >({
     initialPageParam: 0,
-    queryKey: ["clipboard-search", debouncedQuery],
+    queryKey: ["clipboard-search", debouncedQuery, typeFilter],
     queryFn: ({ pageParam }) => getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
     getNextPageParam: (lastPage, allPages) => (lastPage.length === LIMIT ? allPages.length * LIMIT : undefined),
   });
@@ -113,10 +115,11 @@ function HomeComponent() {
   }, [grouped]);
 
   // Filter by type after deduplication
-  const filteredFlatList = React.useMemo(
-    () => (typeFilter && typeFilter !== "all" ? flatList.filter((entry) => entry.type === typeFilter) : flatList),
-    [flatList, typeFilter],
-  );
+  const filteredFlatList = React.useMemo(() => {
+    const selectedTypes = typeFilter.filter((t): t is TypeFilter["value"] => allowedTypes.includes(t as TypeFilter["value"]));
+    if (selectedTypes.length === 0 || selectedTypes.includes("all")) return flatList;
+    return flatList.filter((entry) => selectedTypes.includes(entry.type));
+  }, [flatList, typeFilter]);
 
   const previousDataLength = usePrevious(flatList.length);
 
@@ -130,11 +133,29 @@ function HomeComponent() {
     [],
   );
 
-  const setQuery = React.useCallback((q: string) => {
-    setQueryRaw(q);
-    setSelectedIndex(0);
-  }, []);
-  const setTypeFilter = React.useCallback((type: TypeFilter["value"]) => setTypeFilterRaw(type), []);
+  const setQuery = React.useCallback(
+    (q: string, types?: string[]) => {
+      setQueryRaw(q);
+      setSelectedIndex(0);
+      if (types) setTypeFilter(types);
+      refetch();
+    },
+    [refetch],
+  );
+
+  const setTypeFilter = React.useCallback(
+    (types: string[]) => {
+      if (!types || types.length === 0) {
+        setTypeFilterRaw(["all"]);
+      } else {
+        const filtered = types.filter((t): t is TypeFilter["value"] => allowedTypes.includes(t as TypeFilter["value"]));
+        setTypeFilterRaw(filtered.length === 0 ? ["all"] : filtered);
+      }
+      setSelectedIndex(0);
+      refetch();
+    },
+    [refetch],
+  );
 
   const handleUpdateSelectedIndex = React.useCallback((index: number) => {
     const el = itemRefs.current[index];
