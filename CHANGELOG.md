@@ -1,5 +1,11 @@
 # clipboard-manager
 
+## 0.0.3
+
+### Patch Changes
+
+- e1c4d45: Add a html copy feature
+
 ## 0.0.2
 
 ### Patch Changes
