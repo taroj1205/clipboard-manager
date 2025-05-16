@@ -12,6 +12,10 @@ on:
       - "pnpm-lock.yaml"
       - ".github/workflows/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
