@@ -148,12 +148,10 @@ export const SidebarList = React.memo(
           overflowX="hidden"
           ref={ref}
           onLoad={({ finish }) => {
-            console.log(totalEntries, previousDataLength);
             if (
               totalEntries % 50 === 0 &&
               previousDataLength !== totalEntries
             ) {
-              console.log("fetching next page");
               fetchNextPage();
             } else {
               if (!hasNextPage) finish();

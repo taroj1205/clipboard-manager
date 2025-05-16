@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
+import { BaseDirectory } from "@tauri-apps/plugin-fs";
+import { readFile } from "@tauri-apps/plugin-fs";
 import Database from "@tauri-apps/plugin-sql";
 import { useOS } from "@yamada-ui/react";
 import { writeImageBinary, writeText } from "tauri-plugin-clipboard-api";
@@ -16,7 +18,6 @@ export interface ClipboardEntry {
 const db = await Database.load("sqlite:clipboard.db");
 
 export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
-  console.log("addClipboardEntry", entry);
   await db.execute(
     "INSERT INTO clipboard_entries (content, type, timestamp, app, path, html) VALUES (?, ?, ?, ?, ?, ?)",
     [
@@ -200,14 +201,18 @@ export async function copyClipboardEntry(
   }) => void,
 ) {
   if (entry.type === "image" && entry.path) {
-    // let imagePath = Array.isArray(entry.path) ? entry.path[0] : entry.path;
     try {
-      await writeImageBinary(entry.content as unknown as number[]);
-      notice({
-        title: "Image copied!",
-        description: "Image copied to clipboard",
-        status: "success",
+      const data = await readFile(entry.path as string, {
+        baseDir: BaseDirectory.Picture,
       });
+      if (data) {
+        await writeImageBinary(Array.from(data));
+        notice({
+          title: "Image copied!",
+          description: "Image copied to clipboard",
+          status: "success",
+        });
+      }
     } catch (e) {
       console.error(e);
       notice({

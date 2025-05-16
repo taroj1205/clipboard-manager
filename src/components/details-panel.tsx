@@ -42,8 +42,6 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
   ({ selectedEntry }) => {
     const notice = useNotice({ isClosable: true, closeStrategy: "both" });
 
-    console.log(selectedEntry);
-
     const os = useOS();
 
     const { background } = useLoading();
@@ -66,7 +64,6 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(
     const handleReloadOCR = async () => {
       if (selectedEntry?.type !== "image" || !selectedEntry.content) return;
       try {
-        console.log("Reloading OCR");
         background.start();
         // Try to extract base64 from file path if content is a file path
         const imagePath = isArray(selectedEntry.path)

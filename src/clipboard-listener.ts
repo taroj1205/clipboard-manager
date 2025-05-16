@@ -53,14 +53,11 @@ export function initClipboardListener() {
       return;
     }
     if (await hasImage()) {
-      console.log("Image detected");
       const image = await readImageBase64();
       if (image && image !== prevImage) {
         prevImage = image;
         // save image to file
         const filename = `clipboard-manager/${now}.png`;
-
-        console.log("Image saved to file");
         try {
           await writeFile(filename, base64ToUint8Array(image), {
             baseDir: BaseDirectory.Picture,

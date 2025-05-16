@@ -12,21 +12,23 @@ import {
   copyClipboardEntry,
   getPaginatedClipboardEntries,
 } from "../utils/clipboard";
+import { useEventListener } from "../utils/events";
 
 import { ErrorComponent } from "../components/error-component";
+import { hideWindow } from "../utils/window";
 export const Route = createFileRoute("/")({
   component: HomeComponent,
   errorComponent: ErrorComponent,
 });
 
-function useDebouncedValue<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = React.useState(value);
-  React.useEffect(() => {
-    const handler = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debounced;
-}
+// function useDebouncedValue<T>(value: T, delay: number): T {
+//   const [debounced, setDebounced] = React.useState(value);
+//   React.useEffect(() => {
+//     const handler = setTimeout(() => setDebounced(value), delay);
+//     return () => clearTimeout(handler);
+//   }, [value, delay]);
+//   return debounced;
+// }
 
 function groupEntriesByDate(
   entries: ClipboardEntry[],
@@ -87,7 +89,7 @@ function HomeComponent() {
   const [typeFilter, setTypeFilterRaw] =
     React.useState<TypeFilter["value"]>("all");
   const [selectedIndex, setSelectedIndexRaw] = React.useState<number>(0);
-  const debouncedQuery = useDebouncedValue(query, 200);
+  const debouncedQuery = React.useDeferredValue(query);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const itemRefs = React.useRef<(HTMLLIElement | null)[]>([]);
 
@@ -151,7 +153,10 @@ function HomeComponent() {
     [],
   );
 
-  const setQuery = React.useCallback((q: string) => setQueryRaw(q), []);
+  const setQuery = React.useCallback((q: string) => {
+    setQueryRaw(q);
+    setSelectedIndex(0);
+  }, []);
   const setTypeFilter = React.useCallback(
     (type: TypeFilter["value"]) => setTypeFilterRaw(type),
     [],
@@ -196,7 +201,9 @@ function HomeComponent() {
   );
 
   const focusInput = React.useCallback(() => {
-    inputRef.current?.focus();
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
   }, []);
 
   const blurInput = React.useCallback(() => {
@@ -213,7 +220,6 @@ function HomeComponent() {
   });
 
   listen("tauri://blur", () => {
-    console.log("blur");
     setSelectedIndex(0);
     getCurrentWindow().hide();
     blurInput();
@@ -233,16 +239,68 @@ function HomeComponent() {
     [filteredFlatList, handleUpdateSelectedIndex],
   );
 
-  const handleKeyDown = React.useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        e.stopPropagation();
-        copyClipboardEntry(filteredFlatList[selectedIndex], () => {});
+  useEventListener("keydown", (ev) => {
+    if (ev.key === "ArrowUp" || ev.key === "ArrowDown") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      focusInput();
+      handleArrowKey(ev.key === "ArrowUp" ? "up" : "down");
+    } else if (ev.key === "k" && (ev.ctrlKey || ev.metaKey)) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      focusInput();
+    } else if (ev.key === "Enter") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      copyClipboardEntry(filteredFlatList[selectedIndex], () => {});
+      hideWindow();
+    } else if (ev.key === "Escape") {
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (query) {
+        setQuery("");
+      } else {
+        hideWindow();
       }
-    },
-    [filteredFlatList, selectedIndex],
-  );
+    } else if (
+      ev.key.length === 1 &&
+      !ev.ctrlKey &&
+      !ev.metaKey &&
+      !ev.altKey &&
+      !ev.shiftKey &&
+      ev.key !== "Enter" &&
+      ev.key !== "Escape" &&
+      ev.key !== "Tab" &&
+      ev.key !== "Backspace" &&
+      ev.key !== "Delete" &&
+      ev.key !== "ArrowUp" &&
+      ev.key !== "ArrowDown" &&
+      ev.key !== "ArrowLeft" &&
+      ev.key !== "ArrowRight" &&
+      ev.key !== "Home" &&
+      ev.key !== "End" &&
+      ev.key !== "PageUp" &&
+      ev.key !== "PageDown" &&
+      ev.key !== "Insert" &&
+      ev.key !== "F1" &&
+      ev.key !== "F2" &&
+      ev.key !== "F3" &&
+      ev.key !== "F4" &&
+      ev.key !== "F5" &&
+      ev.key !== "F6" &&
+      ev.key !== "F7" &&
+      ev.key !== "F8" &&
+      ev.key !== "F9" &&
+      ev.key !== "F10" &&
+      ev.key !== "F11" &&
+      ev.key !== "F12"
+    ) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      focusInput();
+      setQuery(query + ev.key);
+    }
+  });
 
   return (
     <VStack
@@ -250,7 +308,7 @@ function HomeComponent() {
       h="100vh"
       p="sm"
       separator={<Separator />}
-      onKeyDown={handleKeyDown}
+      // onKeyDown={handleKeyDown}
       color="white"
     >
       <TopBar
@@ -260,7 +318,6 @@ function HomeComponent() {
         setTypeFilter={setTypeFilter}
         typeOptions={typeOptions}
         ref={inputRef}
-        onArrowKey={handleArrowKey}
       />
       <HStack
         gap="xs"

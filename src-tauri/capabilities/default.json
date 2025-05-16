@@ -18,6 +18,7 @@
     "fs:allow-app-write",
     "fs:allow-app-read",
     "clipboard:allow-write-text",
+    "clipboard:allow-write-image-base64",
     "clipboard:allow-write-image-binary",
     "core:window:allow-hide",
     {

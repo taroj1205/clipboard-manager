@@ -8,15 +8,11 @@ interface TopBarProps {
   typeFilter: TypeFilter["value"];
   setTypeFilter: (type: TypeFilter["value"]) => void;
   typeOptions: TypeFilter[];
-  onArrowKey?: (direction: "up" | "down") => void;
 }
 
 export const TopBar = React.memo(
   React.forwardRef<HTMLInputElement, TopBarProps>(
-    (
-      { query, setQuery, typeFilter, setTypeFilter, typeOptions, onArrowKey },
-      ref,
-    ) => {
+    ({ query, setQuery, typeFilter, setTypeFilter, typeOptions }, ref) => {
       return (
         <HStack gap="0">
           <Input
@@ -26,15 +22,6 @@ export const TopBar = React.memo(
             roundedRight="none"
             borderRight="none"
             ref={ref}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowUp") {
-                e.preventDefault();
-                onArrowKey?.("up");
-              } else if (e.key === "ArrowDown") {
-                e.preventDefault();
-                onArrowKey?.("down");
-              }
-            }}
           />
 
           <Select
