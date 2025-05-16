@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -87,7 +87,7 @@ function HomeComponent() {
 
   const LIMIT = 50;
 
-  const { data, fetchNextPage, isLoading, hasNextPage, isFetchingNextPage, refetch } = useInfiniteQuery<
+  const { data, fetchNextPage, isLoading, hasNextPage, isFetchingNextPage, refetch } = useSuspenseInfiniteQuery<
     ClipboardEntry[],
     Error
   >({
@@ -95,7 +95,6 @@ function HomeComponent() {
     queryKey: ["clipboard-search", debouncedQuery],
     queryFn: ({ pageParam }) => getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
     getNextPageParam: (lastPage, allPages) => (lastPage.length === LIMIT ? allPages.length * LIMIT : undefined),
-    enabled: true,
   });
 
   // Flatten paginated results
