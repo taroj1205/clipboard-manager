@@ -9,7 +9,7 @@ import { writeImageBase64 } from "tauri-plugin-clipboard-api";
 
 export interface ClipboardEntry {
   content: string;
-  type: string;
+  type: "text" | "image" | "color" | "html";
   timestamp: number;
   app?: string;
   path?: string | string[];

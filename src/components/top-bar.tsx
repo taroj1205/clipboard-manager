@@ -1,41 +1,30 @@
-import { HStack, Input, Option, Select } from "@yamada-ui/react";
+import { Input } from "@yamada-ui/react";
 import * as React from "react";
 import type { TypeFilter } from "../routes";
 
 interface TopBarProps {
   query: string;
-  setQuery: (q: string) => void;
-  typeFilter: TypeFilter["value"];
-  setTypeFilter: (type: TypeFilter["value"]) => void;
+  setQuery: (q: string, types?: string[]) => void;
+  typeFilter: string[];
+  setTypeFilter: (types: string[]) => void;
   typeOptions: TypeFilter[];
 }
 
 export const TopBar = React.memo(
-  React.forwardRef<HTMLInputElement, TopBarProps>(({ query, setQuery, typeFilter, setTypeFilter, typeOptions }, ref) => {
-    return (
-      <HStack gap="0">
-        <Input
-          placeholder="Type to search..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          roundedRight="none"
-          borderRight="none"
-          ref={ref}
-        />
+  React.forwardRef<HTMLInputElement, TopBarProps>(({ query, setQuery, typeFilter }, ref) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setQuery(e.target.value, typeFilter);
+    };
 
-        <Select
-          onChange={(value) => setTypeFilter(value as TypeFilter["value"])}
-          defaultValue={typeFilter}
-          w="xs"
-          roundedLeft="none"
-        >
-          {typeOptions.map((option) => (
-            <Option key={option.value} value={option.value}>
-              {option.label}
-            </Option>
-          ))}
-        </Select>
-      </HStack>
+    return (
+      <Input
+        placeholder="Type to search..."
+        value={query}
+        onChange={handleInputChange}
+        // roundedRight="none"
+        // borderRight="none"
+        ref={ref}
+      />
     );
   }),
 );
