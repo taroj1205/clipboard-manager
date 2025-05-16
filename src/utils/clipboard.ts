@@ -1,10 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
+import { writeHtml, writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { BaseDirectory } from "@tauri-apps/plugin-fs";
 import { readFile } from "@tauri-apps/plugin-fs";
 import Database from "@tauri-apps/plugin-sql";
 import { useOS } from "@yamada-ui/react";
-import { writeImageBinary, writeText } from "tauri-plugin-clipboard-api";
+import { writeImageBase64 } from "tauri-plugin-clipboard-api";
 
 export interface ClipboardEntry {
   content: string;
@@ -158,7 +159,8 @@ export async function copyClipboardEntry(
         baseDir: BaseDirectory.Picture,
       });
       if (data) {
-        await writeImageBinary(Array.from(data));
+        const base64 = uint8ArrayToBase64(data);
+        await writeImageBase64(base64);
         notice({
           title: "Image copied!",
           description: "Image copied to clipboard",
@@ -172,6 +174,31 @@ export async function copyClipboardEntry(
         description: "Failed to copy image",
         status: "error",
       });
+    }
+  } else if (entry.type === "html" && entry.html) {
+    try {
+      await writeHtml(entry.html);
+      notice({
+        title: "HTML copied!",
+        description: "HTML copied to clipboard",
+        status: "success",
+      });
+    } catch (e) {
+      console.error("Failed to copy HTML, falling back to text. Error:", e);
+      try {
+        await writeText(entry.content);
+        notice({
+          title: "Copied as text",
+          description: "HTML copy failed, copied as plain text instead.",
+          status: "error",
+        });
+      } catch (e2) {
+        notice({
+          title: "Failed to copy",
+          description: "Failed to copy HTML and text",
+          status: "error",
+        });
+      }
     }
   } else {
     try {

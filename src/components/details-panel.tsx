@@ -1,4 +1,5 @@
 import { pictureDir } from "@tauri-apps/api/path";
+import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { CopyIcon, ImageIcon, RefreshCwIcon, TextIcon } from "@yamada-ui/lucide";
 import {
   Badge,
@@ -20,7 +21,6 @@ import {
   useOS,
 } from "@yamada-ui/react";
 import * as React from "react";
-import { writeText } from "tauri-plugin-clipboard-api";
 import type { ClipboardEntry } from "../utils/clipboard";
 import { copyClipboardEntry, editClipboardEntry, extractTextFromImage } from "../utils/clipboard";
 import { ClipboardImage } from "./clipboard-image";
@@ -180,7 +180,6 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
             </Center>
           ) : selectedEntry.type === "html" && selectedEntry.html ? (
             <Text
-              whiteSpace="pre-wrap"
               wordBreak="break-word"
               // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
               dangerouslySetInnerHTML={{ __html: selectedEntry.html }}
