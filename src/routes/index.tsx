@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
 // }
 
 function groupEntriesByDate(
-  entries: ClipboardEntry[]
+  entries: ClipboardEntry[],
 ): Record<string, (ClipboardEntry & { count: number })[]> {
   const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
   // Deduplicate by content+type, keep latest, and count occurrences
@@ -117,7 +117,7 @@ function HomeComponent() {
   // Flatten paginated results
   const results = React.useMemo(
     () => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []),
-    [data]
+    [data],
   );
 
   // Deduplicate and group entries by date, then flatten for selection
@@ -138,7 +138,7 @@ function HomeComponent() {
       typeFilter && typeFilter !== "all"
         ? flatList.filter((entry) => entry.type === typeFilter)
         : flatList,
-    [flatList, typeFilter]
+    [flatList, typeFilter],
   );
 
   const previousDataLength = usePrevious(flatList.length);
@@ -150,7 +150,7 @@ function HomeComponent() {
       { label: "Image", value: "image" },
       { label: "Color", value: "color" },
     ],
-    []
+    [],
   );
 
   const setQuery = React.useCallback((q: string) => {
@@ -159,7 +159,7 @@ function HomeComponent() {
   }, []);
   const setTypeFilter = React.useCallback(
     (type: TypeFilter["value"]) => setTypeFilterRaw(type),
-    []
+    [],
   );
 
   const handleUpdateSelectedIndex = React.useCallback((index: number) => {
@@ -197,7 +197,7 @@ function HomeComponent() {
       setSelectedIndexRaw(index);
       handleUpdateSelectedIndex(index);
     },
-    [handleUpdateSelectedIndex]
+    [handleUpdateSelectedIndex],
   );
 
   const focusInput = React.useCallback(() => {
@@ -236,7 +236,7 @@ function HomeComponent() {
         return newIndex;
       });
     },
-    [filteredFlatList, handleUpdateSelectedIndex]
+    [filteredFlatList, handleUpdateSelectedIndex],
   );
 
   useEventListener("keydown", (ev) => {

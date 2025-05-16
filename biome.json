@@ -12,7 +12,9 @@
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "useEditorconfig": true
+    "useEditorconfig": true,
+    "lineEnding": "lf",
+    "lineWidth": 128
   },
   "organizeImports": {
     "enabled": true
