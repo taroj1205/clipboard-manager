@@ -180,7 +180,6 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
             </Center>
           ) : selectedEntry.type === "html" && selectedEntry.html ? (
             <Text
-              whiteSpace="pre-wrap"
               wordBreak="break-word"
               // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
               dangerouslySetInnerHTML={{ __html: selectedEntry.html }}
