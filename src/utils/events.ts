@@ -17,28 +17,16 @@ export const useEventListener = <K extends keyof DocumentEventMap>(
 
     if (!handler) return;
 
-    node.addEventListener(
-      event,
-      listener as EventListenerOrEventListenerObject,
-      options,
-    );
+    node.addEventListener(event, listener as EventListenerOrEventListenerObject, options);
 
     return () => {
-      node.removeEventListener(
-        event,
-        listener as EventListenerOrEventListenerObject,
-        options,
-      );
+      node.removeEventListener(event, listener as EventListenerOrEventListenerObject, options);
     };
   }, [event, env, options, listener, handler]);
 
   return () => {
     const node = runIfFunc(env) ?? document;
 
-    node.removeEventListener(
-      event,
-      listener as EventListenerOrEventListenerObject,
-      options,
-    );
+    node.removeEventListener(event, listener as EventListenerOrEventListenerObject, options);
   };
 };

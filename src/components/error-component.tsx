@@ -1,10 +1,5 @@
 import { ShieldAlertIcon } from "@yamada-ui/lucide";
-import {
-  EmptyState,
-  EmptyStateDescription,
-  EmptyStateIndicator,
-  EmptyStateTitle,
-} from "@yamada-ui/react";
+import { EmptyState, EmptyStateDescription, EmptyStateIndicator, EmptyStateTitle } from "@yamada-ui/react";
 
 export const ErrorComponent = () => {
   return (
@@ -13,9 +8,7 @@ export const ErrorComponent = () => {
         <ShieldAlertIcon />
       </EmptyStateIndicator>
       <EmptyStateTitle>Error</EmptyStateTitle>
-      <EmptyStateDescription>
-        An error occurred while loading the page.
-      </EmptyStateDescription>
+      <EmptyStateDescription>An error occurred while loading the page.</EmptyStateDescription>
     </EmptyState>
   );
 };

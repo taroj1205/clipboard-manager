@@ -7,11 +7,7 @@ import * as React from "react";
 import { DetailsPanel } from "../components/details-panel";
 import { SidebarList } from "../components/sidebar-list";
 import { TopBar } from "../components/top-bar";
-import {
-  type ClipboardEntry,
-  copyClipboardEntry,
-  getPaginatedClipboardEntries,
-} from "../utils/clipboard";
+import { type ClipboardEntry, copyClipboardEntry, getPaginatedClipboardEntries } from "../utils/clipboard";
 import { useEventListener } from "../utils/events";
 
 import { ErrorComponent } from "../components/error-component";
@@ -30,15 +26,10 @@ export const Route = createFileRoute("/")({
 //   return debounced;
 // }
 
-function groupEntriesByDate(
-  entries: ClipboardEntry[],
-): Record<string, (ClipboardEntry & { count: number })[]> {
+function groupEntriesByDate(entries: ClipboardEntry[]): Record<string, (ClipboardEntry & { count: number })[]> {
   const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
   // Deduplicate by content+type, keep latest, and count occurrences
-  const dedupedMap = new Map<
-    string,
-    { entry: ClipboardEntry; count: number }
-  >();
+  const dedupedMap = new Map<string, { entry: ClipboardEntry; count: number }>();
   for (const entry of entries) {
     const key = `${entry.type}::${entry.content}`;
     const existing = dedupedMap.get(key);
@@ -86,8 +77,7 @@ export interface TypeFilter {
 
 function HomeComponent() {
   const [query, setQueryRaw] = React.useState("");
-  const [typeFilter, setTypeFilterRaw] =
-    React.useState<TypeFilter["value"]>("all");
+  const [typeFilter, setTypeFilterRaw] = React.useState<TypeFilter["value"]>("all");
   const [selectedIndex, setSelectedIndexRaw] = React.useState<number>(0);
   const debouncedQuery = React.useDeferredValue(query);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -97,28 +87,19 @@ function HomeComponent() {
 
   const LIMIT = 50;
 
-  const {
-    data,
-    fetchNextPage,
-    isLoading,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-  } = useInfiniteQuery<ClipboardEntry[], Error>({
+  const { data, fetchNextPage, isLoading, hasNextPage, isFetchingNextPage, refetch } = useInfiniteQuery<
+    ClipboardEntry[],
+    Error
+  >({
     initialPageParam: 0,
     queryKey: ["clipboard-search", debouncedQuery],
-    queryFn: ({ pageParam }) =>
-      getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.length === LIMIT ? allPages.length * LIMIT : undefined,
+    queryFn: ({ pageParam }) => getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
+    getNextPageParam: (lastPage, allPages) => (lastPage.length === LIMIT ? allPages.length * LIMIT : undefined),
     enabled: true,
   });
 
   // Flatten paginated results
-  const results = React.useMemo(
-    () => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []),
-    [data],
-  );
+  const results = React.useMemo(() => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []), [data]);
 
   // Deduplicate and group entries by date, then flatten for selection
   const grouped = React.useMemo(() => groupEntriesByDate(results), [results]);
@@ -134,10 +115,7 @@ function HomeComponent() {
 
   // Filter by type after deduplication
   const filteredFlatList = React.useMemo(
-    () =>
-      typeFilter && typeFilter !== "all"
-        ? flatList.filter((entry) => entry.type === typeFilter)
-        : flatList,
+    () => (typeFilter && typeFilter !== "all" ? flatList.filter((entry) => entry.type === typeFilter) : flatList),
     [flatList, typeFilter],
   );
 
@@ -157,10 +135,7 @@ function HomeComponent() {
     setQueryRaw(q);
     setSelectedIndex(0);
   }, []);
-  const setTypeFilter = React.useCallback(
-    (type: TypeFilter["value"]) => setTypeFilterRaw(type),
-    [],
-  );
+  const setTypeFilter = React.useCallback((type: TypeFilter["value"]) => setTypeFilterRaw(type), []);
 
   const handleUpdateSelectedIndex = React.useCallback((index: number) => {
     const el = itemRefs.current[index];
@@ -228,10 +203,7 @@ function HomeComponent() {
   const handleArrowKey = React.useCallback(
     (direction: "up" | "down") => {
       setSelectedIndexRaw((prev) => {
-        const newIndex =
-          direction === "up"
-            ? Math.max(0, prev - 1)
-            : Math.min(filteredFlatList.length - 1, prev + 1);
+        const newIndex = direction === "up" ? Math.max(0, prev - 1) : Math.min(filteredFlatList.length - 1, prev + 1);
         handleUpdateSelectedIndex(newIndex);
         return newIndex;
       });
@@ -262,13 +234,7 @@ function HomeComponent() {
       } else {
         hideWindow();
       }
-    } else if (
-      ev.key.length === 1 &&
-      !ev.ctrlKey &&
-      !ev.metaKey &&
-      !ev.altKey &&
-      !ev.shiftKey
-    ) {
+    } else if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey && !ev.shiftKey) {
       ev.preventDefault();
       ev.stopPropagation();
       focusInput();
@@ -293,12 +259,7 @@ function HomeComponent() {
         typeOptions={typeOptions}
         ref={inputRef}
       />
-      <HStack
-        gap="xs"
-        flex={1}
-        align="stretch"
-        separator={<Separator orientation="vertical" />}
-      >
+      <HStack gap="xs" flex={1} align="stretch" separator={<Separator orientation="vertical" />}>
         <SidebarList
           entries={filteredFlatList}
           fetchNextPage={fetchNextPage}
@@ -311,9 +272,7 @@ function HomeComponent() {
           totalEntries={results.length}
           previousDataLength={previousDataLength}
         />
-        {filteredFlatList.length > 0 && (
-          <DetailsPanel selectedEntry={filteredFlatList[selectedIndex]} />
-        )}
+        {filteredFlatList.length > 0 && <DetailsPanel selectedEntry={filteredFlatList[selectedIndex]} />}
       </HStack>
     </VStack>
   );

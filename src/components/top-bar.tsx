@@ -11,35 +11,33 @@ interface TopBarProps {
 }
 
 export const TopBar = React.memo(
-  React.forwardRef<HTMLInputElement, TopBarProps>(
-    ({ query, setQuery, typeFilter, setTypeFilter, typeOptions }, ref) => {
-      return (
-        <HStack gap="0">
-          <Input
-            placeholder="Type to search..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            roundedRight="none"
-            borderRight="none"
-            ref={ref}
-          />
+  React.forwardRef<HTMLInputElement, TopBarProps>(({ query, setQuery, typeFilter, setTypeFilter, typeOptions }, ref) => {
+    return (
+      <HStack gap="0">
+        <Input
+          placeholder="Type to search..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          roundedRight="none"
+          borderRight="none"
+          ref={ref}
+        />
 
-          <Select
-            onChange={(value) => setTypeFilter(value as TypeFilter["value"])}
-            defaultValue={typeFilter}
-            w="xs"
-            roundedLeft="none"
-          >
-            {typeOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
-          </Select>
-        </HStack>
-      );
-    },
-  ),
+        <Select
+          onChange={(value) => setTypeFilter(value as TypeFilter["value"])}
+          defaultValue={typeFilter}
+          w="xs"
+          roundedLeft="none"
+        >
+          {typeOptions.map((option) => (
+            <Option key={option.value} value={option.value}>
+              {option.label}
+            </Option>
+          ))}
+        </Select>
+      </HStack>
+    );
+  }),
 );
 
 TopBar.displayName = "TopBar";

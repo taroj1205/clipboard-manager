@@ -1,9 +1,7 @@
 import { BaseDirectory, readFile } from "@tauri-apps/plugin-fs";
 import { uint8ArrayToBase64 } from "./clipboard";
 
-export async function getImageDataUrl(
-  src: string,
-): Promise<string | undefined> {
+export async function getImageDataUrl(src: string): Promise<string | undefined> {
   try {
     const data = await readFile(src, { baseDir: BaseDirectory.Picture });
     if (data) {

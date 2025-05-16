@@ -44,6 +44,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+    needs: check
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
