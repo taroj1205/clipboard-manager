@@ -1,5 +1,11 @@
 # clipboard-manager
 
+## 0.0.4
+
+### Patch Changes
+
+- f9cee5e: Fix HTML copy feature and improve auto-closing logic and acrylic effect
+
 ## 0.0.3
 
 ### Patch Changes
