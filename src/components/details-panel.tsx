@@ -1,6 +1,6 @@
 import { pictureDir } from "@tauri-apps/api/path";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { CopyIcon, ImageIcon, RefreshCwIcon, TextIcon } from "@yamada-ui/lucide";
+import { CopyIcon, ImageIcon, RefreshCwIcon, TextIcon, TrashIcon } from "@yamada-ui/lucide";
 import {
   Badge,
   Box,
@@ -22,7 +22,7 @@ import {
 } from "@yamada-ui/react";
 import * as React from "react";
 import type { ClipboardEntry } from "../utils/clipboard";
-import { copyClipboardEntry, editClipboardEntry, extractTextFromImage } from "../utils/clipboard";
+import { copyClipboardEntry, deleteClipboardEntry, editClipboardEntry, extractTextFromImage } from "../utils/clipboard";
 import { ClipboardImage } from "./clipboard-image";
 
 interface DetailsPanelProps {
@@ -137,6 +137,31 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
               title="Reload OCR Text"
             />
           )}
+          {selectedEntry.type === "html" && (
+            <IconButton
+              aria-label="Copy Plain Text"
+              icon={<TextIcon />}
+              size="sm"
+              variant="surface"
+              onClick={async () => {
+                await writeText(selectedEntry.content);
+                notice({
+                  title: "Plain text copied!",
+                  description: "Plain text copied!",
+                  status: "success",
+                });
+              }}
+              title="Copy Plain Text"
+            />
+          )}
+          <IconButton
+            aria-label="Delete Entry"
+            icon={<TrashIcon />}
+            size="sm"
+            variant="surface"
+            colorScheme="danger"
+            onClick={() => deleteClipboardEntry(selectedEntry.timestamp)}
+          />
         </ButtonGroup>
         <ScrollArea maxH="calc(100vh - 70px - 160px)" maxW="calc(100vw - 25px - sm)">
           {selectedEntry.type === "image" && selectedEntry.path ? (

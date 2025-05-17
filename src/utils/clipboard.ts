@@ -1,10 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
-import { BaseDirectory } from "@tauri-apps/plugin-fs";
-import { readFile } from "@tauri-apps/plugin-fs";
+import { writeHtml } from "@tauri-apps/plugin-clipboard-manager";
+import { BaseDirectory, readFile } from "@tauri-apps/plugin-fs";
 import Database from "@tauri-apps/plugin-sql";
 import { useOS } from "@yamada-ui/react";
-import { writeHtml, writeImageBase64, writeText } from "tauri-plugin-clipboard-api";
+import { writeImageBase64, writeText } from "tauri-plugin-clipboard-api";
 
 export interface ClipboardEntry {
   content: string;
@@ -26,6 +26,11 @@ export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
     entry.path ? (Array.isArray(entry.path) ? JSON.stringify(entry.path) : entry.path) : null,
     entry.html,
   ]);
+  emit("clipboard-entry-updated");
+}
+
+export async function deleteClipboardEntry(timestamp: number): Promise<void> {
+  await db.execute("DELETE FROM clipboard_entries WHERE timestamp = ?", [timestamp]);
   emit("clipboard-entry-updated");
 }
 
@@ -154,9 +159,7 @@ export async function copyClipboardEntry(
   if (entry.type === "image" && entry.path) {
     try {
       const normalizedPath = Array.isArray(entry.path) ? entry.path[0] : entry.path;
-      const data = await readFile(normalizedPath, {
-        baseDir: BaseDirectory.Picture,
-      });
+      const data = await readFile(normalizedPath, { baseDir: BaseDirectory.Picture });
       if (data) {
         const base64 = uint8ArrayToBase64(data);
         await writeImageBase64(base64);
@@ -164,6 +167,12 @@ export async function copyClipboardEntry(
           title: "Image copied!",
           description: "Image copied to clipboard",
           status: "success",
+        });
+      } else {
+        notice({
+          title: "Failed to copy image",
+          description: "No image data found",
+          status: "error",
         });
       }
     } catch (e) {
@@ -176,7 +185,7 @@ export async function copyClipboardEntry(
     }
   } else if (entry.type === "html" && entry.html) {
     try {
-      await writeHtml(entry.html);
+      await writeHtml(entry.html, entry.content);
       notice({
         title: "HTML copied!",
         description: "HTML copied to clipboard",
