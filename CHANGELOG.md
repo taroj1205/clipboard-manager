@@ -1,5 +1,12 @@
 # clipboard-manager
 
+## 0.0.5
+
+### Patch Changes
+
+- 8fbc682: Added deleting entries feature!
+- 8fbc682: Upgraded react version to 19 and enabled react compiler
+
 ## 0.0.4
 
 ### Patch Changes
