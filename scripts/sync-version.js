@@ -17,19 +17,3 @@ const cargoTomlPath = join("src-tauri", "Cargo.toml");
 const cargoToml = toml.parse(readFileSync(cargoTomlPath, "utf8"));
 cargoToml.package.version = version;
 writeFileSync(cargoTomlPath, toml.stringify(cargoToml));
-
-// Update Cargo.lock
-const cargoLockPath = join("src-tauri", "Cargo.lock");
-let cargoLockContent = readFileSync(cargoLockPath, "utf8");
-const packageName = cargoToml.package.name;
-const packageRegex = new RegExp(
-  `(\[\[package\]\]\s*name = "${packageName}"[\s\S]*?version = ")([^"]+)(")`,
-  "g"
-);
-cargoLockContent = cargoLockContent.replace(
-  packageRegex,
-  (match, p1, p2, p3) => {
-    return `${p1}${version}${p3}`;
-  }
-);
-writeFileSync(cargoLockPath, cargoLockContent);
