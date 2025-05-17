@@ -1,4 +1,4 @@
-import { ColorModeScript, UIProvider, extendTheme } from "@yamada-ui/react";
+import { ColorModeScript, UIProvider, extendConfig, extendTheme } from "@yamada-ui/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app";
@@ -21,10 +21,19 @@ if (rootEl) {
     },
   })();
 
+  const config = extendConfig({
+    notice: {
+      options: {
+        placement: "bottom-right",
+      },
+    },
+    initialColorMode: "dark",
+  });
+
   root.render(
     <React.StrictMode>
       <ColorModeScript initialColorMode="dark" />
-      <UIProvider colorMode="dark" theme={theme}>
+      <UIProvider theme={theme} config={config}>
         <App />
       </UIProvider>
     </React.StrictMode>,

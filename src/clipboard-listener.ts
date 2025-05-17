@@ -38,6 +38,10 @@ export function initClipboardListener() {
     }
     if (await hasImage()) {
       const image = await readImageBase64();
+      // if image is too big, skip
+      if (image.length > 1000000) {
+        return;
+      }
       if (image && image !== prevImage) {
         prevImage = image;
         // save image to file

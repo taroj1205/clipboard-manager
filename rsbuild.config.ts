@@ -14,9 +14,47 @@ export default defineConfig({
   ],
   tools: {
     rspack: {
-      plugins: [
-        TanStackRouterRspack({ target: "react", autoCodeSplitting: true }),
-      ],
+      plugins: [TanStackRouterRspack({ target: "react", autoCodeSplitting: true })],
+      module: {
+        rules: [
+          {
+            test: /\\.jsx?$/,
+            use: [
+              {
+                loader: "builtin:swc-loader",
+                options: {
+                  jsc: {
+                    parser: {
+                      syntax: "ecmascript",
+                      jsx: true,
+                    },
+                  },
+                },
+              },
+              { loader: "babel-loader" },
+            ],
+            type: "javascript/auto",
+          },
+          {
+            test: /\\.tsx?$/,
+            use: [
+              {
+                loader: "builtin:swc-loader",
+                options: {
+                  jsc: {
+                    parser: {
+                      syntax: "typescript",
+                      tsx: true,
+                    },
+                  },
+                },
+              },
+              { loader: "babel-loader" },
+            ],
+            type: "javascript/auto",
+          },
+        ],
+      },
     },
     swc: {
       jsc: {
