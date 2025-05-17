@@ -1,11 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
-import { writeHtml, writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { BaseDirectory } from "@tauri-apps/plugin-fs";
 import { readFile } from "@tauri-apps/plugin-fs";
 import Database from "@tauri-apps/plugin-sql";
 import { useOS } from "@yamada-ui/react";
-import { writeImageBase64 } from "tauri-plugin-clipboard-api";
+import { writeHtml, writeImageBase64, writeText } from "tauri-plugin-clipboard-api";
 
 export interface ClipboardEntry {
   content: string;

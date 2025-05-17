@@ -1,7 +1,6 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { listen } from "@tauri-apps/api/event";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { HStack, Separator, VStack, usePrevious } from "@yamada-ui/react";
 import * as React from "react";
 import { DetailsPanel } from "../components/details-panel";
@@ -216,7 +215,7 @@ function HomeComponent() {
 
   listen("tauri://blur", () => {
     setSelectedIndex(0);
-    getCurrentWindow().hide();
+    // getCurrentWindow().hide();
     blurInput();
   });
 
@@ -244,8 +243,9 @@ function HomeComponent() {
     } else if (ev.key === "Enter") {
       ev.preventDefault();
       ev.stopPropagation();
-      copyClipboardEntry(filteredFlatList[selectedIndex], () => {});
-      hideWindow();
+      copyClipboardEntry(filteredFlatList[selectedIndex], () => {}).then(() => {
+        hideWindow();
+      });
     } else if (ev.key === "Escape") {
       ev.preventDefault();
       ev.stopPropagation();

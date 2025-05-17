@@ -88,7 +88,7 @@ pub fn run() {
                 .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
 
             #[cfg(target_os = "windows")]
-            apply_acrylic(&window, Some((255, 255, 255, 255)))
+            apply_acrylic(&window, Some((255, 255, 255, 125)))
                 .expect("Unsupported platform! 'apply_acrylic' is only supported on Windows");
 
             let app_handle = Arc::new(Mutex::new(app.handle().clone()));
@@ -146,6 +146,12 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|app, event| {
+            #[cfg(dev)]
+            println!(
+                "Window event: {:?} for {:?}",
+                event,
+                app.get_webview_window("popup").unwrap().label()
+            );
             #[cfg(not(dev))]
             if let tauri::WindowEvent::Focused(false) = event {
                 if let Some(window) = app.get_webview_window("popup") {
