@@ -10,6 +10,10 @@
     "clipboard:allow-has-image",
     "clipboard:allow-has-text",
     "clipboard:read-all",
+    "clipboard:allow-write-html",
+    "clipboard:allow-write-image-base64",
+    "clipboard:allow-write-text",
+    "clipboard:allow-write-html-and-text",
     "sql:default",
     "sql:allow-execute",
     "fs:default",
@@ -20,7 +24,6 @@
     "clipboard-manager:allow-write-html",
     "clipboard-manager:allow-write-image",
     "clipboard-manager:allow-write-text",
-    "clipboard:allow-write-image-base64",
     "core:window:allow-hide",
     {
       "identifier": "fs:scope",

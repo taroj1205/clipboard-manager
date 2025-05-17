@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["src/routeTree.gen.ts", "public"]
+    "ignore": ["src/routeTree.gen.ts", "public", "node_modules"]
   },
   "formatter": {
     "enabled": true,
