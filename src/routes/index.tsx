@@ -1,17 +1,27 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { listen } from "@tauri-apps/api/event";
-import { HStack, Separator, VStack, usePrevious } from "@yamada-ui/react";
+import {
+  EmptyState,
+  EmptyStateDescription,
+  EmptyStateIndicator,
+  EmptyStateTitle,
+  HStack,
+  Loading,
+  Separator,
+  VStack,
+  usePrevious,
+} from "@yamada-ui/react";
 import * as React from "react";
-import { DetailsPanel } from "../components/details-panel";
-import { SidebarList } from "../components/sidebar-list";
-import { TopBar } from "../components/top-bar";
-import { type ClipboardEntry, copyClipboardEntry, getPaginatedClipboardEntries } from "../utils/clipboard";
-import { useEventListener } from "../utils/events";
+import { DetailsPanel } from "~/components/details-panel";
+import { SidebarList } from "~/components/sidebar-list";
+import { TopBar } from "~/components/top-bar";
+import { type ClipboardEntry, copyClipboardEntry, getPaginatedClipboardEntries } from "~/utils/clipboard";
+import { useEventListener } from "~/utils/events";
 
-import { ErrorComponent } from "../components/error-component";
-import { groupEntriesByDate } from "../utils/dates";
-import { hideWindow } from "../utils/window";
+import { ErrorComponent } from "~/components/error-component";
+import { groupEntriesByDate } from "~/utils/dates";
+import { hideWindow } from "~/utils/window";
 export const Route = createFileRoute("/")({
   component: HomeComponent,
   errorComponent: ErrorComponent,
@@ -25,6 +35,7 @@ export interface TypeFilter {
 const allowedTypes: TypeFilter["value"][] = ["all", "text", "image", "color", "html"];
 
 function HomeComponent() {
+  const loaderData = Route.useLoaderData();
   const [query, setQueryRaw] = React.useState("");
   const [typeFilter, setTypeFilterRaw] = React.useState<TypeFilter["value"][]>(["all"]);
   const [selectedIndex, setSelectedIndexRaw] = React.useState<number>(0);
@@ -36,15 +47,31 @@ function HomeComponent() {
 
   const LIMIT = 50;
 
-  const { data, fetchNextPage, isLoading, hasNextPage, isFetchingNextPage, refetch } = useSuspenseInfiniteQuery<
-    ClipboardEntry[],
-    Error
-  >({
+  const {
+    data = loaderData,
+    fetchNextPage,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useSuspenseInfiniteQuery<ClipboardEntry[], Error>({
     initialPageParam: 0,
     queryKey: ["clipboard-search", debouncedQuery, typeFilter],
     queryFn: ({ pageParam }) => getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
     getNextPageParam: (lastPage, allPages) => (lastPage.length === LIMIT ? allPages.length * LIMIT : undefined),
   });
+
+  if (isLoading) {
+    return (
+      <EmptyState>
+        <EmptyStateIndicator>
+          <Loading />
+        </EmptyStateIndicator>
+        <EmptyStateTitle>Loading entries...</EmptyStateTitle>
+        <EmptyStateDescription>Please wait while we fetch your clipboard entries.</EmptyStateDescription>
+      </EmptyState>
+    );
+  }
 
   // Flatten paginated results
   const results = React.useMemo(() => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []), [data]);

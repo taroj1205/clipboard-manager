@@ -29,13 +29,13 @@ pub struct WindowInfo {
 pub fn get_current_window() -> Option<WindowInfo> {
     get_active_window().ok().map(|window| WindowInfo {
         title: window.title,
-        process_path: window
+        process_path: window.process_path.to_string_lossy().to_string(),
+        app_name: window
             .process_path
             .file_name()
             .and_then(|n| n.to_str())
             .unwrap_or("")
             .to_string(),
-        app_name: window.app_name,
         window_id: window.window_id,
         process_id: window.process_id,
     })

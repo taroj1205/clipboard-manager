@@ -14,8 +14,8 @@
       {
         "title": "Clipboard Manager",
         "label": "popup",
-        "width": 800,
-        "height": 600,
+        "width": 1000,
+        "height": 750,
         "resizable": false,
         "decorations": false,
         "transparent": true,
@@ -28,9 +28,7 @@
       "csp": "default-src 'self' ipc: http://ipc.localhost; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost data:",
       "assetProtocol": {
         "enable": true,
-        "scope": [
-          "*/**"
-        ]
+        "scope": ["*/**"]
       }
     },
     "macOSPrivateApi": true

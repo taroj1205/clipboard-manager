@@ -16,7 +16,7 @@ use window_vibrancy::apply_acrylic;
 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
 mod db;
-use db::MIGRATION;
+use db::{MIGRATION_1, MIGRATION_2, MIGRATION_3};
 
 mod api;
 
@@ -29,7 +29,7 @@ fn message(message: String) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let migrations = vec![MIGRATION];
+    let migrations = vec![MIGRATION_1, MIGRATION_2, MIGRATION_3];
 
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
