@@ -1,18 +1,5 @@
-import {
-  hasHTML,
-  hasImage,
-  hasText,
-  onClipboardUpdate,
-  readHtml,
-  readImageBase64,
-  readText,
-} from "tauri-plugin-clipboard-api";
-import {
-  addClipboardEntry,
-  base64ToUint8Array,
-  editClipboardEntry,
-  extractTextFromImage,
-} from "./utils/clipboard";
+import { hasHTML, hasImage, hasText, onClipboardUpdate, readHtml, readImageBase64, readText } from "tauri-plugin-clipboard-api";
+import { addClipboardEntry, base64ToUint8Array, editClipboardEntry, extractTextFromImage } from "./utils/clipboard";
 import { isAppExcluded } from "./utils/excluded-apps";
 
 import { invoke } from "@tauri-apps/api/core";
@@ -24,9 +11,7 @@ let prevImage = "";
 let prevHTML = "";
 
 function isColorCode(text: string): boolean {
-  return /^(#[0-9A-Fa-f]{3,8}|rgb\(.*\)|rgba\(.*\)|hsl\(.*\)|hsla\(.*\))$/.test(
-    text.trim()
-  );
+  return /^(#[0-9A-Fa-f]{3,8}|rgb\(.*\)|rgba\(.*\)|hsl\(.*\)|hsla\(.*\))$/.test(text.trim());
 }
 
 type ActiveWindowProps = {
@@ -48,8 +33,7 @@ export function initClipboardListener() {
       return;
     }
     // const windowTitle = window.title;
-    const windowExe =
-      window.process_path.split(/[/\\]/).pop() || window.process_path;
+    const windowExe = window.process_path.split(/[/\\]/).pop() || window.process_path;
     if (windowExe === "clipboard-manager.exe") {
       return;
     }
@@ -88,9 +72,7 @@ export function initClipboardListener() {
           // Extract text asynchronously and update entry
           try {
             const picturePath = await pictureDir();
-            const ocrText = await extractTextFromImage(
-              `${picturePath}/${filename}`
-            );
+            const ocrText = await extractTextFromImage(`${picturePath}/${filename}`);
             if (ocrText) {
               await editClipboardEntry(now, { content: ocrText });
             }

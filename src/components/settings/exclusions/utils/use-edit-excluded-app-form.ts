@@ -8,10 +8,7 @@ interface EditFormData {
   path: string;
 }
 
-export function useEditExcludedAppForm(
-  appId: string | undefined,
-  onSuccess?: () => void
-) {
+export function useEditExcludedAppForm(appId: string | undefined, onSuccess?: () => void) {
   const {
     register,
     handleSubmit,
@@ -45,7 +42,7 @@ export function useEditExcludedAppForm(
         console.error("Failed to update excluded app:", error);
       }
     },
-    [app?.id, onSuccess, reset]
+    [app?.id, onSuccess, reset],
   );
 
   return {

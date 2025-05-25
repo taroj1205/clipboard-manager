@@ -1,12 +1,7 @@
 import type { Column } from "@yamada-ui/table";
 import { useMemo } from "react";
 import type { ExcludedApp } from "~/utils/excluded-apps";
-import {
-  ACTIONS_COLUMN,
-  DATE_COLUMN,
-  NAME_COLUMN,
-  PATH_COLUMN,
-} from "./columns";
+import { ACTIONS_COLUMN, DATE_COLUMN, NAME_COLUMN, PATH_COLUMN } from "./columns";
 
 interface UseExcludedAppsColumnsOptions {
   hasName?: boolean;

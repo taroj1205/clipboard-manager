@@ -12,15 +12,10 @@ export interface ExcludedApp {
 
 const db = await Database.load("sqlite:clipboard.db");
 
-export async function addExcludedApp(
-  app: Omit<ExcludedApp, "id" | "createdAt" | "updatedAt">
-): Promise<ExcludedApp> {
+export async function addExcludedApp(app: Omit<ExcludedApp, "id" | "createdAt" | "updatedAt">): Promise<ExcludedApp> {
   const id = Date.now().toString();
 
-  await db.execute(
-    "INSERT INTO excluded_applications (id, name, path) VALUES (?, ?, ?)",
-    [id, app.name, app.path]
-  );
+  await db.execute("INSERT INTO excluded_applications (id, name, path) VALUES (?, ?, ?)", [id, app.name, app.path]);
 
   // Get the created record with the auto-generated created_at and updated_at
   const result = await getExcludedAppById(id);
@@ -37,16 +32,12 @@ export async function deleteExcludedApp(id: string): Promise<void> {
   emit("excluded-apps-updated");
 }
 
-export async function getPaginatedExcludedApps(
-  query = "",
-  limit = 50,
-  offset = 0
-): Promise<ExcludedApp[]> {
+export async function getPaginatedExcludedApps(query = "", limit = 50, offset = 0): Promise<ExcludedApp[]> {
   let result: ExcludedApp[];
   if (!query) {
     result = (await db.select(
       "SELECT id, name, path, created_at as createdAt, updated_at as updatedAt FROM excluded_applications ORDER BY created_at DESC LIMIT ? OFFSET ?",
-      [limit, offset]
+      [limit, offset],
     )) as ExcludedApp[];
   } else {
     // Search in name and path
@@ -63,18 +54,7 @@ export async function getPaginatedExcludedApps(
       WHERE name LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE
       ORDER BY relevance DESC, created_at DESC
       LIMIT ? OFFSET ?`,
-      [
-        query,
-        query,
-        `${query}%`,
-        `${query}%`,
-        likeQuery,
-        likeQuery,
-        likeQuery,
-        likeQuery,
-        limit,
-        offset,
-      ]
+      [query, query, `${query}%`, `${query}%`, likeQuery, likeQuery, likeQuery, likeQuery, limit, offset],
     )) as ExcludedApp[];
   }
 
@@ -83,27 +63,22 @@ export async function getPaginatedExcludedApps(
 
 export async function getAllExcludedApps(): Promise<ExcludedApp[]> {
   const result = (await db.select(
-    "SELECT id, name, path, created_at as createdAt, updated_at as updatedAt FROM excluded_applications ORDER BY created_at DESC"
+    "SELECT id, name, path, created_at as createdAt, updated_at as updatedAt FROM excluded_applications ORDER BY created_at DESC",
   )) as ExcludedApp[];
 
   return result;
 }
 
-export async function getExcludedAppById(
-  id: string
-): Promise<ExcludedApp | null> {
+export async function getExcludedAppById(id: string): Promise<ExcludedApp | null> {
   const result = (await db.select(
     "SELECT id, name, path, created_at as createdAt, updated_at as updatedAt FROM excluded_applications WHERE id = ?",
-    [id]
+    [id],
   )) as ExcludedApp[];
 
   return result.length > 0 ? result[0] : null;
 }
 
-export async function updateExcludedApp(
-  id: string,
-  updates: Partial<Pick<ExcludedApp, "name" | "path">>
-): Promise<void> {
+export async function updateExcludedApp(id: string, updates: Partial<Pick<ExcludedApp, "name" | "path">>): Promise<void> {
   const fields = [];
   const values = [];
 
@@ -123,18 +98,14 @@ export async function updateExcludedApp(
   values.push(Date.now());
 
   values.push(id);
-  await db.execute(
-    `UPDATE excluded_applications SET ${fields.join(", ")} WHERE id = ?`,
-    values
-  );
+  await db.execute(`UPDATE excluded_applications SET ${fields.join(", ")} WHERE id = ?`, values);
   emit("excluded-apps-updated");
 }
 
 export async function isAppExcluded(appPath: string): Promise<boolean> {
-  const result = (await db.select(
-    "SELECT COUNT(*) as count FROM excluded_applications WHERE path = ?",
-    [appPath]
-  )) as { count: number }[];
+  const result = (await db.select("SELECT COUNT(*) as count FROM excluded_applications WHERE path = ?", [appPath])) as {
+    count: number;
+  }[];
 
   return result.length > 0 && result[0].count > 0;
 }

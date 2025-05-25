@@ -26,7 +26,7 @@ export function useAddExcludedAppForm(onSuccess?: () => void) {
         console.error("Failed to add excluded app:", error);
       }
     },
-    [onSuccess, reset]
+    [onSuccess, reset],
   );
 
   return {

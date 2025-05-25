@@ -6,12 +6,10 @@ import { type ExcludedApp, getAllExcludedApps } from "~/utils/excluded-apps";
 export function useExcludedApps() {
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isPending } = useSuspenseQuery<ExcludedApp[], Error>(
-    {
-      queryKey: ["excluded-apps"],
-      queryFn: () => getAllExcludedApps(),
-    }
-  );
+  const { data, isLoading, isPending } = useSuspenseQuery<ExcludedApp[], Error>({
+    queryKey: ["excluded-apps"],
+    queryFn: () => getAllExcludedApps(),
+  });
 
   const excludedApps = useMemo(() => {
     return data.flat() || [];
