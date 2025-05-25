@@ -1,5 +1,13 @@
 # clipboard-manager
 
+## 0.0.6
+
+### Patch Changes
+
+- [#35](https://github.com/taroj1205/clipboard-manager/pull/35) [`3802f5c`](https://github.com/taroj1205/clipboard-manager/commit/3802f5c34f67e8f978814084b099c318e9cad318) Thanks [@taroj1205](https://github.com/taroj1205)! - Fix how typing while selecting text in input will unselect before inserting the new query
+
+- [#40](https://github.com/taroj1205/clipboard-manager/pull/40) [`2d1c583`](https://github.com/taroj1205/clipboard-manager/commit/2d1c58307123b2fb329a1150ea15d985dabb9075) Thanks [@taroj1205](https://github.com/taroj1205)! - Added settings. Currently, it allows you to exclude apps from history.
+
 ## 0.0.5
 
 ### Patch Changes
