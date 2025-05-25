@@ -18,7 +18,7 @@ import {
   useNotice,
 } from "@yamada-ui/react";
 import * as React from "react";
-import { type ClipboardEntry, copyClipboardEntry } from "../utils/clipboard";
+import { type ClipboardEntry, copyClipboardEntry } from "~/utils/clipboard";
 import { ClipboardImage } from "./clipboard-image";
 
 interface SidebarListProps {
@@ -103,9 +103,9 @@ export const SidebarList = React.memo(
       }, [grouped]);
 
       // Refs for keyboard navigation
-      flatList.forEach((_, i) => {
+      for (const i of flatList.keys()) {
         itemRefs.current[i] = itemRefs.current[i] || null;
-      });
+      }
 
       if (flatList.length === 0) {
         return (

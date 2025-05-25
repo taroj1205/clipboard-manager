@@ -1,5 +1,6 @@
 import { hasHTML, hasImage, hasText, onClipboardUpdate, readHtml, readImageBase64, readText } from "tauri-plugin-clipboard-api";
 import { addClipboardEntry, base64ToUint8Array, editClipboardEntry, extractTextFromImage } from "./utils/clipboard";
+import { isAppExcluded } from "./utils/excluded-apps";
 
 import { invoke } from "@tauri-apps/api/core";
 import { BaseDirectory, pictureDir } from "@tauri-apps/api/path";
@@ -36,6 +37,17 @@ export function initClipboardListener() {
     if (windowExe === "clipboard-manager.exe") {
       return;
     }
+
+    // Check if the current window's path is excluded
+    try {
+      const isExcluded = await isAppExcluded(window.process_path);
+      if (isExcluded) {
+        return;
+      }
+    } catch (err) {
+      console.error("Failed to check excluded apps:", err);
+      // Continue processing if exclusion check fails
+    }
     if (await hasImage()) {
       const image = await readImageBase64();
       // if image is too big, skip
@@ -55,7 +67,7 @@ export function initClipboardListener() {
             type: "image",
             timestamp: now,
             path: filename,
-            app: windowExe,
+            app: window.process_path,
           });
           // Extract text asynchronously and update entry
           try {

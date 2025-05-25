@@ -1,6 +1,8 @@
-import { Input } from "@yamada-ui/react";
+import { CogIcon } from "@yamada-ui/lucide";
+import { HStack, IconButton, Input } from "@yamada-ui/react";
 import * as React from "react";
-import type { TypeFilter } from "../routes";
+import type { TypeFilter } from "~/routes";
+import { Link } from "./ui/link";
 
 interface TopBarProps {
   query: string;
@@ -17,14 +19,26 @@ export const TopBar = React.memo(
     };
 
     return (
-      <Input
-        placeholder="Type to search..."
-        value={query}
-        onChange={handleInputChange}
-        // roundedRight="none"
-        // borderRight="none"
-        ref={ref}
-      />
+      <HStack gap="0">
+        <Input
+          placeholder="Type to search..."
+          value={query}
+          onChange={handleInputChange}
+          roundedRight="none"
+          borderRight="none"
+          ref={ref}
+        />
+        <IconButton
+          as={Link}
+          to="/settings"
+          aria-label="Settings"
+          variant="outline"
+          borderLeftRadius="none"
+          borderColor="border"
+        >
+          <CogIcon />
+        </IconButton>
+      </HStack>
     );
   }),
 );

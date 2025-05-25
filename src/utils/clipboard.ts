@@ -42,10 +42,12 @@ export async function getPaginatedClipboardEntries(query: string, limit = 50, of
       offset,
     ])) as ClipboardEntry[];
   } else {
-    // Multi-word (tokenized) search: all words must be present in content or path, case-insensitive
+    // Multi-word (tokenized) search: all words must be present in content, path, or app, case-insensitive
     const words = query.trim().split(/\s+/);
-    const likeClauses = words.map(() => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)").join(" AND ");
-    const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`]);
+    const likeClauses = words
+      .map(() => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE)")
+      .join(" AND ");
+    const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`, `%${word}%`]);
     // For relevance, boost if all words match exactly, then if any word is a prefix, then if all are substrings
     // (Simple: just use the first word for exact/prefix, rest for AND substrings)
     const firstWord = words[0];
@@ -54,16 +56,29 @@ export async function getPaginatedClipboardEntries(query: string, limit = 50, of
     result = (await db.select(
       `SELECT *,
         (CASE
-          WHEN content = ? COLLATE NOCASE OR path = ? COLLATE NOCASE THEN 3
-          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE THEN 2
-          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE THEN 1
+          WHEN content = ? COLLATE NOCASE OR path = ? COLLATE NOCASE OR app = ? COLLATE NOCASE THEN 3
+          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE THEN 2
+          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE THEN 1
           ELSE 0
         END) AS relevance
       FROM clipboard_entries
       WHERE ${likeClauses}
       ORDER BY relevance DESC, timestamp DESC
       LIMIT ? OFFSET ?`,
-      [firstWord, firstWord, startsWithQuery, startsWithQuery, likeQuery, likeQuery, ...likeParams, limit, offset],
+      [
+        firstWord,
+        firstWord,
+        firstWord,
+        startsWithQuery,
+        startsWithQuery,
+        startsWithQuery,
+        likeQuery,
+        likeQuery,
+        likeQuery,
+        ...likeParams,
+        limit,
+        offset,
+      ],
     )) as ClipboardEntry[];
   }
   return result;
@@ -74,10 +89,12 @@ export async function getAllClipboardEntries(query: string): Promise<ClipboardEn
   if (!query) {
     result = (await db.select("SELECT * FROM clipboard_entries ORDER BY timestamp DESC")) as ClipboardEntry[];
   } else {
-    // Multi-word (tokenized) search: all words must be present in content or path, case-insensitive
+    // Multi-word (tokenized) search: all words must be present in content, path, or app, case-insensitive
     const words = query.trim().split(/\s+/);
-    const likeClauses = words.map(() => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE)").join(" AND ");
-    const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`]);
+    const likeClauses = words
+      .map(() => "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE)")
+      .join(" AND ");
+    const likeParams = words.flatMap((word) => [`%${word}%`, `%${word}%`, `%${word}%`]);
     // For relevance, boost if all words match exactly, then if any word is a prefix, then if all are substrings
     // (Simple: just use the first word for exact/prefix, rest for AND substrings)
     const firstWord = words[0];
@@ -86,16 +103,27 @@ export async function getAllClipboardEntries(query: string): Promise<ClipboardEn
     result = (await db.select(
       `SELECT *,
         (CASE
-          WHEN content = ? COLLATE NOCASE OR path = ? COLLATE NOCASE THEN 3
-          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE THEN 2
-          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE THEN 1
+          WHEN content = ? COLLATE NOCASE OR path = ? COLLATE NOCASE OR app = ? COLLATE NOCASE THEN 3
+          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE THEN 2
+          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE THEN 1
           ELSE 0
         END) AS relevance
       FROM clipboard_entries
       WHERE ${likeClauses}
       ORDER BY relevance DESC, timestamp DESC
       LIMIT ? OFFSET ?`,
-      [firstWord, firstWord, startsWithQuery, startsWithQuery, likeQuery, likeQuery, ...likeParams],
+      [
+        firstWord,
+        firstWord,
+        firstWord,
+        startsWithQuery,
+        startsWithQuery,
+        startsWithQuery,
+        likeQuery,
+        likeQuery,
+        likeQuery,
+        ...likeParams,
+      ],
     )) as ClipboardEntry[];
   }
   return result;
@@ -159,7 +187,9 @@ export async function copyClipboardEntry(
   if (entry.type === "image" && entry.path) {
     try {
       const normalizedPath = Array.isArray(entry.path) ? entry.path[0] : entry.path;
-      const data = await readFile(normalizedPath, { baseDir: BaseDirectory.Picture });
+      const data = await readFile(normalizedPath, {
+        baseDir: BaseDirectory.Picture,
+      });
       if (data) {
         const base64 = uint8ArrayToBase64(data);
         await writeImageBase64(base64);

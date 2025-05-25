@@ -21,8 +21,8 @@ import {
   useOS,
 } from "@yamada-ui/react";
 import * as React from "react";
-import type { ClipboardEntry } from "../utils/clipboard";
-import { copyClipboardEntry, deleteClipboardEntry, editClipboardEntry, extractTextFromImage } from "../utils/clipboard";
+import type { ClipboardEntry } from "~/utils/clipboard";
+import { copyClipboardEntry, deleteClipboardEntry, editClipboardEntry, extractTextFromImage } from "~/utils/clipboard";
 import { ClipboardImage } from "./clipboard-image";
 
 interface DetailsPanelProps {
@@ -246,7 +246,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
           </DataListItem>
           <DataListItem>
             <DataListTerm>Application</DataListTerm>
-            <DataListDescription>{selectedEntry.app || "Unknown"}</DataListDescription>
+            <DataListDescription>{selectedEntry.app?.replace(/\\/g, "/") || "Unknown"}</DataListDescription>
           </DataListItem>
         </DataList>
       </GridItem>

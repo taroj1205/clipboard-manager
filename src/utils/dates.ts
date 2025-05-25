@@ -1,14 +1,9 @@
 import type { ClipboardEntry } from "./clipboard";
 
-export function groupEntriesByDate(
-  entries: ClipboardEntry[]
-): Record<string, (ClipboardEntry & { count: number })[]> {
+export function groupEntriesByDate(entries: ClipboardEntry[]): Record<string, (ClipboardEntry & { count: number })[]> {
   const groups: Record<string, (ClipboardEntry & { count: number })[]> = {};
   // Deduplicate by content+type, keep latest, and count occurrences
-  const dedupedMap = new Map<
-    string,
-    { entry: ClipboardEntry; count: number }
-  >();
+  const dedupedMap = new Map<string, { entry: ClipboardEntry; count: number }>();
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Image, type ImageProps } from "@yamada-ui/react";
 import { type FC, memo } from "react";
-import { getImageDataUrl } from "../utils/image";
+import { getImageDataUrl } from "~/utils/image";
 
 type ClipboardImageProps = ImageProps & {
   src: string;
