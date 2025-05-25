@@ -42,20 +42,23 @@ export const AddExcludedAppModal = memo(({ trigger }: AddExcludedAppModalProps) 
         <ModalHeader>Add Excluded Application</ModalHeader>
         <ModalBody>
           <VStack gap="md">
-            <FormControl required gap="xs">
-              <Text fontSize="sm" fontWeight="medium" mb="xs">
-                Application Name
-              </Text>
+            <FormControl required gap="xs" display="flex" flexDirection="column">
+              <Text fontSize="sm">Application Name</Text>
               <Input
                 placeholder="e.g., Visual Studio Code"
                 {...register("name", { required: "Application name is required" })}
               />
             </FormControl>
 
-            <FormControl required invalid={!!errors.path} errorMessage={errors.path?.message} gap="xs">
-              <Text fontSize="sm" fontWeight="medium" mb="xs">
-                Application Path or Process Name
-              </Text>
+            <FormControl
+              required
+              invalid={!!errors.path}
+              errorMessage={errors.path?.message}
+              gap="xs"
+              display="flex"
+              flexDirection="column"
+            >
+              <Text fontSize="sm">Application Path or Process Name</Text>
               <Input
                 placeholder="e.g., Code.exe or C:\\Program Files\\..."
                 fontFamily="mono"
