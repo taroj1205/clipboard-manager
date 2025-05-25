@@ -9,11 +9,19 @@ export function groupEntriesByDate(
     string,
     { entry: ClipboardEntry; count: number }
   >();
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
   for (const entry of entries) {
     const key = `${entry.type}::${entry.content}`;
     const existing = dedupedMap.get(key);
     if (existing) {
-      existing.count++;
+      if (entry.timestamp > existing.entry.timestamp) {
+        dedupedMap.set(key, { entry, count: existing.count + 1 });
+      } else {
+        existing.count++;
+      }
     } else {
       dedupedMap.set(key, { entry, count: 1 });
     }
@@ -21,9 +29,6 @@ export function groupEntriesByDate(
   // Only keep the latest entry for each unique content/type
   for (const { entry, count } of dedupedMap.values()) {
     const date = new Date(entry.timestamp);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
     let groupKey: string;
     if (date.toDateString() === today.toDateString()) {
       groupKey = "Today";
