@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Undo2Icon } from "@yamada-ui/lucide";
 import { IconButton, TabList, TabPanels, Tabs, VStack } from "@yamada-ui/react";
+import { SettingsLoadingComponent } from "~/components/loading/settings";
 import { ExclusionSettings } from "~/components/settings";
 import { Link } from "~/components/ui/link";
 
 export const Route = createFileRoute("/settings")({
   component: RouteComponent,
+  pendingComponent: SettingsLoadingComponent,
 });
 
 function RouteComponent() {

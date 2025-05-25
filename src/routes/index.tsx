@@ -14,6 +14,7 @@ import {
 } from "@yamada-ui/react";
 import * as React from "react";
 import { DetailsPanel } from "~/components/details-panel";
+import { HomeLoadingComponent } from "~/components/loading/home";
 import { SidebarList } from "~/components/sidebar-list";
 import { TopBar } from "~/components/top-bar";
 import { type ClipboardEntry, copyClipboardEntry, getPaginatedClipboardEntries } from "~/utils/clipboard";
@@ -25,6 +26,7 @@ import { hideWindow } from "~/utils/window";
 export const Route = createFileRoute("/")({
   component: HomeComponent,
   errorComponent: ErrorComponent,
+  pendingComponent: HomeLoadingComponent,
 });
 
 export interface TypeFilter {
@@ -51,6 +53,7 @@ function HomeComponent() {
     data = loaderData,
     fetchNextPage,
     isLoading,
+    isPending,
     hasNextPage,
     isFetchingNextPage,
     refetch,
@@ -61,7 +64,7 @@ function HomeComponent() {
     getNextPageParam: (lastPage, allPages) => (lastPage.length === LIMIT ? allPages.length * LIMIT : undefined),
   });
 
-  if (isLoading) {
+  if (isLoading || isPending) {
     return (
       <EmptyState>
         <EmptyStateIndicator>
@@ -263,7 +266,7 @@ function HomeComponent() {
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
-          isLoading={isLoading}
+          isLoading={isLoading || isPending}
           selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
           itemRefs={itemRefs}

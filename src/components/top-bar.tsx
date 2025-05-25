@@ -1,4 +1,4 @@
-import { SettingsIcon } from "@yamada-ui/lucide";
+import { CogIcon } from "@yamada-ui/lucide";
 import { HStack, IconButton, Input } from "@yamada-ui/react";
 import * as React from "react";
 import type { TypeFilter } from "~/routes";
@@ -36,7 +36,7 @@ export const TopBar = React.memo(
           borderLeftRadius="none"
           borderColor="border"
         >
-          <SettingsIcon />
+          <CogIcon />
         </IconButton>
       </HStack>
     );
