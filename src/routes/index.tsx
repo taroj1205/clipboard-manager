@@ -1,4 +1,7 @@
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import {
+  useSuspenseInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { listen } from "@tauri-apps/api/event";
 import {
@@ -17,7 +20,11 @@ import { DetailsPanel } from "~/components/details-panel";
 import { HomeLoadingComponent } from "~/components/loading/home";
 import { SidebarList } from "~/components/sidebar-list";
 import { TopBar } from "~/components/top-bar";
-import { type ClipboardEntry, copyClipboardEntry, getPaginatedClipboardEntries } from "~/utils/clipboard";
+import {
+  type ClipboardEntry,
+  copyClipboardEntry,
+  getPaginatedClipboardEntries,
+} from "~/utils/clipboard";
 import { useEventListener } from "~/utils/events";
 
 import { ErrorComponent } from "~/components/error-component";
@@ -34,12 +41,21 @@ export interface TypeFilter {
   value: "all" | "text" | "image" | "color" | "html";
 }
 
-const allowedTypes: TypeFilter["value"][] = ["all", "text", "image", "color", "html"];
+const allowedTypes: TypeFilter["value"][] = [
+  "all",
+  "text",
+  "image",
+  "color",
+  "html",
+];
 
 function HomeComponent() {
+  const queryClient = useQueryClient();
   const loaderData = Route.useLoaderData();
   const [query, setQueryRaw] = React.useState("");
-  const [typeFilter, setTypeFilterRaw] = React.useState<TypeFilter["value"][]>(["all"]);
+  const [typeFilter, setTypeFilterRaw] = React.useState<TypeFilter["value"][]>([
+    "all",
+  ]);
   const [selectedIndex, setSelectedIndexRaw] = React.useState<number>(0);
   const debouncedQuery = React.useDeferredValue(query);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -60,8 +76,13 @@ function HomeComponent() {
   } = useSuspenseInfiniteQuery<ClipboardEntry[], Error>({
     initialPageParam: 0,
     queryKey: ["clipboard-search", debouncedQuery, typeFilter],
-    queryFn: ({ pageParam }) => getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
-    getNextPageParam: (lastPage, allPages) => (lastPage.length === LIMIT ? allPages.length * LIMIT : undefined),
+    queryFn: ({ pageParam }) =>
+      getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === LIMIT ? allPages.length * LIMIT : undefined,
+    gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
+    staleTime: 2 * 60 * 1000, // 2 minutes stale time
+    maxPages: 10, // Limit to 10 pages in memory
   });
 
   if (isLoading || isPending) {
@@ -71,13 +92,18 @@ function HomeComponent() {
           <Loading />
         </EmptyStateIndicator>
         <EmptyStateTitle>Loading entries...</EmptyStateTitle>
-        <EmptyStateDescription>Please wait while we fetch your clipboard entries.</EmptyStateDescription>
+        <EmptyStateDescription>
+          Please wait while we fetch your clipboard entries.
+        </EmptyStateDescription>
       </EmptyState>
     );
   }
 
   // Flatten paginated results
-  const results = React.useMemo(() => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []), [data]);
+  const results = React.useMemo(
+    () => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []),
+    [data]
+  );
 
   // Deduplicate and group entries by date, then flatten for selection
   const grouped = React.useMemo(() => groupEntriesByDate(results), [results]);
@@ -93,8 +119,11 @@ function HomeComponent() {
 
   // Filter by type after deduplication
   const filteredFlatList = React.useMemo(() => {
-    const selectedTypes = typeFilter.filter((t): t is TypeFilter["value"] => allowedTypes.includes(t as TypeFilter["value"]));
-    if (selectedTypes.length === 0 || selectedTypes.includes("all")) return flatList;
+    const selectedTypes = typeFilter.filter((t): t is TypeFilter["value"] =>
+      allowedTypes.includes(t as TypeFilter["value"])
+    );
+    if (selectedTypes.length === 0 || selectedTypes.includes("all"))
+      return flatList;
     return flatList.filter((entry) => selectedTypes.includes(entry.type));
   }, [flatList, typeFilter]);
 
@@ -107,7 +136,7 @@ function HomeComponent() {
       { label: "Image", value: "image" },
       { label: "Color", value: "color" },
     ],
-    [],
+    []
   );
 
   const setQuery = React.useCallback(
@@ -117,7 +146,7 @@ function HomeComponent() {
       if (types) setTypeFilter(types);
       refetch();
     },
-    [refetch],
+    [refetch]
   );
 
   const setTypeFilter = React.useCallback(
@@ -125,13 +154,15 @@ function HomeComponent() {
       if (!types || types.length === 0) {
         setTypeFilterRaw(["all"]);
       } else {
-        const filtered = types.filter((t): t is TypeFilter["value"] => allowedTypes.includes(t as TypeFilter["value"]));
+        const filtered = types.filter((t): t is TypeFilter["value"] =>
+          allowedTypes.includes(t as TypeFilter["value"])
+        );
         setTypeFilterRaw(filtered.length === 0 ? ["all"] : filtered);
       }
       setSelectedIndex(0);
       refetch();
     },
-    [refetch],
+    [refetch]
   );
 
   const handleUpdateSelectedIndex = React.useCallback((index: number) => {
@@ -169,7 +200,7 @@ function HomeComponent() {
       setSelectedIndexRaw(index);
       handleUpdateSelectedIndex(index);
     },
-    [handleUpdateSelectedIndex],
+    [handleUpdateSelectedIndex]
   );
 
   const focusInput = React.useCallback(() => {
@@ -184,6 +215,11 @@ function HomeComponent() {
 
   listen("clipboard-entry-updated", () => {
     setSelectedIndex(0);
+    // Clear old cache entries to prevent memory buildup
+    queryClient.removeQueries({
+      queryKey: ["clipboard-search"],
+      exact: false,
+    });
     refetch();
   });
 
@@ -200,12 +236,15 @@ function HomeComponent() {
   const handleArrowKey = React.useCallback(
     (direction: "up" | "down") => {
       setSelectedIndexRaw((prev) => {
-        const newIndex = direction === "up" ? Math.max(0, prev - 1) : Math.min(filteredFlatList.length - 1, prev + 1);
+        const newIndex =
+          direction === "up"
+            ? Math.max(0, prev - 1)
+            : Math.min(filteredFlatList.length - 1, prev + 1);
         handleUpdateSelectedIndex(newIndex);
         return newIndex;
       });
     },
-    [filteredFlatList, handleUpdateSelectedIndex],
+    [filteredFlatList, handleUpdateSelectedIndex]
   );
 
   useEventListener("keydown", (ev) => {
@@ -232,7 +271,13 @@ function HomeComponent() {
       } else {
         hideWindow();
       }
-    } else if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey && !ev.shiftKey) {
+    } else if (
+      ev.key.length === 1 &&
+      !ev.ctrlKey &&
+      !ev.metaKey &&
+      !ev.altKey &&
+      !ev.shiftKey
+    ) {
       if (inputRef.current && document.activeElement === inputRef.current) {
         return;
       }
@@ -260,7 +305,12 @@ function HomeComponent() {
         typeOptions={typeOptions}
         ref={inputRef}
       />
-      <HStack gap="xs" flex={1} align="stretch" separator={<Separator orientation="vertical" />}>
+      <HStack
+        gap="xs"
+        flex={1}
+        align="stretch"
+        separator={<Separator orientation="vertical" />}
+      >
         <SidebarList
           entries={filteredFlatList}
           fetchNextPage={fetchNextPage}
@@ -273,7 +323,9 @@ function HomeComponent() {
           totalEntries={results.length}
           previousDataLength={previousDataLength}
         />
-        {filteredFlatList.length > 0 && <DetailsPanel selectedEntry={filteredFlatList[selectedIndex]} />}
+        {filteredFlatList.length > 0 && (
+          <DetailsPanel selectedEntry={filteredFlatList[selectedIndex]} />
+        )}
       </HStack>
     </VStack>
   );
