@@ -1,14 +1,77 @@
-# Tauri + React + Typescript
+# Clipboard Manager
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+A modern, efficient clipboard manager built with Tauri and React. Keep track of your clipboard history, organize snippets, and boost your productivity.
 
-## Environment Variables
+## ✨ Features
 
-- `LOCAL_DATA_DIR`: (Optional) The directory where clipboard data is stored. If not set, defaults to your OS user config directory (e.g., C:/Users/<user>/AppData/Roaming on Windows).
-- `BUNDLE_IDENTIFIER`: (Optional) Used to namespace the clipboard index. Defaults to `com.clipboard-manager.app` if not set.
+- 📋 Multiple clipboard history
+- 🔍 Quick search through clipboard items
+- 🏷️ Organize items with tags
+- ⌨️ Keyboard shortcuts for quick access
+- 🌙 Dark/Light mode support
+- 🔒 Secure local storage
+- 🚀 Cross-platform support
 
-You can set these in your shell or via a `.env` file if you use a tool like [dotenv](https://crates.io/crates/dotenvy) or your shell's environment management.
+## 🚀 Getting Started
 
-## Recommended IDE Setup
+### Prerequisites
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- Node.js (v16 or higher)
+- pnpm
+- Rust (for Tauri development)
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/taroj1205/clipboard-manager.git
+cd clipboard-manager
+```
+
+2. Install dependencies:
+
+```bash
+pnpm install
+```
+
+3. Start the development server:
+
+```bash
+pnpm dev
+```
+
+4. Build for production:
+
+```bash
+pnpm build
+```
+
+## 🎯 Usage
+
+1. Launch the application
+2. Copy any text to your clipboard
+3. Use the keyboard shortcut (default: `Ctrl+Shift+V`) to open the clipboard manager
+4. Select an item from your history to paste
+
+## 🛠️ Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and setup instructions.
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Tauri](https://tauri.app/) - For the amazing framework
+- [React](https://reactjs.org/) - For the UI library
+- All our contributors and users
+
+## 📞 Support
+
+If you encounter any issues or have questions, please [open an issue](https://github.com/taroj1205/clipboard-manager/issues).
