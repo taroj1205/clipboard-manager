@@ -3,7 +3,6 @@ name: CI
 on:
   pull_request:
     branches:
-      - develop
       - main
     types: [opened, synchronize, reopened]
     paths:
@@ -51,7 +50,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     needs: check
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'develop')
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

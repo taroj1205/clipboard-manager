@@ -4,48 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "CHANGELOG.md"
 
 jobs:
-  semantic-release:
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-    runs-on: ubuntu-latest
-    outputs:
-      new-release-published: ${{ steps.semantic.outputs.new-release-published }}
-      new-release-version: ${{ steps.semantic.outputs.new-release-version }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-          run_install: false
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run semantic-release
-        id: semantic
-        run: pnpm semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   publish-tauri:
-    needs: semantic-release
-    if: needs.semantic-release.outputs.new-release-published == 'true'
     permissions:
       contents: write
     strategy:
@@ -64,9 +27,6 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
 
       - name: setup node
         uses: actions/setup-node@v4
@@ -96,10 +56,21 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Extract latest release notes
+        id: changelog
+        run: |
+          awk '/^## /{if (p) exit; p=1} p' CHANGELOG.md | awk 'NR==1{next} /^## /{exit} {print}' > LATEST_CHANGELOG.md
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          cat LATEST_CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v${{ needs.semantic-release.outputs.new-release-version }}
+          tagName: v__VERSION__
+          releaseName: "Release v__VERSION__"
+          releaseBody: ${{ steps.changelog.outputs.body }}
           releaseDraft: true
+          prerelease: false
           args: ${{ matrix.args }}

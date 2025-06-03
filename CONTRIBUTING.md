@@ -20,17 +20,15 @@ Thank you for your interest in contributing to Clipboard Manager! This document 
 ### Pull Requests
 
 1. Fork the repository
-2. Create a new branch from `develop` (not `main`)
+2. Create a new branch from main
    ```bash
-   git checkout develop
-   git pull origin develop
+   git checkout main
+   git pull origin main
    git checkout -b your-branch-name
    ```
 3. Make your changes
 4. Follow our commit message convention (see below)
-5. Submit a pull request targeting the `develop` branch
-
-> **Important**: Always create pull requests against the `develop` branch, not `main`. The `main` branch is protected and only accepts merges from `develop` to trigger releases.
+5. Submit a pull request targeting the `main` branch
 
 ## 📝 Commit Message Convention
 
