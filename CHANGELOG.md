@@ -1,5 +1,11 @@
 # clipboard-manager
 
+## 0.0.7
+
+### Patch Changes
+
+- [#50](https://github.com/taroj1205/clipboard-manager/pull/50) [`40db2ec`](https://github.com/taroj1205/clipboard-manager/commit/40db2ec64c7b56173f03773eb21426e87dd107b6) Thanks [@taroj1205](https://github.com/taroj1205)! - Fix caching problem with tanstack query
+
 ## 0.0.6
 
 ### Patch Changes
