@@ -1,4 +1,4 @@
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { listen } from "@tauri-apps/api/event";
 import {
@@ -37,6 +37,7 @@ export interface TypeFilter {
 const allowedTypes: TypeFilter["value"][] = ["all", "text", "image", "color", "html"];
 
 function HomeComponent() {
+  const queryClient = useQueryClient();
   const loaderData = Route.useLoaderData();
   const [query, setQueryRaw] = React.useState("");
   const [typeFilter, setTypeFilterRaw] = React.useState<TypeFilter["value"][]>(["all"]);
@@ -62,6 +63,9 @@ function HomeComponent() {
     queryKey: ["clipboard-search", debouncedQuery, typeFilter],
     queryFn: ({ pageParam }) => getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
     getNextPageParam: (lastPage, allPages) => (lastPage.length === LIMIT ? allPages.length * LIMIT : undefined),
+    gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
+    staleTime: 2 * 60 * 1000, // 2 minutes stale time
+    maxPages: 10, // Limit to 10 pages in memory
   });
 
   if (isLoading || isPending) {
@@ -184,6 +188,11 @@ function HomeComponent() {
 
   listen("clipboard-entry-updated", () => {
     setSelectedIndex(0);
+    // Clear old cache entries to prevent memory buildup
+    queryClient.removeQueries({
+      queryKey: ["clipboard-search"],
+      exact: false,
+    });
     refetch();
   });
 
