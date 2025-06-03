@@ -12,6 +12,7 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - ".github/workflows/**"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -50,6 +51,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     needs: check
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
