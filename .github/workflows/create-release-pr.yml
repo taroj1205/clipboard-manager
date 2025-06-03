@@ -1,0 +1,46 @@
+name: Create Release PR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          branch: develop
+          title: "chore(release): merge develop into main"
+          body: |
+            # Release PR
+
+            This PR is automatically created to merge changes from develop into main.
+
+            ## Next Steps
+            - [ ] Review changes
+            - [ ] Approve PR
+            - [ ] Merge PR
+            - [ ] Release will be automatically created after merge via semantic-release
+
+            ## Note
+            All commit messages from develop branch will be included in the release notes.
+            The release version will be determined by semantic-release based on commit types:
+            - feat: minor version bump
+            - fix: patch version bump
+            - perf: patch version bump
+            - revert: patch version bump
+            - refactor: patch version bump
+            - build: patch version bump
+          labels: |
+            release
+            automated pr
+          delete-branch: false
