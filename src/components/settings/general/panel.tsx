@@ -12,7 +12,7 @@ export const Panel = memo(() => {
         <Heading as="h3" fontSize="lg">
           Clipboard Entries
         </Heading>
-          <DeleteAll />
+        <DeleteAll />
       </VStack>
     </TabPanel>
   );

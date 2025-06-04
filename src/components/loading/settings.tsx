@@ -2,18 +2,21 @@ import { Undo2Icon } from "@yamada-ui/lucide";
 import {
   Alert,
   AlertDescription,
-  AlertTitle,
   AlertIcon,
-  Button, Heading,
-  IconButton, Tab,
+  AlertTitle,
+  Button,
+  Heading,
+  IconButton,
+  Tab,
   TabList,
   TabPanel,
-  TabPanels, Tabs, VStack
+  TabPanels,
+  Tabs,
+  VStack,
 } from "@yamada-ui/react";
 import { Link } from "~/components/ui/link";
 
 export const SettingsLoadingComponent = () => {
-
   return (
     <VStack h="100vh" py="0" position="relative">
       <Tabs orientation="vertical" lazyBehavior="unmount" h="full">
@@ -30,14 +33,14 @@ export const SettingsLoadingComponent = () => {
               <Heading as="h3" fontSize="lg">
                 Clipboard Entries
               </Heading>
-              <Alert status="warning" variant="subtle" colorScheme='danger'>
+              <Alert status="warning" variant="subtle" colorScheme="danger">
                 <AlertIcon />
                 <AlertTitle>Warning</AlertTitle>
                 <AlertDescription>This will delete all clipboard entries. This action cannot be undone.</AlertDescription>
               </Alert>
-                <Button w="fit-content" disabled>
-                  Delete All Entries
-                </Button>
+              <Button w="fit-content" disabled>
+                Delete All Entries
+              </Button>
             </VStack>
           </TabPanel>
         </TabPanels>
