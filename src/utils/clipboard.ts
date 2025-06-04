@@ -2,9 +2,9 @@ import { invoke } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
 import { writeHtml } from "@tauri-apps/plugin-clipboard-manager";
 import { BaseDirectory, readFile } from "@tauri-apps/plugin-fs";
-import Database from "@tauri-apps/plugin-sql";
 import { useOS } from "@yamada-ui/react";
 import { writeImageBase64, writeText } from "tauri-plugin-clipboard-api";
+import { db } from "~/db";
 
 export interface ClipboardEntry {
   content: string;
@@ -14,8 +14,6 @@ export interface ClipboardEntry {
   path?: string | string[];
   html?: string;
 }
-
-const db = await Database.load("sqlite:clipboard.db");
 
 export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
   await db.execute("INSERT INTO clipboard_entries (content, type, timestamp, app, path, html) VALUES (?, ?, ?, ?, ?, ?)", [

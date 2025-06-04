@@ -1,12 +1,19 @@
-import { Heading, TabPanel } from "@yamada-ui/react";
+import { Heading, TabPanel, VStack } from "@yamada-ui/react";
 import { memo } from "react";
+import { DeleteAll } from "./delete-all";
 
 export const Panel = memo(() => {
   return (
     <TabPanel>
-      <Heading as="h2" fontSize="xl">
-        General Settings
-      </Heading>
+      <VStack>
+        <Heading as="h2" fontSize="xl">
+          General Settings
+        </Heading>
+        <Heading as="h3" fontSize="lg">
+          Clipboard Entries
+        </Heading>
+        <DeleteAll />
+      </VStack>
     </TabPanel>
   );
 });

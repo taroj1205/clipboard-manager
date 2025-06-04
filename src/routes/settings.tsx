@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Undo2Icon } from "@yamada-ui/lucide";
 import { IconButton, TabList, TabPanels, Tabs, VStack } from "@yamada-ui/react";
 import { SettingsLoadingComponent } from "~/components/loading/settings";
-import { ExclusionSettings } from "~/components/settings";
+import { ExclusionSettings, GeneralSettings } from "~/components/settings";
 import { Link } from "~/components/ui/link";
 
 export const Route = createFileRoute("/settings")({
@@ -15,12 +15,12 @@ function RouteComponent() {
     <VStack h="100vh" py="0" position="relative">
       <Tabs orientation="vertical" lazyBehavior="unmount" h="full">
         <TabList pt="md">
-          {/* <GeneralSettings.Switcher /> */}
+          <GeneralSettings.Switcher />
           {/* <AppSettings.Switcher /> */}
           <ExclusionSettings.Switcher />
         </TabList>
         <TabPanels pt="xs">
-          {/* <GeneralSettings.Panel /> */}
+          <GeneralSettings.Panel />
           {/* <AppSettings.Panel /> */}
           <ExclusionSettings.Panel />
         </TabPanels>
