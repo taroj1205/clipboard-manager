@@ -51,7 +51,7 @@ pnpm build
 
 1. Launch the application
 2. Copy any text to your clipboard
-3. Use the keyboard shortcut (default: `Ctrl+Shift+V`) to open the clipboard manager
+3. Use the keyboard shortcut (default: `Alt+V`) to open the clipboard manager
 4. Select an item from your history to paste
 
 ## 🛠️ Development
