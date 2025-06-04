@@ -22,8 +22,8 @@ export const DeleteAll = memo(() => {
   const handleDelete = useCallback(async () => {
     try {
       await deleteAllClipboardEntries();
-    notice({
-      status: "success",
+      notice({
+        status: "success",
         title: "Success",
         description: "All clipboard entries have been deleted.",
       });
