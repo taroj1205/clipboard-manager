@@ -10,17 +10,24 @@ import {
   Text,
   VStack,
   useDisclosure,
+  useNotice,
 } from "@yamada-ui/react";
 import { memo, useCallback } from "react";
 import { deleteAllClipboardEntries } from "~/db/clipboard-entries";
 
 export const DeleteAll = memo(() => {
   const { open, onOpen, onClose } = useDisclosure();
+  const notice = useNotice();
 
   const handleDelete = useCallback(async () => {
     await deleteAllClipboardEntries();
+    notice({
+      status: "success",
+      title: "Success",
+      description: "All clipboard entries have been deleted.",
+    });
     onClose();
-  }, [onClose]);
+  }, [onClose, notice]);
 
   return (
     <VStack>
