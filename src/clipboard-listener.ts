@@ -5,13 +5,15 @@ import { isAppExcluded } from "./utils/excluded-apps";
 import { invoke } from "@tauri-apps/api/core";
 import { BaseDirectory, pictureDir } from "@tauri-apps/api/path";
 import { writeFile } from "@tauri-apps/plugin-fs";
+import { detectColorFormat } from "~/utils/color";
 
 let prevText = "";
 let prevImage = "";
 let prevHTML = "";
 
-function isColorCode(text: string): boolean {
-  return /^(#[0-9A-Fa-f]{3,8}|rgb\(.*\)|rgba\(.*\)|hsl\(.*\)|hsla\(.*\))$/.test(text.trim());
+function isColor(text: string): boolean {
+  const format = detectColorFormat(text.trim());
+  return format !== "invalid";
 }
 
 type ActiveWindowProps = {
@@ -88,7 +90,7 @@ export function initClipboardListener() {
       const text = await readText();
       if (html && html !== prevHTML) {
         prevHTML = html;
-        const type = isColorCode(text) ? "color" : "html";
+        const type = isColor(text) ? "color" : "html";
         try {
           await addClipboardEntry({
             content: text,
@@ -105,7 +107,7 @@ export function initClipboardListener() {
       const text = await readText();
       if (text && text !== prevText) {
         prevText = text;
-        const type = isColorCode(text) ? "color" : "text";
+        const type = isColor(text) ? "color" : "text";
         try {
           await addClipboardEntry({
             content: text,

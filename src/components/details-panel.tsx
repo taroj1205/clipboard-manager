@@ -1,9 +1,8 @@
 import { pictureDir } from "@tauri-apps/api/path";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { CopyIcon, ImageIcon, RefreshCwIcon, TextIcon, TrashIcon } from "@yamada-ui/lucide";
+import { Box, CopyIcon, ImageIcon, RefreshCwIcon, TextIcon, TrashIcon } from "@yamada-ui/lucide";
 import {
   Badge,
-  Box,
   ButtonGroup,
   Center,
   DataList,
@@ -23,7 +22,7 @@ import {
 import * as React from "react";
 import type { ClipboardEntry } from "~/utils/clipboard";
 import { copyClipboardEntry, deleteClipboardEntry, editClipboardEntry, extractTextFromImage } from "~/utils/clipboard";
-import { ClipboardImage } from "./clipboard-image";
+import { ImagePreview, TextPreview } from "./preview";
 
 interface DetailsPanelProps {
   selectedEntry: (ClipboardEntry & { count?: number }) | null;
@@ -165,7 +164,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
         </ButtonGroup>
         <ScrollArea maxH="calc(100vh - 70px - 160px)" maxW="calc(100vw - 25px - sm)">
           {selectedEntry.type === "image" && selectedEntry.path ? (
-            <ClipboardImage src={Array.isArray(selectedEntry.path) ? selectedEntry.path[0] : selectedEntry.path} boxSize="xl" />
+            <ImagePreview path={selectedEntry.path} />
           ) : selectedEntry.type === "color" ? (
             <Center h="200px">
               <Box
@@ -210,9 +209,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
               dangerouslySetInnerHTML={{ __html: selectedEntry.html }}
             />
           ) : (
-            <Text whiteSpace="pre-wrap" wordBreak="break-word" data-html={selectedEntry.html}>
-              {selectedEntry.content}
-            </Text>
+            <TextPreview content={selectedEntry.content} html={selectedEntry.html} />
           )}
         </ScrollArea>
       </GridItem>
