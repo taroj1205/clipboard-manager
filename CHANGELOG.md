@@ -1,5 +1,13 @@
 # clipboard-manager
 
+## 0.0.8
+
+### Patch Changes
+
+- [#58](https://github.com/taroj1205/clipboard-manager/pull/58) [`7b298c6`](https://github.com/taroj1205/clipboard-manager/commit/7b298c638c8d73820f6140c2fc8cd0a5f682274c) Thanks [@taroj1205](https://github.com/taroj1205)! - Added color conversion feature in color preview.
+
+- [#55](https://github.com/taroj1205/clipboard-manager/pull/55) [`7e040b2`](https://github.com/taroj1205/clipboard-manager/commit/7e040b25c7b9aecd207d5e5d1416841a1b78e51b) Thanks [@taroj1205](https://github.com/taroj1205)! - Add a button to delete all entries from database
+
 ## 0.0.7
 
 ### Patch Changes
