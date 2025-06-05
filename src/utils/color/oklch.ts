@@ -1,16 +1,6 @@
-import { useCallback } from "react";
-import { hexRegex, hexToHsl, hexToRgb } from "./color/hex";
-import { hslRegex, hslToHex } from "./color/hsl";
-import { hexToOklch, oklchRegex, oklchToHex } from "./color/oklch";
-import { rgbRegex, rgbToHex } from "./color/rgb";
+import { hexRegex } from "./hex";
 
-const detectColorFormat = (color: string): "hex" | "rgb" | "rgba" | "hsl" | "hsla" | "oklch" | "invalid" => {
-  if (hexRegex.test(color)) return color.length === 9 ? "rgba" : "hex";
-  if (rgbRegex.test(color)) return color.includes("rgba") ? "rgba" : "rgb";
-  if (hslRegex.test(color)) return color.includes("hsla") ? "hsla" : "hsl";
-  if (oklchRegex.test(color)) return "oklch";
-  return "invalid";
-};
+export const oklchRegex = /^oklch\(\s*([\d.]+)\s*%\s*([\d.]+)\s*([\d.]+)(?:\s*\/\s*([\d.]+))?\s*\)$/i;
 
 // Color space conversion matrices and constants
 const XYZ_TO_LMS = [
@@ -58,7 +48,7 @@ const matrixMultiply = (matrix: number[][], vector: number[]): number[] => {
   return matrix.map((row) => row.reduce((sum, val, i) => sum + val * vector[i], 0));
 };
 
-const hexToOklchImpl = (hex: string): string => {
+export const hexToOklch = (hex: string): string => {
   const result = hexRegex.exec(hex);
   if (!result) return "Invalid color";
 
@@ -93,7 +83,7 @@ const hexToOklchImpl = (hex: string): string => {
     : `oklch(${(lightness * 100).toFixed(2)}% ${chroma.toFixed(2)} ${hue.toFixed(2)})`;
 };
 
-const oklchToHexImpl = (oklch: string): string => {
+export const oklchToHex = (oklch: string): string => {
   const result = oklchRegex.exec(oklch);
   if (!result) return "Invalid color";
 
@@ -133,34 +123,3 @@ const oklchToHexImpl = (oklch: string): string => {
         .padStart(2, "0")}`
     : hex;
 };
-
-export const useColorConverters = () => {
-  const normalizeColor = useCallback((color: string): string => {
-    const format = detectColorFormat(color);
-    switch (format) {
-      case "hex":
-        return color.startsWith("#") ? color : `#${color}`;
-      case "rgb":
-        return rgbToHex(color);
-      case "hsl":
-        return hslToHex(color);
-      case "oklch":
-        return oklchToHex(color);
-      default:
-        return color;
-    }
-  }, []);
-
-  return {
-    hexToRgb,
-    rgbToHex,
-    hexToHsl,
-    hslToHex,
-    oklchToHex,
-    hexToOklch,
-    normalizeColor,
-    detectColorFormat,
-  };
-};
-
-export { detectColorFormat };
