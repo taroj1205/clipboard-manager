@@ -25,6 +25,8 @@ if (rootEl) {
     notice: {
       options: {
         placement: "bottom-right",
+        isClosable: true,
+        closeStrategy: "both",
       },
     },
     initialColorMode: "dark",

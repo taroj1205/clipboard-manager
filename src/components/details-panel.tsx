@@ -3,7 +3,6 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { CopyIcon, ImageIcon, RefreshCwIcon, TextIcon, TrashIcon } from "@yamada-ui/lucide";
 import {
   Badge,
-  Box,
   ButtonGroup,
   Center,
   DataList,
@@ -23,7 +22,7 @@ import {
 import * as React from "react";
 import type { ClipboardEntry } from "~/utils/clipboard";
 import { copyClipboardEntry, deleteClipboardEntry, editClipboardEntry, extractTextFromImage } from "~/utils/clipboard";
-import { ClipboardImage } from "./clipboard-image";
+import { ColorPreview, ImagePreview, TextPreview } from "./preview";
 
 interface DetailsPanelProps {
   selectedEntry: (ClipboardEntry & { count?: number }) | null;
@@ -163,50 +162,13 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
             onClick={() => deleteClipboardEntry(selectedEntry.timestamp)}
           />
         </ButtonGroup>
-        <ScrollArea maxH="calc(100vh - 70px - 160px)" maxW="calc(100vw - 25px - sm)" h='full'>
+        <ScrollArea maxH="calc(100vh - 70px - 160px)" maxW="calc(100vw - 25px - sm)" h="full">
           {selectedEntry.type === "image" && selectedEntry.path ? (
-            <ClipboardImage src={Array.isArray(selectedEntry.path) ? selectedEntry.path[0] : selectedEntry.path} boxSize="xl" />
+            <ImagePreview path={selectedEntry.path} />
           ) : selectedEntry.type === "color" ? (
-            <Center h="200px" flex={1}>
-              <Box
-                position="relative"
-                w="120px"
-                h="120px"
-                borderRadius="full"
-                bg={selectedEntry.content}
-                boxShadow="md"
-                borderWidth="2px"
-                borderColor="gray.300"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                className="group"
-              >
-                <IconButton
-                  aria-label="Copy Color"
-                  icon={<CopyIcon />}
-                  size="lg"
-                  variant="solid"
-                  colorScheme="blackAlpha"
-                  position="absolute"
-                  top="50%"
-                  left="50%"
-                  opacity={0}
-                  transform="translate(-50%, -50%)"
-                  _groupHover={{
-                    opacity: 1,
-                  }}
-                  onClick={() => {
-                    copyClipboardEntry(selectedEntry, notice);
-                  }}
-                  title="Copy Color"
-                />
-              </Box>
-            </Center>
+            <ColorPreview color={selectedEntry.content} onCopy={() => copyClipboardEntry(selectedEntry, notice)} />
           ) : (
-            <Text whiteSpace="pre-wrap" wordBreak="break-word" data-html={selectedEntry.html}>
-              {selectedEntry.content}
-            </Text>
+            <TextPreview content={selectedEntry.content} html={selectedEntry.html} />
           )}
         </ScrollArea>
       </GridItem>
