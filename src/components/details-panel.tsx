@@ -163,11 +163,11 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
             onClick={() => deleteClipboardEntry(selectedEntry.timestamp)}
           />
         </ButtonGroup>
-        <ScrollArea maxH="calc(100vh - 70px - 160px)" maxW="calc(100vw - 25px - sm)" h='full'>
+        <ScrollArea maxH="calc(100vh - 70px - 160px)" maxW="calc(100vw - 25px - sm)">
           {selectedEntry.type === "image" && selectedEntry.path ? (
             <ClipboardImage src={Array.isArray(selectedEntry.path) ? selectedEntry.path[0] : selectedEntry.path} boxSize="xl" />
           ) : selectedEntry.type === "color" ? (
-            <Center h="200px" flex={1}>
+            <Center h="200px">
               <Box
                 position="relative"
                 w="120px"
@@ -203,6 +203,12 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
                 />
               </Box>
             </Center>
+          ) : selectedEntry.type === "html" && selectedEntry.html ? (
+            <Text
+              wordBreak="break-word"
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+              dangerouslySetInnerHTML={{ __html: selectedEntry.html }}
+            />
           ) : (
             <Text whiteSpace="pre-wrap" wordBreak="break-word" data-html={selectedEntry.html}>
               {selectedEntry.content}
