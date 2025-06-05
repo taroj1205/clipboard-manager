@@ -1,16 +1,11 @@
 import { useCallback } from "react";
 
 const hexRegex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i;
-const rgbRegex =
-  /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)$/i;
-const hslRegex =
-  /^hsla?\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%(?:\s*,\s*([\d.]+))?\s*\)$/i;
-const oklchRegex =
-  /^oklch\(\s*([\d.]+)\s*%\s*([\d.]+)\s*([\d.]+)(?:\s*\/\s*([\d.]+))?\s*\)$/i;
+const rgbRegex = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)$/i;
+const hslRegex = /^hsla?\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%(?:\s*,\s*([\d.]+))?\s*\)$/i;
+const oklchRegex = /^oklch\(\s*([\d.]+)\s*%\s*([\d.]+)\s*([\d.]+)(?:\s*\/\s*([\d.]+))?\s*\)$/i;
 
-const detectColorFormat = (
-  color: string
-): "hex" | "rgb" | "rgba" | "hsl" | "hsla" | "oklch" | "invalid" => {
+const detectColorFormat = (color: string): "hex" | "rgb" | "rgba" | "hsl" | "hsla" | "oklch" | "invalid" => {
   if (hexRegex.test(color)) return color.length === 9 ? "rgba" : "hex";
   if (rgbRegex.test(color)) return color.includes("rgba") ? "rgba" : "rgb";
   if (hslRegex.test(color)) return color.includes("hsla") ? "hsla" : "hsl";
@@ -25,9 +20,7 @@ const hexToRgbImpl = (hex: string): string => {
   const g = Number.parseInt(result[2], 16);
   const b = Number.parseInt(result[3], 16);
   const a = result[4] ? Number.parseInt(result[4], 16) / 255 : undefined;
-  return a !== undefined
-    ? `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})`
-    : `rgb(${r}, ${g}, ${b})`;
+  return a !== undefined ? `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})` : `rgb(${r}, ${g}, ${b})`;
 };
 
 const rgbToHexImpl = (rgb: string): string => {
@@ -36,12 +29,8 @@ const rgbToHexImpl = (rgb: string): string => {
   const r = Number.parseInt(result[1]);
   const g = Number.parseInt(result[2]);
   const b = Number.parseInt(result[3]);
-  const a = result[4]
-    ? Math.round(Number.parseFloat(result[4]) * 255)
-    : undefined;
-  const hex = `#${r.toString(16).padStart(2, "0")}${g
-    .toString(16)
-    .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  const a = result[4] ? Math.round(Number.parseFloat(result[4]) * 255) : undefined;
+  const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
   return a !== undefined ? `${hex}${a.toString(16).padStart(2, "0")}` : hex;
 };
 
@@ -83,9 +72,7 @@ const hexToHslImpl = (hex: string): string => {
   s = Math.round(s * 100);
   const lPercent = Math.round(l * 100);
 
-  return a !== undefined
-    ? `hsla(${h}, ${s}%, ${lPercent}%, ${a.toFixed(2)})`
-    : `hsl(${h}, ${s}%, ${lPercent}%)`;
+  return a !== undefined ? `hsla(${h}, ${s}%, ${lPercent}%, ${a.toFixed(2)})` : `hsl(${h}, ${s}%, ${lPercent}%)`;
 };
 
 const hslToHexImpl = (hsl: string): string => {
@@ -180,9 +167,7 @@ const sRGBToLinear = (c: number): number => {
 };
 
 const matrixMultiply = (matrix: number[][], vector: number[]): number[] => {
-  return matrix.map((row) =>
-    row.reduce((sum, val, i) => sum + val * vector[i], 0)
-  );
+  return matrix.map((row) => row.reduce((sum, val, i) => sum + val * vector[i], 0));
 };
 
 const hexToOklchImpl = (hex: string): string => {
@@ -216,12 +201,8 @@ const hexToOklchImpl = (hex: string): string => {
   const hue = hueAngle < 0 ? hueAngle + 360 : hueAngle;
 
   return alpha !== undefined
-    ? `oklch(${(lightness * 100).toFixed(2)}% ${chroma.toFixed(
-        2
-      )} ${hue.toFixed(2)} / ${alpha.toFixed(2)})`
-    : `oklch(${(lightness * 100).toFixed(2)}% ${chroma.toFixed(
-        2
-      )} ${hue.toFixed(2)})`;
+    ? `oklch(${(lightness * 100).toFixed(2)}% ${chroma.toFixed(2)} ${hue.toFixed(2)} / ${alpha.toFixed(2)})`
+    : `oklch(${(lightness * 100).toFixed(2)}% ${chroma.toFixed(2)} ${hue.toFixed(2)})`;
 };
 
 const oklchToHexImpl = (oklch: string): string => {
@@ -257,9 +238,7 @@ const oklchToHexImpl = (oklch: string): string => {
   const sg = Math.round(linearToSRGB(gLinear) * 255);
   const sb = Math.round(linearToSRGB(bLinear) * 255);
 
-  const hex = `#${sr.toString(16).padStart(2, "0")}${sg
-    .toString(16)
-    .padStart(2, "0")}${sb.toString(16).padStart(2, "0")}`;
+  const hex = `#${sr.toString(16).padStart(2, "0")}${sg.toString(16).padStart(2, "0")}${sb.toString(16).padStart(2, "0")}`;
   return alpha !== undefined
     ? `${hex}${Math.round(alpha * 255)
         .toString(16)
@@ -290,7 +269,7 @@ export const useColorConverters = () => {
           return color;
       }
     },
-    [rgbToHex, hslToHex, oklchToHex]
+    [rgbToHex, hslToHex, oklchToHex],
   );
 
   return {
