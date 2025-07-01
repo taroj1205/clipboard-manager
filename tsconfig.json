@@ -22,7 +22,7 @@
       "~/*": ["./src/*"]
     }
   },
-  "include": ["src", ".eslint", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+  "include": ["src", ".eslint", "**/*.ts", "**/*.tsx"],
   "references": [
     {
       "path": "./tsconfig.node.json"

@@ -16,6 +16,7 @@ if (rootEl) {
       globalStyle: {
         body: {
           bg: "blackAlpha.600",
+          overflow: "clip",
         },
       },
     },

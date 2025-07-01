@@ -110,8 +110,15 @@ export const SidebarList = React.memo(
         return arr;
       }, [grouped]);
 
-      // Initialize refs array with correct length
-      itemRefs.current = new Array(flatList.length).fill(null);
+      // Initialize refs array with correct length, preserving existing refs
+      if (itemRefs.current.length !== flatList.length) {
+        const oldRefs = itemRefs.current;
+        itemRefs.current = new Array(flatList.length);
+        // Preserve existing refs where possible
+        for (let i = 0; i < flatList.length; i++) {
+          itemRefs.current[i] = i < oldRefs.length ? oldRefs[i] : null;
+        }
+      }
 
       if (flatList.length === 0) {
         return (

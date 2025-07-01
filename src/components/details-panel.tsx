@@ -1,9 +1,10 @@
 import type { ClipboardEntry } from "~/utils/clipboard";
 import { pictureDir } from "@tauri-apps/api/path";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { Box, CopyIcon, ImageIcon, RefreshCwIcon, TextIcon, TrashIcon } from "@yamada-ui/lucide";
+import { CopyIcon, ImageIcon, RefreshCwIcon, TextIcon, TrashIcon } from "@yamada-ui/lucide";
 import {
   Badge,
+  Box,
   ButtonGroup,
   Center,
   DataList,
@@ -203,9 +204,20 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
               </Box>
             </Center>
           ) : selectedEntry.type === "html" && selectedEntry.html ? (
-            <Text
-              // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+            <Box
+              sx={{
+                "& *": {
+                  maxWidth: "100% !important",
+                  whiteSpace: "pre-wrap !important",
+                  overflowWrap: "break-word !important",
+                  wordBreak: "break-word !important",
+                },
+              }}
+              maxH="calc(100vh - 70px - 160px)"
+              maxW="calc(100vw - 25px - sm)"
               dangerouslySetInnerHTML={{ __html: selectedEntry.html }}
+              overflow="hidden"
+              overflowWrap="break-word"
               wordBreak="break-word"
             />
           ) : (
