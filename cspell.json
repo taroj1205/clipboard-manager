@@ -34,7 +34,11 @@
     "taroj",
     "iarna",
     "Ultracite",
-    "commitlint"
+    "commitlint",
+    "libwebkit",
+    "libappindicator",
+    "librsvg",
+    "patchelf"
   ],
   "ignorePaths": [
     "node_modules/**",

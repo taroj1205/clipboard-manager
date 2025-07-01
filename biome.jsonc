@@ -2,7 +2,20 @@
   "$schema": "https://biomejs.dev/schemas/2.0.5/schema.json",
   "extends": ["ultracite"],
   "files": {
-    "includes": ["**", "!src/routeTree.gen.ts"]
+    "includes": [
+      "**",
+      "!**/bun.lock",
+      "!**/dist/**",
+      "!**/build/**",
+      "!**/src-tauri/target/**",
+      "!**/node_modules/**",
+      "!**/package-lock.json",
+      "!**/yarn.lock",
+      "!**/pnpm-lock.yaml",
+      "!**/node_modules/**",
+      "!**/.tanstack/**",
+      "!**/*.gen.ts"
+    ]
   },
   "linter": {
     "rules": {
