@@ -12,6 +12,11 @@ pre-commit:
     spell:
       glob: "*.{js,ts,tsx,md}"
       run: pnpm cspell {staged_files}
+      stage_fixed: true
+    types:
+      run: pnpm tsc --noEmit
+    packages-audit:
+      run: pnpm audit --audit-level moderate
 
 commit-msg:
   commands:
@@ -31,10 +36,3 @@ post-merge:
     pnpm:
       glob: "{package.json,pnpm-lock.yaml}"
       run: pnpm install
-
-pre-push:
-  commands:
-    packages-audit:
-      run: pnpm audit --audit-level moderate
-    types:
-      run: pnpm tsc --noEmit

@@ -1,6 +1,7 @@
 import type { Linter } from "eslint";
 import { fixupPluginRules } from "@eslint/compat";
 import { flatConfigs } from "eslint-plugin-import";
+// @ts-expect-error no types
 import importReplacePlugin from "eslint-plugin-import-replace";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
 import { sharedFiles, sharedTestFiles } from "./shared";

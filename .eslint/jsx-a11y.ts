@@ -1,4 +1,5 @@
 import type { Linter } from "eslint";
+// @ts-expect-error no types
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
 import { sharedFiles } from "./shared";
 
