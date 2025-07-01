@@ -1,6 +1,5 @@
-{  "branches": [
-    "main"
-  ],
+{
+  "branches": ["main"],
   "repositoryUrl": "https://github.com/taroj1205/clipboard-manager",
   "plugins": [
     [
@@ -42,7 +41,8 @@
           ]
         }
       }
-    ],    [
+    ],
+    [
       "@semantic-release/changelog",
       {
         "changelogFile": "CHANGELOG.md"
@@ -58,13 +58,8 @@
     [
       "@semantic-release/git",
       {
-        "assets": [
-          "CHANGELOG.md",
-          "package.json",
-          "pnpm-lock.yaml",
-          "src-tauri/Cargo.toml",
-          "src-tauri/Cargo.lock"
-        ],        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        "assets": ["CHANGELOG.md", "package.json", "pnpm-lock.yaml", "src-tauri/Cargo.toml", "src-tauri/Cargo.lock"],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
     [

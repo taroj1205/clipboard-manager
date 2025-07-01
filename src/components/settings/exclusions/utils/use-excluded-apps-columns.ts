@@ -1,19 +1,19 @@
 import type { Column } from "@yamada-ui/table";
-import { useMemo } from "react";
 import type { ExcludedApp } from "~/utils/excluded-apps";
+import { useMemo } from "react";
 import { ACTIONS_COLUMN, DATE_COLUMN, NAME_COLUMN, PATH_COLUMN } from "./columns";
 
 interface UseExcludedAppsColumnsOptions {
+  hasDate?: boolean;
   hasName?: boolean;
   hasPath?: boolean;
-  hasDate?: boolean;
   hasActions?: boolean;
 }
 
 export function useExcludedAppsColumns({
+  hasDate = true,
   hasName = true,
   hasPath = true,
-  hasDate = true,
   hasActions = true,
 }: UseExcludedAppsColumnsOptions = {}) {
   return useMemo(() => {

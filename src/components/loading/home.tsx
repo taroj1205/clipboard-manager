@@ -20,25 +20,25 @@ import {
 
 export const HomeLoadingComponent = () => {
   return (
-    <VStack gap="sm" h="100vh" p="sm" separator={<Separator />} color="white">
+    <VStack gap="sm" h="100vh" p="sm" color="white" separator={<Separator />}>
       {/* TopBar skeleton */}
       <HStack gap="0" w="full">
-        <Input placeholder="Type to search..." roundedRight="none" borderRight="none" disabled />
+        <Input disabled borderRight="none" placeholder="Type to search..." roundedRight="none" />
         <IconButton
-          as={Link}
-          to="/settings"
-          borderColor="border"
-          variant="outline"
           aria-label="Settings"
+          variant="outline"
+          as={Link}
+          borderColor="border"
           borderLeftRadius="none"
+          to="/settings"
         >
           <CogIcon />
         </IconButton>
       </HStack>
 
-      <HStack gap="xs" flex={1} align="stretch" separator={<Separator orientation="vertical" />}>
+      <HStack align="stretch" flex={1} gap="xs" separator={<Separator orientation="vertical" />}>
         {/* SidebarList skeleton */}
-        <VStack w="full" minW="sm" maxW="sm" maxH="calc(100vh - 70px)" gap="xs">
+        <VStack gap="xs" maxH="calc(100vh - 70px)" maxW="sm" minW="sm" w="full">
           {Array.from({ length: 3 }, (_, groupIndex) => (
             <VStack
               key={`group-skeleton--${
@@ -49,7 +49,7 @@ export const HomeLoadingComponent = () => {
             >
               {/* Date group header */}
               <Skeleton>
-                <Text fontWeight="bold" fontSize="sm" p="sm">
+                <Text p="sm" fontSize="sm" fontWeight="bold">
                   Today
                 </Text>
               </Skeleton>
@@ -70,15 +70,15 @@ export const HomeLoadingComponent = () => {
         </VStack>
 
         {/* DetailsPanel skeleton */}
-        <VStack px="sm" gap="sm" w="full">
+        <VStack gap="sm" px="sm" w="full">
           {/* Content area */}
           <ScrollArea maxH="calc(100vh - 70px - 160px)" maxW="calc(100vw - 25px - sm)">
             <VStack gap="md">
               <Skeleton>
-                <VStack gap="md" align="stretch">
+                <VStack align="stretch" gap="md">
                   <Text whiteSpace="pre-wrap" wordBreak="break-word">
-                    This is sample clipboard content that shows how the text would appear in the details panel. It can be
-                    multiple lines and wraps properly.
+                    This is sample clipboard content that shows how the text would appear in the details panel. It can
+                    be multiple lines and wraps properly.
                   </Text>
                 </VStack>
               </Skeleton>
@@ -87,7 +87,7 @@ export const HomeLoadingComponent = () => {
 
           <Spacer />
 
-          <DataList col={2} w="fit-content">
+          <DataList w="fit-content" col={2}>
             <DataListItem>
               <DataListTerm>Copy Count</DataListTerm>
               <DataListDescription>

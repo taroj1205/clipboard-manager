@@ -2,14 +2,10 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export const hideWindow = () => {
   const window = getCurrentWindow();
-  if (window) {
-    window.hide();
-  }
+  window.hide();
 };
 
 export const showWindow = () => {
   const window = getCurrentWindow();
-  if (window) {
-    window.show();
-  }
+  window.show();
 };

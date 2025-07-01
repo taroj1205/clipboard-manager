@@ -11,8 +11,8 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
-  VStack,
   useDisclosure,
+  VStack,
 } from "@yamada-ui/react";
 import { memo } from "react";
 import { useAddExcludedAppForm } from "./utils";
@@ -22,8 +22,8 @@ interface AddExcludedAppModalProps {
 }
 
 export const AddExcludedAppModal = memo(({ trigger }: AddExcludedAppModalProps) => {
-  const { open, onOpen, onClose } = useDisclosure();
-  const { register, handleSubmit, errors, onSubmit } = useAddExcludedAppForm(onClose);
+  const { onClose, onOpen, open } = useDisclosure();
+  const { handleSubmit, register, errors, onSubmit } = useAddExcludedAppForm(onClose);
 
   return (
     <>
@@ -32,17 +32,23 @@ export const AddExcludedAppModal = memo(({ trigger }: AddExcludedAppModalProps) 
           {trigger}
         </Button>
       ) : (
-        <Button startIcon={<PlusIcon />} size="sm" onClick={onOpen}>
+        <Button size="sm" onClick={onOpen} startIcon={<PlusIcon />}>
           Add Application
         </Button>
       )}
-      <Modal open={open} onClose={onClose} as="form" onSubmit={handleSubmit(onSubmit)} onClick={(ev) => ev.stopPropagation()}>
+      <Modal
+        as="form"
+        onClick={(ev) => ev.stopPropagation()}
+        onClose={onClose}
+        onSubmit={handleSubmit(onSubmit)}
+        open={open}
+      >
         <ModalOverlay />
         <ModalCloseButton />
         <ModalHeader>Add Excluded Application</ModalHeader>
         <ModalBody>
           <VStack gap="md">
-            <FormControl required gap="xs" display="flex" flexDirection="column">
+            <FormControl display="flex" gap="xs" required flexDirection="column">
               <Text fontSize="sm">Application Name</Text>
               <Input
                 placeholder="e.g., Visual Studio Code"
@@ -51,21 +57,21 @@ export const AddExcludedAppModal = memo(({ trigger }: AddExcludedAppModalProps) 
             </FormControl>
 
             <FormControl
-              required
               invalid={!!errors.path}
-              errorMessage={errors.path?.message}
-              gap="xs"
               display="flex"
+              gap="xs"
+              required
+              errorMessage={errors.path?.message}
               flexDirection="column"
             >
               <Text fontSize="sm">Application Path or Process Name</Text>
               <Input
-                placeholder="e.g., Code.exe or C:\\Program Files\\..."
                 fontFamily="mono"
                 fontSize="sm"
+                placeholder="e.g., Code.exe or C:\\Program Files\\..."
                 {...register("path", { required: "Application path is required" })}
               />
-              <Text fontSize="xs" color="muted">
+              <Text color="muted" fontSize="xs">
                 You can specify either the executable name (e.g., "chrome.exe") or the full path
               </Text>
             </FormControl>

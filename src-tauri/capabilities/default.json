@@ -27,10 +27,7 @@
     "core:window:allow-hide",
     {
       "identifier": "fs:scope",
-      "allow": [
-        { "path": "$RESOURCE/assets/*" },
-        { "path": "$PICTURE/clipboard-manager/*" }
-      ]
+      "allow": [{ "path": "$RESOURCE/assets/*" }, { "path": "$PICTURE/clipboard-manager/*" }]
     }
   ]
 }

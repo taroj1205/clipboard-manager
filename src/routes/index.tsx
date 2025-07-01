@@ -1,28 +1,19 @@
-import { useQueryClient, useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import type { ClipboardEntry } from "~/utils/clipboard";
+import { keepPreviousData, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { listen } from "@tauri-apps/api/event";
-import {
-  EmptyState,
-  EmptyStateDescription,
-  EmptyStateIndicator,
-  EmptyStateTitle,
-  HStack,
-  Loading,
-  Separator,
-  VStack,
-  usePrevious,
-} from "@yamada-ui/react";
+import { HStack, Separator, usePrevious, VStack } from "@yamada-ui/react";
 import * as React from "react";
 import { DetailsPanel } from "~/components/details-panel";
+import { ErrorComponent } from "~/components/error-component";
 import { HomeLoadingComponent } from "~/components/loading/home";
 import { SidebarList } from "~/components/sidebar-list";
 import { TopBar } from "~/components/top-bar";
-import { type ClipboardEntry, copyClipboardEntry, getPaginatedClipboardEntries } from "~/utils/clipboard";
-import { useEventListener } from "~/utils/events";
-
-import { ErrorComponent } from "~/components/error-component";
+import { copyClipboardEntry, getPaginatedClipboardEntries } from "~/utils/clipboard";
 import { groupEntriesByDate } from "~/utils/dates";
+import { useEventListener } from "~/utils/events";
 import { hideWindow } from "~/utils/window";
+
 export const Route = createFileRoute("/")({
   component: HomeComponent,
   errorComponent: ErrorComponent,
@@ -31,7 +22,7 @@ export const Route = createFileRoute("/")({
 
 export interface TypeFilter {
   label: string;
-  value: "all" | "text" | "image" | "color" | "html";
+  value: "all" | "color" | "html" | "image" | "text";
 }
 
 const allowedTypes: TypeFilter["value"][] = ["all", "text", "image", "color", "html"];
@@ -40,45 +31,44 @@ function HomeComponent() {
   const queryClient = useQueryClient();
   const loaderData = Route.useLoaderData();
   const [query, setQueryRaw] = React.useState("");
+  const [debouncedQuery, setDebouncedQuery] = React.useState("");
   const [typeFilter, setTypeFilterRaw] = React.useState<TypeFilter["value"][]>(["all"]);
   const [selectedIndex, setSelectedIndexRaw] = React.useState<number>(0);
-  const debouncedQuery = React.useDeferredValue(query);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const itemRefs = React.useRef<(HTMLLIElement | null)[]>([]);
 
-  localStorage.setItem("ui-color-mode", "dark");
+  // Debounce search query with a shorter delay for better UX
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 200); // 200ms debounce for fast feedback
+
+    return () => clearTimeout(timeoutId);
+  }, [query]);
+
+  React.useEffect(() => {
+    localStorage.setItem("ui-color-mode", "dark");
+  }, []);
 
   const LIMIT = 50;
 
   const {
+    refetch,
     data = loaderData,
     fetchNextPage,
-    isLoading,
-    isPending,
     hasNextPage,
     isFetchingNextPage,
-    refetch,
-  } = useSuspenseInfiniteQuery<ClipboardEntry[], Error>({
-    initialPageParam: 0,
-    queryKey: ["clipboard-search", debouncedQuery, typeFilter],
-    queryFn: ({ pageParam }) => getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
-    getNextPageParam: (lastPage, allPages) => (lastPage.length === LIMIT ? allPages.length * LIMIT : undefined),
+    isLoading,
+  } = useInfiniteQuery<ClipboardEntry[]>({
     gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
-    staleTime: 2 * 60 * 1000, // 2 minutes stale time
+    getNextPageParam: (lastPage, allPages) => (lastPage.length === LIMIT ? allPages.length * LIMIT : undefined),
+    initialPageParam: 0,
     maxPages: 10, // Limit to 10 pages in memory
+    queryFn: async ({ pageParam }) => getPaginatedClipboardEntries(debouncedQuery, LIMIT, pageParam as number),
+    queryKey: ["clipboard-search", debouncedQuery, typeFilter],
+    staleTime: 2 * 60 * 1000, // 2 minutes stale time
+    placeholderData: keepPreviousData,
   });
-
-  if (isLoading || isPending) {
-    return (
-      <EmptyState>
-        <EmptyStateIndicator>
-          <Loading />
-        </EmptyStateIndicator>
-        <EmptyStateTitle>Loading entries...</EmptyStateTitle>
-        <EmptyStateDescription>Please wait while we fetch your clipboard entries.</EmptyStateDescription>
-      </EmptyState>
-    );
-  }
 
   // Flatten paginated results
   const results = React.useMemo(() => (data ? data.pages.flat().slice(0, data.pages.length * LIMIT) : []), [data]);
@@ -97,7 +87,9 @@ function HomeComponent() {
 
   // Filter by type after deduplication
   const filteredFlatList = React.useMemo(() => {
-    const selectedTypes = typeFilter.filter((t): t is TypeFilter["value"] => allowedTypes.includes(t as TypeFilter["value"]));
+    const selectedTypes = typeFilter.filter((t): t is TypeFilter["value"] =>
+      allowedTypes.includes(t as TypeFilter["value"])
+    );
     if (selectedTypes.length === 0 || selectedTypes.includes("all")) return flatList;
     return flatList.filter((entry) => selectedTypes.includes(entry.type));
   }, [flatList, typeFilter]);
@@ -111,40 +103,16 @@ function HomeComponent() {
       { label: "Image", value: "image" },
       { label: "Color", value: "color" },
     ],
-    [],
-  );
-
-  const setQuery = React.useCallback(
-    (q: string, types?: string[]) => {
-      setQueryRaw(q);
-      setSelectedIndex(0);
-      if (types) setTypeFilter(types);
-      refetch();
-    },
-    [refetch],
-  );
-
-  const setTypeFilter = React.useCallback(
-    (types: string[]) => {
-      if (!types || types.length === 0) {
-        setTypeFilterRaw(["all"]);
-      } else {
-        const filtered = types.filter((t): t is TypeFilter["value"] => allowedTypes.includes(t as TypeFilter["value"]));
-        setTypeFilterRaw(filtered.length === 0 ? ["all"] : filtered);
-      }
-      setSelectedIndex(0);
-      refetch();
-    },
-    [refetch],
+    []
   );
 
   const handleUpdateSelectedIndex = React.useCallback((index: number) => {
     const el = itemRefs.current[index];
     if (el) {
       const parent = el.parentElement?.parentElement?.parentElement;
-      if (parent && parent.scrollTop !== undefined) {
+      if (parent?.scrollTop !== undefined) {
         if (index < 6) {
-          parent.scrollTo({ top: 0, behavior: "smooth" });
+          parent.scrollTo({ behavior: "smooth", top: 0 });
           return;
         }
         const elTop = el.offsetTop;
@@ -153,17 +121,17 @@ function HomeComponent() {
         const parentHeight = parent.clientHeight;
         // If the element is above the visible area
         if (elTop - 50 < parentScroll) {
-          parent.scrollTo({ top: elTop - 50, behavior: "smooth" });
+          parent.scrollTo({ behavior: "smooth", top: elTop - 50 });
         } else if (elTop + elHeight + 50 > parentScroll + parentHeight) {
           // If the element is below the visible area
           parent.scrollTo({
-            top: elTop - parentHeight + elHeight + 50,
             behavior: "smooth",
+            top: elTop - parentHeight + elHeight + 50,
           });
         }
       } else {
         // fallback to scrollIntoView if parent not found
-        el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
     }
   }, []);
@@ -173,7 +141,27 @@ function HomeComponent() {
       setSelectedIndexRaw(index);
       handleUpdateSelectedIndex(index);
     },
-    [handleUpdateSelectedIndex],
+    [handleUpdateSelectedIndex]
+  );
+
+  const setTypeFilter = React.useCallback(
+    (types: string[]) => {
+      const filtered = types.filter((t): t is TypeFilter["value"] => allowedTypes.includes(t as TypeFilter["value"]));
+      setTypeFilterRaw(filtered.length === 0 ? ["all"] : filtered);
+      setSelectedIndex(0);
+      refetch();
+    },
+    [refetch, setSelectedIndex]
+  );
+
+  const setQuery = React.useCallback(
+    (q: string, types?: string[]) => {
+      setQueryRaw(q);
+      setSelectedIndex(0);
+      if (types) setTypeFilter(types);
+      refetch();
+    },
+    [refetch, setSelectedIndex, setTypeFilter]
   );
 
   const focusInput = React.useCallback(() => {
@@ -186,36 +174,43 @@ function HomeComponent() {
     inputRef.current?.blur();
   }, []);
 
-  listen("clipboard-entry-updated", () => {
-    setSelectedIndex(0);
-    // Clear old cache entries to prevent memory buildup
-    queryClient.removeQueries({
-      queryKey: ["clipboard-search"],
-      exact: false,
-    });
-    refetch();
-  });
-
-  listen("tauri://focus", () => {
-    focusInput();
-  });
-
-  listen("tauri://blur", () => {
-    setSelectedIndex(0);
-    // getCurrentWindow().hide();
-    blurInput();
-  });
-
   const handleArrowKey = React.useCallback(
-    (direction: "up" | "down") => {
+    (direction: "down" | "up") => {
       setSelectedIndexRaw((prev) => {
         const newIndex = direction === "up" ? Math.max(0, prev - 1) : Math.min(filteredFlatList.length - 1, prev + 1);
         handleUpdateSelectedIndex(newIndex);
         return newIndex;
       });
     },
-    [filteredFlatList, handleUpdateSelectedIndex],
+    [filteredFlatList, handleUpdateSelectedIndex]
   );
+
+  // Event listeners in useEffect
+  React.useEffect(() => {
+    const unlistenClipboard = listen("clipboard-entry-updated", () => {
+      setSelectedIndex(0);
+      // Invalidate queries to trigger refetch while keeping current data visible
+      queryClient.invalidateQueries({
+        exact: false,
+        queryKey: ["clipboard-search"],
+      });
+    });
+
+    const unlistenFocus = listen("tauri://focus", () => {
+      focusInput();
+    });
+
+    const unlistenBlur = listen("tauri://blur", () => {
+      setSelectedIndex(0);
+      blurInput();
+    });
+
+    return () => {
+      unlistenClipboard.then((unlisten) => unlisten());
+      unlistenFocus.then((unlisten) => unlisten());
+      unlistenBlur.then((unlisten) => unlisten());
+    };
+  }, [queryClient, refetch, setSelectedIndex, focusInput, blurInput]);
 
   useEventListener("keydown", (ev) => {
     if (ev.key === "ArrowUp" || ev.key === "ArrowDown") {
@@ -230,21 +225,21 @@ function HomeComponent() {
     } else if (ev.key === "Enter") {
       ev.preventDefault();
       ev.stopPropagation();
-      copyClipboardEntry(filteredFlatList[selectedIndex], () => {}).then(() => {
+      const entry = filteredFlatList[selectedIndex];
+      copyClipboardEntry(entry, () => {
+        // Callback for copy completion
+      }).then(() => {
         hideWindow();
       });
     } else if (ev.key === "Escape") {
       ev.preventDefault();
       ev.stopPropagation();
-      if (query) {
+      if (query.length > 0) {
         setQuery("");
       } else {
         hideWindow();
       }
     } else if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey && !ev.shiftKey) {
-      if (inputRef.current && document.activeElement === inputRef.current) {
-        return;
-      }
       ev.preventDefault();
       ev.stopPropagation();
       focusInput();
@@ -253,34 +248,27 @@ function HomeComponent() {
   });
 
   return (
-    <VStack
-      gap="sm"
-      h="100vh"
-      p="sm"
-      separator={<Separator />}
-      // onKeyDown={handleKeyDown}
-      color="white"
-    >
+    <VStack gap="sm" h="100vh" p="sm" color="white" separator={<Separator />}>
       <TopBar
+        ref={inputRef}
         query={query}
         setQuery={setQuery}
-        typeFilter={typeFilter}
         setTypeFilter={setTypeFilter}
+        typeFilter={typeFilter}
         typeOptions={typeOptions}
-        ref={inputRef}
       />
-      <HStack gap="xs" flex={1} align="stretch" separator={<Separator orientation="vertical" />}>
+      <HStack align="stretch" flex={1} gap="xs" separator={<Separator orientation="vertical" />}>
         <SidebarList
           entries={filteredFlatList}
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
-          isLoading={isLoading || isPending}
+          itemRefs={itemRefs}
           selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
-          itemRefs={itemRefs}
-          totalEntries={results.length}
+          isLoading={isLoading}
           previousDataLength={previousDataLength}
+          totalEntries={results.length}
         />
         {filteredFlatList.length > 0 && <DetailsPanel selectedEntry={filteredFlatList[selectedIndex]} />}
       </HStack>

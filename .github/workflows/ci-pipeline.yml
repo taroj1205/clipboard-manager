@@ -12,6 +12,21 @@ on:
       - "pnpm-lock.yaml"
       - ".github/workflows/**"
   workflow_dispatch:
+    inputs:
+      os:
+        description: "The operating system to build for"
+        required: true
+        default: "ubuntu-latest"
+        type: choice
+        options:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+      build:
+        description: "Build the application"
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -50,7 +65,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     needs: check
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && inputs.build == true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

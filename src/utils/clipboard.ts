@@ -2,28 +2,30 @@ import { invoke } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
 import { writeHtml } from "@tauri-apps/plugin-clipboard-manager";
 import { BaseDirectory, readFile } from "@tauri-apps/plugin-fs";
-import { useOS } from "@yamada-ui/react";
 import { writeImageBase64, writeText } from "tauri-plugin-clipboard-api";
 import { db } from "~/db";
 
 export interface ClipboardEntry {
-  content: string;
-  type: "text" | "image" | "color" | "html";
   timestamp: number;
+  type: "color" | "html" | "image" | "text";
+  content: string;
   app?: string;
-  path?: string | string[];
   html?: string;
+  path?: string | string[];
 }
 
 export async function addClipboardEntry(entry: ClipboardEntry): Promise<void> {
-  await db.execute("INSERT INTO clipboard_entries (content, type, timestamp, app, path, html) VALUES (?, ?, ?, ?, ?, ?)", [
-    entry.content,
-    entry.type,
-    entry.timestamp,
-    entry.app,
-    entry.path ? (Array.isArray(entry.path) ? JSON.stringify(entry.path) : entry.path) : null,
-    entry.html,
-  ]);
+  await db.execute(
+    "INSERT INTO clipboard_entries (content, type, timestamp, app, path, html) VALUES (?, ?, ?, ?, ?, ?)",
+    [
+      entry.content,
+      entry.type,
+      entry.timestamp,
+      entry.app,
+      entry.path ? (Array.isArray(entry.path) ? JSON.stringify(entry.path) : entry.path) : null,
+      entry.html,
+    ]
+  );
   emit("clipboard-entry-updated");
 }
 
@@ -76,7 +78,7 @@ export async function getPaginatedClipboardEntries(query: string, limit = 50, of
         ...likeParams,
         limit,
         offset,
-      ],
+      ]
     )) as ClipboardEntry[];
   }
   return result;
@@ -121,7 +123,7 @@ export async function getAllClipboardEntries(query: string): Promise<ClipboardEn
         likeQuery,
         likeQuery,
         ...likeParams,
-      ],
+      ]
     )) as ClipboardEntry[];
   }
   return result;
@@ -158,8 +160,8 @@ export async function editClipboardEntry(timestamp: number, updates: Partial<Cli
 
 export function uint8ArrayToBase64(bytes: Uint8Array): string {
   let binary = "";
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]);
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
   }
   return window.btoa(binary);
 }
@@ -176,11 +178,7 @@ export function base64ToUint8Array(base64: string): Uint8Array {
 
 export async function copyClipboardEntry(
   entry: ClipboardEntry,
-  notice: (args: {
-    title: string;
-    description: string;
-    status: "success" | "error";
-  }) => void,
+  notice: (args: { status: "error" | "success"; title: string; description: string }) => void
 ) {
   if (entry.type === "image" && entry.path) {
     try {
@@ -188,51 +186,43 @@ export async function copyClipboardEntry(
       const data = await readFile(normalizedPath, {
         baseDir: BaseDirectory.Picture,
       });
-      if (data) {
-        const base64 = uint8ArrayToBase64(data);
-        await writeImageBase64(base64);
-        notice({
-          title: "Image copied!",
-          description: "Image copied to clipboard",
-          status: "success",
-        });
-      } else {
-        notice({
-          title: "Failed to copy image",
-          description: "No image data found",
-          status: "error",
-        });
-      }
-    } catch (e) {
-      console.error(e);
+      const base64 = uint8ArrayToBase64(data);
+      await writeImageBase64(base64);
       notice({
+        status: "success",
+        title: "Image copied!",
+        description: "Image copied to clipboard",
+      });
+    } catch (_error) {
+      console.error(_error);
+      notice({
+        status: "error",
         title: "Failed to copy image",
         description: "Failed to copy image",
-        status: "error",
       });
     }
   } else if (entry.type === "html" && entry.html) {
     try {
       await writeHtml(entry.html, entry.content);
       notice({
+        status: "success",
         title: "HTML copied!",
         description: "HTML copied to clipboard",
-        status: "success",
       });
-    } catch (e) {
-      console.error("Failed to copy HTML, falling back to text. Error:", e);
+    } catch (_error) {
+      console.error("Failed to copy HTML, falling back to text. Error:", _error);
       try {
         await writeText(entry.content);
         notice({
+          status: "error",
           title: "Copied as text",
           description: "HTML copy failed, copied as plain text instead.",
-          status: "error",
         });
-      } catch (e2) {
+      } catch (_error) {
         notice({
+          status: "error",
           title: "Failed to copy",
           description: "Failed to copy HTML and text",
-          status: "error",
         });
       }
     }
@@ -240,15 +230,15 @@ export async function copyClipboardEntry(
     try {
       await writeText(entry.content);
       notice({
+        status: "success",
         title: "Copied!",
         description: "Copied to clipboard",
-        status: "success",
       });
-    } catch (e) {
+    } catch (_error) {
       notice({
+        status: "error",
         title: "Failed to copy",
         description: "Failed to copy",
-        status: "error",
       });
     }
   }
@@ -261,9 +251,17 @@ export async function copyClipboardEntry(
  * @param imagePathOrBase64 The image path (Windows) or base64-encoded image string (other platforms)
  * @returns The extracted text, or an empty string if OCR fails
  */
-export async function extractTextFromImage(imagePathOrBase64: string): Promise<string> {
-  const platform = useOS();
-  if (platform === "windows") {
+export async function extractTextFromImage(imagePathOrBase64: string, platform?: string): Promise<string> {
+  // Platform should be passed as parameter instead of using React hook
+  const detectedPlatform =
+    platform ||
+    (typeof window !== "undefined" && "navigator" in window
+      ? navigator.platform.toLowerCase().includes("win")
+        ? "windows"
+        : "other"
+      : "other");
+
+  if (detectedPlatform === "windows") {
     try {
       // On Windows, pass the image path to the Tauri command
       const text = await invoke<string>("ocr_image", {

@@ -10,7 +10,7 @@ interface ControlMenuProps {
 
 export const ControlMenu = memo(
   ({ rowId }: ControlMenuProps) => {
-    const { open: isEditModalOpen, onOpen: openEditModal, onClose: closeEditModal } = useDisclosure();
+    const { onClose: closeEditModal, onOpen: openEditModal, open: isEditModalOpen } = useDisclosure();
 
     const handleDelete = useCallback(async () => {
       try {
@@ -25,16 +25,16 @@ export const ControlMenu = memo(
         ev.stopPropagation();
         openEditModal();
       },
-      [openEditModal],
+      [openEditModal]
     );
 
     return (
       <>
         <Menu lazy>
           <MenuButton
-            as={IconButton}
             size="sm"
             variant="ghost"
+            as={IconButton}
             icon={<EllipsisIcon />}
             onClick={(ev) => {
               ev.stopPropagation();
@@ -58,7 +58,7 @@ export const ControlMenu = memo(
       </>
     );
   },
-  () => false,
+  () => false
 );
 
 ControlMenu.displayName = "ControlMenu";

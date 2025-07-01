@@ -1,11 +1,13 @@
+import type { SubmitHandler } from "react-hook-form";
+import type { ExcludedApp } from "~/utils/excluded-apps";
 import { useCallback } from "react";
-import { type SubmitHandler, useForm } from "react-hook-form";
-import { type ExcludedApp, addExcludedApp } from "~/utils/excluded-apps";
+import { useForm } from "react-hook-form";
+import { addExcludedApp } from "~/utils/excluded-apps";
 
 export function useAddExcludedAppForm(onSuccess?: () => void) {
   const {
-    register,
     handleSubmit,
+    register,
     reset,
     formState: { errors },
   } = useForm<ExcludedApp>();
@@ -14,7 +16,7 @@ export function useAddExcludedAppForm(onSuccess?: () => void) {
     async (data) => {
       const { name, path } = data;
 
-      if (!name?.trim() || !path?.trim()) return;
+      if (!name.trim() || !path.trim()) return;
       try {
         await addExcludedApp({
           name: name.trim(),
@@ -26,12 +28,12 @@ export function useAddExcludedAppForm(onSuccess?: () => void) {
         console.error("Failed to add excluded app:", error);
       }
     },
-    [onSuccess, reset],
+    [onSuccess, reset]
   );
 
   return {
-    register,
     handleSubmit,
+    register,
     errors,
     onSubmit,
   };
