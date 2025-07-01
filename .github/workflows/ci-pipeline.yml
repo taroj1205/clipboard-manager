@@ -5,12 +5,6 @@ on:
     branches:
       - main
     types: [opened, synchronize, reopened]
-    paths:
-      - "src/**"
-      - "src-tauri/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - ".github/workflows/**"
   workflow_dispatch:
     inputs:
       os:
@@ -44,11 +38,11 @@ jobs:
       - name: Check for changes
         id: check_changes
         run: |
-          if git diff --name-only origin/main...HEAD | grep -qE 'src|src-tauri|package.json|pnpm-lock.yaml|github/workflows'; then
-            echo "Changes detected in src, src-tauri, package.json, pnpm-lock.yaml, or github/workflows"
+          if git diff --name-only origin/main...HEAD | grep -qE 'src|src-tauri|package\.json|bun\.lock|tsconfig.*\.json|biome\.jsonc|rsbuild\.config\.ts|\.github/workflows'; then
+            echo "Changes detected in relevant files"
             echo "changes=true" >> $GITHUB_OUTPUT
           else
-            echo "No changes detected in src, src-tauri, package.json, pnpm-lock.yaml, or github/workflows"
+            echo "No changes detected in relevant files"
             echo "changes=false" >> $GITHUB_OUTPUT
           fi
 
