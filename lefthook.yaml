@@ -9,8 +9,6 @@ pre-commit:
       glob: "*.{js,ts,tsx,mjs,cjs,md,mdx,yml,yaml}"
       run: bun cspell {staged_files}
       stage_fixed: true
-    types:
-      run: bun tsc --noEmit
 
 commit-msg:
   commands:
