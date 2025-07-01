@@ -1,13 +1,13 @@
 import type { TSESLint } from "@typescript-eslint/utils";
 import { configs, plugin } from "typescript-eslint";
-import { sharedFiles } from "./shared";
+import { tsFiles } from "./shared";
 
 const disabledRules = configs.recommended[1]?.rules;
 const stylisticRules = configs.stylistic[2]?.rules;
 
 export const typescriptConfig: TSESLint.FlatConfig.Config = {
   name: "eslint/typescript",
-  files: sharedFiles,
+  files: tsFiles,
   plugins: {
     "@typescript-eslint": plugin,
   },

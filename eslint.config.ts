@@ -5,6 +5,7 @@ import {
   baseConfig,
   cspellConfig,
   importConfigArray,
+  jsLanguageOptionFactory,
   languageOptionFactory,
   perfectionistConfig,
   reactConfig,
@@ -19,11 +20,13 @@ const ignoresConfig: TSESLint.FlatConfig.Config = {
   ignores: ["**/dist/**", "**/node_modules/**", "**/build/**", "src-tauri/gen/**", "src-tauri/target/**"],
 };
 
-const languageOptionConfig = languageOptionFactory(true);
+const jsLanguageOptionConfig = jsLanguageOptionFactory();
+const tsLanguageOptionConfig = languageOptionFactory(true);
 
 const config: TSESLint.FlatConfig.ConfigArray = tseslint.config(
   ignoresConfig,
-  languageOptionConfig,
+  jsLanguageOptionConfig,
+  tsLanguageOptionConfig,
   baseConfig,
   typescriptConfig,
   ...importConfigArray,
