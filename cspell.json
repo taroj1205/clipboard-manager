@@ -38,7 +38,8 @@
     "libwebkit",
     "libappindicator",
     "librsvg",
-    "patchelf"
+    "patchelf",
+    "dorny"
   ],
   "ignorePaths": [
     "node_modules/**",
