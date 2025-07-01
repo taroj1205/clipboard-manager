@@ -34,6 +34,7 @@ concurrency:
 
 jobs:
   setup:
+    name: Setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -89,13 +90,13 @@ jobs:
     strategy:
       matrix:
         task:
-          - name: "Type Check"
+          - name: "TypeScript"
             command: "pnpm tsc --noEmit"
           - name: "Lint"
             command: "pnpm eslint ."
-          - name: "Format Check"
+          - name: "Format"
             command: "pnpm prettier --check ."
-          - name: "Frontend Build"
+          - name: "Build"
             command: "pnpm build"
     name: ${{ matrix.task.name }}
     steps:
@@ -130,6 +131,7 @@ jobs:
         run: ${{ matrix.task.command }}
 
   build:
+    name: Build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
