@@ -251,17 +251,8 @@ export async function copyClipboardEntry(
  * @param imagePathOrBase64 The image path (Windows) or base64-encoded image string (other platforms)
  * @returns The extracted text, or an empty string if OCR fails
  */
-export async function extractTextFromImage(imagePathOrBase64: string, platform?: string): Promise<string> {
-  // Platform should be passed as parameter instead of using React hook
-  const detectedPlatform =
-    platform ||
-    (typeof window !== "undefined" && "navigator" in window
-      ? navigator.platform.toLowerCase().includes("win")
-        ? "windows"
-        : "other"
-      : "other");
-
-  if (detectedPlatform === "windows") {
+export async function extractTextFromImage(imagePathOrBase64: string, platform: string): Promise<string> {
+  if (platform === "windows") {
     try {
       // On Windows, pass the image path to the Tauri command
       const text = await invoke<string>("ocr_image", {
