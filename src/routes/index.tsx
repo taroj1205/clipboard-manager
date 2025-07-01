@@ -166,7 +166,10 @@ function HomeComponent() {
 
   const focusInput = React.useCallback(() => {
     requestAnimationFrame(() => {
-      inputRef.current?.focus();
+      const input = inputRef.current;
+      if (input && document.activeElement !== input) {
+        input.focus();
+      }
     });
   }, []);
 
@@ -235,6 +238,7 @@ function HomeComponent() {
       ev.preventDefault();
       ev.stopPropagation();
       if (query.length > 0) {
+        focusInput();
         setQuery("");
       } else {
         hideWindow();
@@ -243,7 +247,20 @@ function HomeComponent() {
       ev.preventDefault();
       ev.stopPropagation();
       focusInput();
-      setQuery(query + ev.key);
+
+      const input = inputRef.current;
+      if (input && input.selectionStart !== null && input.selectionEnd !== null) {
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const newQuery = query.slice(0, start) + ev.key + query.slice(end);
+        setQuery(newQuery);
+
+        requestAnimationFrame(() => {
+          input.setSelectionRange(start + 1, start + 1);
+        });
+      } else {
+        setQuery(query + ev.key);
+      }
     }
   });
 
