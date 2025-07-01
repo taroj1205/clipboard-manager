@@ -1,3 +1,4 @@
+import type { FC } from "react";
 import { CopyIcon } from "@yamada-ui/lucide";
 import {
   Box,
@@ -8,10 +9,9 @@ import {
   DataListItem,
   DataListTerm,
   IconButton,
-  VStack,
   useNotice,
+  VStack,
 } from "@yamada-ui/react";
-import type { FC } from "react";
 import { memo, useCallback } from "react";
 import { writeText } from "tauri-plugin-clipboard-api";
 import { useColorConverters } from "~/utils/color";
@@ -22,7 +22,7 @@ interface ColorPreviewProps {
 }
 
 export const ColorPreview: FC<ColorPreviewProps> = memo(({ color, onCopy }) => {
-  const { hexToRgb, hexToHsl, hexToOklch, normalizeColor, detectColorFormat } = useColorConverters();
+  const { detectColorFormat, hexToHsl, hexToOklch, hexToRgb, normalizeColor } = useColorConverters();
 
   const notice = useNotice();
 
@@ -30,12 +30,12 @@ export const ColorPreview: FC<ColorPreviewProps> = memo(({ color, onCopy }) => {
     (text: string) => {
       writeText(text);
       notice({
+        status: "success",
         title: "Copied to clipboard",
         description: "Copied to clipboard",
-        status: "success",
       });
     },
-    [notice],
+    [notice]
   );
 
   const normalizedColor = normalizeColor(color);
@@ -46,47 +46,47 @@ export const ColorPreview: FC<ColorPreviewProps> = memo(({ color, onCopy }) => {
   const rgb = hexToRgb(normalizedColor);
 
   return (
-    <Center h="200px" flex={1} as={VStack} pt="4xl">
+    <Center as={VStack} flex={1} h="200px" pt="4xl">
       <Box position="relative">
-        <ColorSwatch color={normalizedColor} variant="rounded" h="120px" w="120px" />
+        <ColorSwatch variant="rounded" h="120px" w="120px" color={normalizedColor} />
         <IconButton
           aria-label="Copy Color"
-          icon={<CopyIcon />}
-          h="full"
-          w="full"
           variant="solid"
-          colorScheme="blackAlpha"
-          position="absolute"
-          rounded="full"
-          top="50%"
+          h="full"
           left="50%"
-          transform="translate(-50%, -50%)"
-          opacity={0}
+          title="Copy Color"
+          w="full"
           _hover={{
             opacity: 1,
           }}
+          colorScheme="blackAlpha"
+          icon={<CopyIcon />}
           onClick={onCopy}
-          title="Copy Color"
+          opacity={0}
+          position="absolute"
+          rounded="full"
+          top="50%"
+          transform="translate(-50%, -50%)"
         />
       </Box>
-      <DataList col={2} alignSelf="flex-start">
-        <DataListItem onClick={() => handleCopy(color)} cursor="pointer">
+      <DataList alignSelf="flex-start" col={2}>
+        <DataListItem cursor="pointer" onClick={() => handleCopy(color)}>
           <DataListTerm>Original ({originalFormat.toUpperCase()})</DataListTerm>
           <DataListDescription>{color}</DataListDescription>
         </DataListItem>
-        <DataListItem onClick={() => handleCopy(hex)} cursor="pointer">
+        <DataListItem cursor="pointer" onClick={() => handleCopy(hex)}>
           <DataListTerm>Hex{hex.length === 9 ? " (with Alpha)" : ""}</DataListTerm>
           <DataListDescription>{hex}</DataListDescription>
         </DataListItem>
-        <DataListItem onClick={() => handleCopy(rgb)} cursor="pointer">
+        <DataListItem cursor="pointer" onClick={() => handleCopy(rgb)}>
           <DataListTerm>RGB{originalFormat === "rgba" ? "A" : ""}</DataListTerm>
           <DataListDescription>{rgb}</DataListDescription>
         </DataListItem>
-        <DataListItem onClick={() => handleCopy(hsl)} cursor="pointer">
+        <DataListItem cursor="pointer" onClick={() => handleCopy(hsl)}>
           <DataListTerm>HSL{originalFormat === "hsla" ? "A" : ""}</DataListTerm>
           <DataListDescription>{hsl}</DataListDescription>
         </DataListItem>
-        <DataListItem onClick={() => handleCopy(oklch)} cursor="pointer">
+        <DataListItem cursor="pointer" onClick={() => handleCopy(oklch)}>
           <DataListTerm>OKLCH</DataListTerm>
           <DataListDescription>{oklch}</DataListDescription>
         </DataListItem>

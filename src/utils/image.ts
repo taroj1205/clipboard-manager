@@ -4,9 +4,7 @@ import { uint8ArrayToBase64 } from "./clipboard";
 export async function getImageDataUrl(src: string): Promise<string | undefined> {
   try {
     const data = await readFile(src, { baseDir: BaseDirectory.Picture });
-    if (data) {
-      return `data:image/png;base64,${uint8ArrayToBase64(data)}`;
-    }
+    return `data:image/png;base64,${uint8ArrayToBase64(data)}`;
   } catch (e) {
     console.error(e);
   }

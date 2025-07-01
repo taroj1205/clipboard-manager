@@ -1,4 +1,4 @@
-import { ColorModeScript, UIProvider, extendConfig, extendTheme } from "@yamada-ui/react";
+import { ColorModeScript, extendConfig, extendTheme, UIProvider } from "@yamada-ui/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app";
@@ -16,20 +16,21 @@ if (rootEl) {
       globalStyle: {
         body: {
           bg: "blackAlpha.600",
+          overflow: "clip",
         },
       },
     },
   })();
 
   const config = extendConfig({
+    initialColorMode: "dark",
     notice: {
       options: {
         placement: "bottom-right",
-        isClosable: true,
         closeStrategy: "both",
+        isClosable: true,
       },
     },
-    initialColorMode: "dark",
   });
 
   root.render(
@@ -38,6 +39,6 @@ if (rootEl) {
       <UIProvider theme={theme} config={config}>
         <App />
       </UIProvider>
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 }

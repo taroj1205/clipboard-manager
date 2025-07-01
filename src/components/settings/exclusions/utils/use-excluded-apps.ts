@@ -1,18 +1,19 @@
+import type { ExcludedApp } from "~/utils/excluded-apps";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { listen } from "@tauri-apps/api/event";
 import { useMemo } from "react";
-import { type ExcludedApp, getAllExcludedApps } from "~/utils/excluded-apps";
+import { getAllExcludedApps } from "~/utils/excluded-apps";
 
 export function useExcludedApps() {
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isPending } = useSuspenseQuery<ExcludedApp[], Error>({
+  const { data, isPending, isLoading } = useSuspenseQuery<ExcludedApp[]>({
+    queryFn: async () => getAllExcludedApps(),
     queryKey: ["excluded-apps"],
-    queryFn: () => getAllExcludedApps(),
   });
 
   const excludedApps = useMemo(() => {
-    return data.flat() || [];
+    return data.flat();
   }, [data]);
 
   listen("excluded-apps-updated", () => {
@@ -21,8 +22,8 @@ export function useExcludedApps() {
 
   return {
     excludedApps,
-    isLoading,
-    isPending,
     hasData: !!excludedApps.length,
+    isPending,
+    isLoading,
   };
 }

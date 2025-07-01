@@ -12,13 +12,29 @@ on:
       - "pnpm-lock.yaml"
       - ".github/workflows/**"
   workflow_dispatch:
+    inputs:
+      os:
+        description: "The operating system to build for"
+        required: true
+        default: "ubuntu-latest"
+        type: choice
+        options:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+      build:
+        description: "Build the application"
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  check:
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -35,22 +51,106 @@ jobs:
           version: latest
           run_install: false
 
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Restore pnpm cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Restore node_modules cache
+        id: cache-node-modules
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: Type check
-        run: pnpm tsc --noEmit
+      - name: Save node_modules cache
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Biome check
-        run: pnpm lint
+  check:
+    runs-on: ubuntu-latest
+    needs: setup
+    strategy:
+      matrix:
+        task:
+          - name: "TypeScript"
+            command: "pnpm tsc --noEmit"
+          - name: "Lint"
+            command: "pnpm eslint ."
+          - name: "Format"
+            command: "pnpm prettier --check ."
+          - name: "Build"
+            command: "pnpm build"
+    name: ${{ matrix.task.name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Restore pnpm cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Restore node_modules cache
+        id: cache-node-modules
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ${{ matrix.task.name }}
+        run: ${{ matrix.task.command }}
 
   build:
+    name: Build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    needs: check
-    if: github.event_name == 'workflow_dispatch'
+    needs: [setup, check]
+    if: github.event_name == 'workflow_dispatch' && inputs.build == true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

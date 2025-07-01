@@ -1,5 +1,5 @@
-import { Text } from "@yamada-ui/react";
 import type { FC } from "react";
+import { Text } from "@yamada-ui/react";
 import { memo } from "react";
 
 interface TextPreviewProps {
@@ -7,9 +7,9 @@ interface TextPreviewProps {
   html?: string;
 }
 
-export const TextPreview: FC<TextPreviewProps> = memo(({ content, html }) => {
+export const TextPreview: FC<TextPreviewProps> = memo(({ html, content }) => {
   return (
-    <Text whiteSpace="pre-wrap" wordBreak="break-word" data-html={html}>
+    <Text data-html={html} whiteSpace="pre-wrap" wordBreak="break-word">
       {content}
     </Text>
   );

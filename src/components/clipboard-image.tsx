@@ -1,6 +1,8 @@
+import type { ImageProps } from "@yamada-ui/react";
+import type { FC } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Image, type ImageProps } from "@yamada-ui/react";
-import { type FC, memo } from "react";
+import { Image } from "@yamada-ui/react";
+import { memo } from "react";
 import { getImageDataUrl } from "~/utils/image";
 
 type ClipboardImageProps = ImageProps & {
@@ -11,9 +13,12 @@ export const ClipboardImage: FC<ClipboardImageProps> = memo((props) => {
   const { src, ...rest } = props;
 
   const { data } = useQuery({
+    queryFn: async () => getImageDataUrl(src),
     queryKey: ["clipboard-image", src],
-    queryFn: () => getImageDataUrl(src),
+    staleTime: 60 * 1000, // 1 minute
   });
 
-  return <Image src={data} w="full" h="full" objectFit="cover" {...rest} />;
+  return <Image src={data} h="full" w="full" objectFit="cover" {...rest} />;
 });
+
+ClipboardImage.displayName = "ClipboardImage";

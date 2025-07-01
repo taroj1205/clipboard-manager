@@ -1,11 +1,19 @@
-import { hasHTML, hasImage, hasText, onClipboardUpdate, readHtml, readImageBase64, readText } from "tauri-plugin-clipboard-api";
-import { addClipboardEntry, base64ToUint8Array, editClipboardEntry, extractTextFromImage } from "./utils/clipboard";
-import { isAppExcluded } from "./utils/excluded-apps";
-
 import { invoke } from "@tauri-apps/api/core";
 import { BaseDirectory, pictureDir } from "@tauri-apps/api/path";
 import { writeFile } from "@tauri-apps/plugin-fs";
+import { useOS } from "@yamada-ui/react";
+import {
+  hasHTML,
+  hasImage,
+  hasText,
+  onClipboardUpdate,
+  readHtml,
+  readImageBase64,
+  readText,
+} from "tauri-plugin-clipboard-api";
 import { detectColorFormat } from "~/utils/color";
+import { addClipboardEntry, base64ToUint8Array, editClipboardEntry, extractTextFromImage } from "./utils/clipboard";
+import { isAppExcluded } from "./utils/excluded-apps";
 
 let prevText = "";
 let prevImage = "";
@@ -16,13 +24,13 @@ function isColor(text: string): boolean {
   return format !== "invalid";
 }
 
-type ActiveWindowProps = {
+interface ActiveWindowProps {
   title: string;
-  process_path: string;
-  app_name: string;
-  window_id: string;
   process_id: number;
-};
+  process_path: string;
+  window_id: string;
+  app_name: string;
+}
 
 export function initClipboardListener() {
   onClipboardUpdate(async () => {
@@ -65,16 +73,17 @@ export function initClipboardListener() {
             baseDir: BaseDirectory.Picture,
           });
           await addClipboardEntry({
-            content: filename,
-            type: "image",
-            timestamp: now,
-            path: filename,
             app: window.process_path,
+            path: filename,
+            timestamp: now,
+            type: "image",
+            content: filename,
           });
           // Extract text asynchronously and update entry
           try {
             const picturePath = await pictureDir();
-            const ocrText = await extractTextFromImage(`${picturePath}/${filename}`);
+            const os = useOS();
+            const ocrText = await extractTextFromImage(`${picturePath}/${filename}`, os);
             if (ocrText) {
               await editClipboardEntry(now, { content: ocrText });
             }
@@ -93,11 +102,11 @@ export function initClipboardListener() {
         const type = isColor(text) ? "color" : "html";
         try {
           await addClipboardEntry({
-            content: text,
-            type,
-            timestamp: now,
             app: windowExe,
             html,
+            timestamp: now,
+            type,
+            content: text,
           });
         } catch (err) {
           console.error("Failed to add clipboard entry:", err);
@@ -110,10 +119,10 @@ export function initClipboardListener() {
         const type = isColor(text) ? "color" : "text";
         try {
           await addClipboardEntry({
-            content: text,
-            type,
-            timestamp: now,
             app: windowExe,
+            timestamp: now,
+            type,
+            content: text,
           });
         } catch (err) {
           console.error("Failed to add clipboard entry:", err);

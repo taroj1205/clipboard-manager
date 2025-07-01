@@ -19,7 +19,7 @@ import { Link } from "~/components/ui/link";
 export const SettingsLoadingComponent = () => {
   return (
     <VStack h="100vh" py="0" position="relative">
-      <Tabs orientation="vertical" lazyBehavior="unmount" h="full">
+      <Tabs h="full" lazyBehavior="unmount" orientation="vertical">
         <TabList pt="md">
           <Tab>General</Tab>
           <Tab>Exclusions</Tab>
@@ -33,12 +33,14 @@ export const SettingsLoadingComponent = () => {
               <Heading as="h3" fontSize="lg">
                 Clipboard Entries
               </Heading>
-              <Alert status="warning" variant="subtle" colorScheme="danger">
+              <Alert variant="subtle" status="warning" colorScheme="danger">
                 <AlertIcon />
                 <AlertTitle>Warning</AlertTitle>
-                <AlertDescription>This will delete all clipboard entries. This action cannot be undone.</AlertDescription>
+                <AlertDescription>
+                  This will delete all clipboard entries. This action cannot be undone.
+                </AlertDescription>
               </Alert>
-              <Button w="fit-content" disabled>
+              <Button disabled w="fit-content">
                 Delete All Entries
               </Button>
             </VStack>
@@ -46,14 +48,14 @@ export const SettingsLoadingComponent = () => {
         </TabPanels>
       </Tabs>
       <IconButton
-        position="fixed"
-        top="sm"
-        right="sm"
+        aria-label="Back to Home"
         variant="outline"
         as={Link}
-        to="/"
-        aria-label="Back to Home"
+        right="sm"
         borderColor="border"
+        position="fixed"
+        to="/"
+        top="sm"
       >
         <Undo2Icon />
       </IconButton>

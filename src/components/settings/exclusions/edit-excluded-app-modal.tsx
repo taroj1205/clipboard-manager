@@ -1,3 +1,4 @@
+import type { FC } from "react";
 import {
   Button,
   FormControl,
@@ -12,7 +13,7 @@ import {
   Text,
   VStack,
 } from "@yamada-ui/react";
-import { type FC, memo } from "react";
+import { memo } from "react";
 import { useEditExcludedAppForm } from "./utils";
 
 interface EditExcludedAppModalProps {
@@ -22,35 +23,44 @@ interface EditExcludedAppModalProps {
 }
 
 export const EditExcludedAppModal: FC<EditExcludedAppModalProps> = memo(({ appId, isOpen, onClose }) => {
-  const { register, handleSubmit, errors, onSubmit } = useEditExcludedAppForm(appId, onClose);
+  const { handleSubmit, register, errors, onSubmit } = useEditExcludedAppForm(appId, onClose);
   return (
-    <Modal open={isOpen} onClose={onClose} as="form" onSubmit={handleSubmit(onSubmit)} onClick={(e) => e.stopPropagation()}>
+    <Modal
+      as="form"
+      onClick={(e) => e.stopPropagation()}
+      onClose={onClose}
+      onSubmit={handleSubmit(onSubmit)}
+      open={isOpen}
+    >
       <ModalOverlay onClick={(e) => e.stopPropagation()} />
       <ModalCloseButton />
       <ModalHeader>Edit Excluded Application</ModalHeader>
       <ModalBody>
         <VStack gap="md">
-          <FormControl required gap="xs" display="flex" flexDirection="column">
+          <FormControl display="flex" gap="xs" required flexDirection="column">
             <Text fontSize="sm">Application Name</Text>
-            <Input placeholder="e.g., Visual Studio Code" {...register("name", { required: "Application name is required" })} />
+            <Input
+              placeholder="e.g., Visual Studio Code"
+              {...register("name", { required: "Application name is required" })}
+            />
           </FormControl>
 
           <FormControl
-            required
             invalid={!!errors.path}
-            errorMessage={errors.path?.message}
-            gap="xs"
             display="flex"
+            gap="xs"
+            required
+            errorMessage={errors.path?.message}
             flexDirection="column"
           >
             <Text fontSize="sm">Application Path or Process Name</Text>
             <Input
-              placeholder="e.g., Code.exe or C:\\Program Files\\..."
               fontFamily="mono"
               fontSize="sm"
+              placeholder="e.g., Code.exe or C:\\Program Files\\..."
               {...register("path", { required: "Application path is required" })}
             />
-            <Text fontSize="xs" color="muted">
+            <Text color="muted" fontSize="xs">
               You can specify either the executable name (e.g., "chrome.exe") or the full path
             </Text>
           </FormControl>

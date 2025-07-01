@@ -1,0 +1,38 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.{js,ts,tsx}"
+      run: pnpm eslint {staged_files} --fix --max-warnings 0 --cache
+      stage_fixed: true
+    format:
+      glob: "*.{js,ts,tsx,json,md}"
+      run: pnpm prettier --write {staged_files} --list-different
+      stage_fixed: true
+    spell:
+      glob: "*.{js,ts,tsx,md}"
+      run: pnpm cspell {staged_files}
+      stage_fixed: true
+    types:
+      run: pnpm tsc --noEmit
+    packages-audit:
+      run: pnpm audit --audit-level moderate
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm commitlint --edit
+
+post-checkout:
+  commands:
+    validate-branch-name:
+      run: pnpm validate-branch-name
+    pnpm:
+      glob: "{package.json,pnpm-lock.yaml}"
+      run: pnpm install
+
+post-merge:
+  commands:
+    pnpm:
+      glob: "{package.json,pnpm-lock.yaml}"
+      run: pnpm install

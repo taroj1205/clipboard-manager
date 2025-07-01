@@ -8,15 +8,15 @@ import {
   DialogBody,
   DialogHeader,
   Text,
-  VStack,
   useDisclosure,
   useNotice,
+  VStack,
 } from "@yamada-ui/react";
 import { memo, useCallback } from "react";
 import { deleteAllClipboardEntries } from "~/db/clipboard-entries";
 
 export const DeleteAll = memo(() => {
-  const { open, onOpen, onClose } = useDisclosure();
+  const { onClose, onOpen, open } = useDisclosure();
   const notice = useNotice();
 
   const handleDelete = useCallback(async () => {
@@ -27,7 +27,7 @@ export const DeleteAll = memo(() => {
         title: "Success",
         description: "All clipboard entries have been deleted.",
       });
-    } catch (error) {
+    } catch (_error) {
       notice({
         status: "error",
         title: "Error",
@@ -39,19 +39,19 @@ export const DeleteAll = memo(() => {
 
   return (
     <VStack>
-      <Alert status="warning" variant="subtle" colorScheme="danger">
+      <Alert variant="subtle" status="warning" colorScheme="danger">
         <AlertIcon />
         <AlertTitle>Warning</AlertTitle>
         <AlertDescription>This will delete all clipboard entries. This action cannot be undone.</AlertDescription>
       </Alert>
-      <Button onClick={onOpen} colorScheme="danger" w="fit-content">
+      <Button w="fit-content" colorScheme="danger" onClick={onOpen}>
         Delete All Entries
       </Button>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog onClose={onClose} open={open}>
         <DialogHeader>Delete All Entries</DialogHeader>
         <DialogBody>
           <Text>Are you sure you want to delete all clipboard entries? This action cannot be undone.</Text>
-          <Button onClick={handleDelete} colorScheme="danger" w="fit-content">
+          <Button w="fit-content" colorScheme="danger" onClick={handleDelete}>
             Delete All Entries
           </Button>
         </DialogBody>
@@ -59,3 +59,5 @@ export const DeleteAll = memo(() => {
     </VStack>
   );
 });
+
+DeleteAll.displayName = "DeleteAll";

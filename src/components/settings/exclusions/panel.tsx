@@ -1,18 +1,18 @@
+import type { ExcludedApp } from "~/utils/excluded-apps";
 import {
   Alert,
   AlertDescription,
   AlertIcon,
-  HStack,
   Heading,
+  HStack,
   Spacer,
-  TabPanel,
   TableContainer,
+  TabPanel,
   Text,
   VStack,
 } from "@yamada-ui/react";
 import { PagingTable } from "@yamada-ui/table";
 import { memo } from "react";
-import type { ExcludedApp } from "~/utils/excluded-apps";
 import { AddExcludedAppModal } from "./add-excluded-app-modal";
 import { useExcludedApps, useExcludedAppsColumns, useExcludedAppsTableProps } from "./utils";
 
@@ -24,7 +24,7 @@ export const Panel = memo(() => {
   const hasData = !!excludedApps.length;
   const resolvedData: ExcludedApp[] = hasData
     ? excludedApps
-    : [{ empty: true, id: "", name: "No applications excluded", path: "", createdAt: 0, updatedAt: 0 }];
+    : [{ id: "", name: "No applications excluded", createdAt: 0, empty: true, path: "", updatedAt: 0 }];
 
   return (
     <TabPanel>
@@ -34,11 +34,11 @@ export const Panel = memo(() => {
             Application Exclusions
           </Heading>
           <Text color="muted" fontSize="sm">
-            Applications in this list will be excluded from clipboard monitoring. No clipboard entries will be recorded when
-            these applications are active.
+            Applications in this list will be excluded from clipboard monitoring. No clipboard entries will be recorded
+            when these applications are active.
           </Text>
         </VStack>
-        <Alert status="info" variant="left-accent">
+        <Alert variant="left-accent" status="info">
           <AlertIcon />
           <AlertDescription>
             You currently have {excludedApps.length} application(s) excluded from clipboard monitoring.
@@ -53,24 +53,26 @@ export const Panel = memo(() => {
         </HStack>
         <TableContainer>
           <PagingTable<ExcludedApp>
-            cellProps={cellProps}
-            columns={columns}
-            data={resolvedData}
-            size="md"
-            withBorder
-            highlightOnHover={hasData}
-            rowsClickSelect={hasData}
-            withPagingControl={hasData}
-            checkboxProps={{ disabled: !hasData }}
-            rounded="md"
-            rowId="id"
-            headerProps={{ textTransform: "capitalize" }}
             sx={{ "tbody > tr:last-of-type > td": { borderBottomWidth: "0px" } }}
+            size="md"
+            data={resolvedData}
             borderCollapse="separate"
             borderWidth="1px"
+            cellProps={cellProps}
+            checkboxProps={{ disabled: !hasData }}
+            columns={columns}
+            headerProps={{ textTransform: "capitalize" }}
+            highlightOnHover={hasData}
+            rounded="md"
+            rowId="id"
+            rowsClickSelect={hasData}
+            withBorder
+            withPagingControl={hasData}
           />{" "}
         </TableContainer>
       </VStack>
     </TabPanel>
   );
 });
+
+Panel.displayName = "Panel";

@@ -1,7 +1,7 @@
 import type { TdProps } from "@yamada-ui/react";
 import type { Cell } from "@yamada-ui/table";
-import { useCallback } from "react";
 import type { ExcludedApp } from "~/utils/excluded-apps";
+import { useCallback } from "react";
 
 export function useExcludedAppsTableProps() {
   const cellProps = useCallback(({ column, row }: Cell<ExcludedApp, unknown>) => {
