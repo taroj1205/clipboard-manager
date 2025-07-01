@@ -3,7 +3,7 @@ pre-commit:
   commands:
     lint:
       glob: "*.{js,ts,tsx}"
-      run: bun biome check {staged_files} --write
+      run: bun biome check --write
       stage_fixed: true
     spell:
       glob: "*.{js,ts,tsx,md}"
