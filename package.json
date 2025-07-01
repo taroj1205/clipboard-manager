@@ -11,7 +11,7 @@
     "tauri": "tauri",
     "lint": "eslint . --max-warnings 0 --cache",
     "lint:fix": "eslint . --fix --max-warnings 0 --cache",
-    "format": "prettier . --check --cache --list-different",
+    "format": "prettier . --check --cache",
     "format:fix": "prettier . --write --cache --list-different",
     "spell": "cspell \"**/*.{ts,tsx,js,jsx,md}\"",
     "commitlint": "commitlint",
