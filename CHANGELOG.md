@@ -1,5 +1,11 @@
 # clipboard-manager
 
+## 0.0.9
+
+### Patch Changes
+
+- [#60](https://github.com/taroj1205/clipboard-manager/pull/60) [`60823ac`](https://github.com/taroj1205/clipboard-manager/commit/60823ac057da88769a3bd5f9dad4fbc32f26a4bc) Thanks [@taroj1205](https://github.com/taroj1205)! - Improved performance and cache logic.
+
 ## 0.0.8
 
 ### Patch Changes
