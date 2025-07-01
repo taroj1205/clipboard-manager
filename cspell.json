@@ -33,7 +33,8 @@
     "rspack",
     "taroj",
     "iarna",
-    "Ultracite"
+    "Ultracite",
+    "commitlint"
   ],
   "ignorePaths": [
     "node_modules/**",

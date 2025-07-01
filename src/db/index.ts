@@ -1,3 +1,3 @@
-import Database from "@tauri-apps/plugin-sql";
+import Database from '@tauri-apps/plugin-sql';
 
-export const db = await Database.load("sqlite:clipboard.db");
+export const db = await Database.load('sqlite:clipboard.db');

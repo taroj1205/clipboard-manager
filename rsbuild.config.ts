@@ -1,6 +1,6 @@
-import { defineConfig } from "@rsbuild/core";
-import { pluginReact } from "@rsbuild/plugin-react";
-import { TanStackRouterRspack } from "@tanstack/router-plugin/rspack";
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import { TanStackRouterRspack } from '@tanstack/router-plugin/rspack';
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -10,17 +10,17 @@ export default defineConfig({
       ? {
           host,
           port: 1421,
-          protocol: "ws",
+          protocol: 'ws',
         }
       : undefined,
     watchFiles: {
-      paths: ["!**/src-tauri/**"],
+      paths: ['!**/src-tauri/**'],
     },
   },
   plugins: [
     pluginReact({
       swcReactOptions: {
-        importSource: "@emotion/react",
+        importSource: '@emotion/react',
       },
     }),
   ],
@@ -31,43 +31,45 @@ export default defineConfig({
   },
   tools: {
     rspack: {
-      plugins: [TanStackRouterRspack({ target: "react", autoCodeSplitting: true })],
+      plugins: [
+        TanStackRouterRspack({ target: 'react', autoCodeSplitting: true }),
+      ],
       module: {
         rules: [
           {
             test: /\\.jsx?$/,
-            type: "javascript/auto",
+            type: 'javascript/auto',
             use: [
               {
-                loader: "builtin:swc-loader",
+                loader: 'builtin:swc-loader',
                 options: {
                   jsc: {
                     parser: {
                       jsx: true,
-                      syntax: "ecmascript",
+                      syntax: 'ecmascript',
                     },
                   },
                 },
               },
-              { loader: "babel-loader" },
+              { loader: 'babel-loader' },
             ],
           },
           {
             test: /\\.tsx?$/,
-            type: "javascript/auto",
+            type: 'javascript/auto',
             use: [
               {
-                loader: "builtin:swc-loader",
+                loader: 'builtin:swc-loader',
                 options: {
                   jsc: {
                     parser: {
                       tsx: true,
-                      syntax: "typescript",
+                      syntax: 'typescript',
                     },
                   },
                 },
               },
-              { loader: "babel-loader" },
+              { loader: 'babel-loader' },
             ],
           },
         ],
@@ -76,7 +78,7 @@ export default defineConfig({
     swc: {
       jsc: {
         experimental: {
-          plugins: [["@swc/plugin-emotion", {}]],
+          plugins: [['@swc/plugin-emotion', {}]],
         },
       },
     },

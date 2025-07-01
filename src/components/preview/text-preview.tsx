@@ -1,6 +1,6 @@
-import type { FC } from "react";
-import { Text } from "@yamada-ui/react";
-import { memo } from "react";
+import { Text } from '@yamada-ui/react';
+import type { FC } from 'react';
+import { memo } from 'react';
 
 interface TextPreviewProps {
   content: string;
@@ -15,4 +15,4 @@ export const TextPreview: FC<TextPreviewProps> = memo(({ html, content }) => {
   );
 });
 
-TextPreview.displayName = "TextPreview";
+TextPreview.displayName = 'TextPreview';

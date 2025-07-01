@@ -1,5 +1,5 @@
-import { Heading, TabPanel } from "@yamada-ui/react";
-import { memo } from "react";
+import { Heading, TabPanel } from '@yamada-ui/react';
+import { memo } from 'react';
 
 export const Panel = memo(() => {
   return (
@@ -11,4 +11,4 @@ export const Panel = memo(() => {
   );
 });
 
-Panel.displayName = "Panel";
+Panel.displayName = 'Panel';

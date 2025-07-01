@@ -1,6 +1,6 @@
-import { Heading, TabPanel, VStack } from "@yamada-ui/react";
-import { memo } from "react";
-import { DeleteAll } from "./delete-all";
+import { Heading, TabPanel, VStack } from '@yamada-ui/react';
+import { memo } from 'react';
+import { DeleteAll } from './delete-all';
 
 export const Panel = memo(() => {
   return (
@@ -18,4 +18,4 @@ export const Panel = memo(() => {
   );
 });
 
-Panel.displayName = "Panel";
+Panel.displayName = 'Panel';

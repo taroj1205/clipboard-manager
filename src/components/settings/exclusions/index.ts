@@ -1,1 +1,1 @@
-export * as ExclusionSettings from "./namespace";
+export * as ExclusionSettings from './namespace';

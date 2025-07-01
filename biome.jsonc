@@ -1,25 +1,15 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.0.5/schema.json",
-  "extends": [
-    "ultracite"
-  ],
+  "extends": ["ultracite"],
   "files": {
-    "includes": [
-      "**",
-      "!src/routeTree.gen.ts"
-    ]
+    "includes": ["**", "!src/routeTree.gen.ts"]
   },
   "linter": {
     "rules": {
       "suspicious": {
         "noConsole": {
           "options": {
-            "allow": [
-              "assert",
-              "error",
-              "info",
-              "warn"
-            ]
+            "allow": ["assert", "error", "info", "warn"]
           }
         }
       }

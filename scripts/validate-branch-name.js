@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /* eslint-env node */
 
-import { execSync } from "node:child_process";
-import { exit } from "node:process";
+import { execSync } from 'node:child_process';
+import { exit } from 'node:process';
 
 /**
  * Validates branch names to follow conventional commit patterns
@@ -21,27 +21,34 @@ import { exit } from "node:process";
  */
 
 const CONVENTIONAL_TYPES = [
-  "build",
-  "chore",
-  "ci",
-  "docs",
-  "feat",
-  "fix",
-  "perf",
-  "refactor",
-  "revert",
-  "style",
-  "test",
-  "renovate",
+  'build',
+  'chore',
+  'ci',
+  'docs',
+  'feat',
+  'fix',
+  'perf',
+  'refactor',
+  'revert',
+  'style',
+  'test',
+  'renovate',
 ];
 
-const PROTECTED_BRANCHES = ["main", "master", "develop", "dev", "staging", "production"];
+const PROTECTED_BRANCHES = [
+  'main',
+  'master',
+  'develop',
+  'dev',
+  'staging',
+  'production',
+];
 
 function getCurrentBranch() {
   try {
-    return execSync("git branch --show-current", { encoding: "utf8" }).trim();
+    return execSync('git branch --show-current', { encoding: 'utf8' }).trim();
   } catch (error) {
-    console.error("❌ Error getting current branch:", error.message);
+    console.error('❌ Error getting current branch:', error.message);
     exit(1);
   }
 }
@@ -54,21 +61,23 @@ function validateBranchName(branchName) {
 
   // Pattern: type/scope or type/scope#issue-number
   // Examples: feat/header, feat/header#32, fix/bug-description#123
-  const pattern = new RegExp(`^(${CONVENTIONAL_TYPES.join("|")})\\/[a-z0-9][a-z0-9\\-]*(?:#\\d+)?$`);
+  const pattern = new RegExp(
+    `^(${CONVENTIONAL_TYPES.join('|')})\\/[a-z0-9][a-z0-9\\-]*(?:#\\d+)?$`
+  );
 
   if (!pattern.test(branchName)) {
     let message = `❌ Invalid branch name: "${branchName}"\n\n`;
-    message += "Branch names must follow conventional commit patterns:\n\n";
-    message += "✅ Valid formats:\n";
-    message += "  - feat/header\n";
-    message += "  - feat/header-component\n";
-    message += "  - feat/header#32\n";
-    message += "  - fix/bug-description#123\n\n";
-    message += "❌ Invalid formats:\n";
+    message += 'Branch names must follow conventional commit patterns:\n\n';
+    message += '✅ Valid formats:\n';
+    message += '  - feat/header\n';
+    message += '  - feat/header-component\n';
+    message += '  - feat/header#32\n';
+    message += '  - fix/bug-description#123\n\n';
+    message += '❌ Invalid formats:\n';
     message += '  - feat-header (use "/" not "-")\n';
     message += "  - 32-feat/header (can't start with number)\n";
-    message += "  - feature/header (use valid conventional types)\n\n";
-    message += `Valid types: ${CONVENTIONAL_TYPES.join(", ")}\n`;
+    message += '  - feature/header (use valid conventional types)\n\n';
+    message += `Valid types: ${CONVENTIONAL_TYPES.join(', ')}\n`;
 
     return { valid: false, message };
   }
@@ -80,7 +89,7 @@ function main() {
   const currentBranch = getCurrentBranch();
 
   if (!currentBranch) {
-    console.error("❌ Could not determine current branch");
+    console.error('❌ Could not determine current branch');
     exit(1);
   }
 

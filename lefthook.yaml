@@ -2,11 +2,11 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      glob: "*.{js,ts,tsx}"
+      glob: "*.{js,ts,tsx,mjs,cjs,json,jsonc,md,mdx,yml,yaml}"
       run: bun biome check --write
       stage_fixed: true
     spell:
-      glob: "*.{js,ts,tsx,md}"
+      glob: "*.{js,ts,tsx,mjs,cjs,md,mdx,yml,yaml}"
       run: bun cspell {staged_files}
       stage_fixed: true
     types:

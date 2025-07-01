@@ -1,1 +1,1 @@
-export * as AppSettings from "./namespace";
+export * as AppSettings from './namespace';

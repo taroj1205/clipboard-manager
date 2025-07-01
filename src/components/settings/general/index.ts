@@ -1,1 +1,1 @@
-export * as GeneralSettings from "./namespace";
+export * as GeneralSettings from './namespace';

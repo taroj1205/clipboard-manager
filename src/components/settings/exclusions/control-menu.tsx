@@ -1,8 +1,15 @@
-import { EllipsisIcon, FilePenLineIcon, TrashIcon } from "@yamada-ui/lucide";
-import { IconButton, Menu, MenuButton, MenuItem, MenuList, useDisclosure } from "@yamada-ui/react";
-import { memo, useCallback } from "react";
-import { deleteExcludedApp } from "~/utils/excluded-apps";
-import { EditExcludedAppModal } from "./edit-excluded-app-modal";
+import { EllipsisIcon, FilePenLineIcon, TrashIcon } from '@yamada-ui/lucide';
+import {
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  useDisclosure,
+} from '@yamada-ui/react';
+import { memo, useCallback } from 'react';
+import { deleteExcludedApp } from '~/utils/excluded-apps';
+import { EditExcludedAppModal } from './edit-excluded-app-modal';
 
 interface ControlMenuProps {
   rowId: string;
@@ -10,13 +17,17 @@ interface ControlMenuProps {
 
 export const ControlMenu = memo(
   ({ rowId }: ControlMenuProps) => {
-    const { onClose: closeEditModal, onOpen: openEditModal, open: isEditModalOpen } = useDisclosure();
+    const {
+      onClose: closeEditModal,
+      onOpen: openEditModal,
+      open: isEditModalOpen,
+    } = useDisclosure();
 
     const handleDelete = useCallback(async () => {
       try {
         await deleteExcludedApp(rowId);
       } catch (error) {
-        console.error("Failed to delete excluded app:", error);
+        console.error('Failed to delete excluded app:', error);
       }
     }, [rowId]);
 
@@ -32,13 +43,13 @@ export const ControlMenu = memo(
       <>
         <Menu lazy>
           <MenuButton
-            size="sm"
-            variant="ghost"
             as={IconButton}
             icon={<EllipsisIcon />}
             onClick={(ev) => {
               ev.stopPropagation();
             }}
+            size="sm"
+            variant="ghost"
           />
           <MenuList
             onClick={(ev) => {
@@ -49,16 +60,24 @@ export const ControlMenu = memo(
               Edit
             </MenuItem>
             {/* <MenuItem disabled>Make a copy</MenuItem> */}
-            <MenuItem color="danger" icon={<TrashIcon color="danger" />} onClick={handleDelete}>
+            <MenuItem
+              color="danger"
+              icon={<TrashIcon color="danger" />}
+              onClick={handleDelete}
+            >
               Delete
             </MenuItem>
           </MenuList>
         </Menu>
-        <EditExcludedAppModal appId={rowId} isOpen={isEditModalOpen} onClose={closeEditModal} />
+        <EditExcludedAppModal
+          appId={rowId}
+          isOpen={isEditModalOpen}
+          onClose={closeEditModal}
+        />
       </>
     );
   },
   () => false
 );
 
-ControlMenu.displayName = "ControlMenu";
+ControlMenu.displayName = 'ControlMenu';
