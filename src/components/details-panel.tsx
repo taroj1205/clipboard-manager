@@ -1,7 +1,12 @@
-import type { ClipboardEntry } from "~/utils/clipboard";
-import { pictureDir } from "@tauri-apps/api/path";
-import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { CopyIcon, ImageIcon, RefreshCwIcon, TextIcon, TrashIcon } from "@yamada-ui/lucide";
+import { pictureDir } from '@tauri-apps/api/path';
+import { writeText } from '@tauri-apps/plugin-clipboard-manager';
+import {
+  CopyIcon,
+  ImageIcon,
+  RefreshCwIcon,
+  TextIcon,
+  TrashIcon,
+} from '@yamada-ui/lucide';
 import {
   Badge,
   Box,
@@ -20,17 +25,113 @@ import {
   useLoading,
   useNotice,
   useOS,
-} from "@yamada-ui/react";
-import * as React from "react";
-import { copyClipboardEntry, deleteClipboardEntry, editClipboardEntry, extractTextFromImage } from "~/utils/clipboard";
-import { ImagePreview, TextPreview } from "./preview";
+} from '@yamada-ui/react';
+import type { FC } from 'react';
+import { memo } from 'react';
+import type { ClipboardEntry } from '~/utils/clipboard';
+import {
+  copyClipboardEntry,
+  deleteClipboardEntry,
+  editClipboardEntry,
+  extractTextFromImage,
+} from '~/utils/clipboard';
+import { ImagePreview, TextPreview } from './preview';
 
 interface DetailsPanelProps {
   selectedEntry: (ClipboardEntry & { count?: number }) | null;
 }
 
-export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedEntry }) => {
-  const notice = useNotice({ closeStrategy: "both", isClosable: true });
+const getContentTypeColorScheme = (type: string): string => {
+  switch (type) {
+    case 'text':
+      return 'purple';
+    case 'image':
+      return 'blue';
+    case 'color':
+      return 'yellow';
+    default:
+      return 'gray';
+  }
+};
+
+const renderContent = (
+  selectedEntry: ClipboardEntry & { count?: number },
+  notice: ReturnType<typeof useNotice>
+) => {
+  if (selectedEntry.type === 'image' && selectedEntry.path) {
+    return <ImagePreview path={selectedEntry.path} />;
+  }
+
+  if (selectedEntry.type === 'color') {
+    return (
+      <Center h="200px">
+        <Box
+          alignItems="center"
+          bg={selectedEntry.content}
+          borderColor="gray.300"
+          borderRadius="full"
+          borderWidth="2px"
+          boxShadow="md"
+          className="group"
+          display="flex"
+          h="120px"
+          justifyContent="center"
+          position="relative"
+          w="120px"
+        >
+          <IconButton
+            _groupHover={{
+              opacity: 1,
+            }}
+            aria-label="Copy Color"
+            colorScheme="blackAlpha"
+            icon={<CopyIcon />}
+            left="50%"
+            onClick={() => {
+              copyClipboardEntry(selectedEntry, notice);
+            }}
+            opacity={0}
+            position="absolute"
+            size="lg"
+            title="Copy Color"
+            top="50%"
+            transform="translate(-50%, -50%)"
+            variant="solid"
+          />
+        </Box>
+      </Center>
+    );
+  }
+
+  if (selectedEntry.type === 'html' && selectedEntry.html) {
+    return (
+      <Box
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: need to render html
+        dangerouslySetInnerHTML={{ __html: selectedEntry.html }}
+        maxH="calc(100vh - 70px - 160px)"
+        maxW="calc(100vw - 25px - sm)"
+        overflow="hidden"
+        overflowWrap="break-word"
+        sx={{
+          '& *': {
+            maxWidth: '100% !important',
+            whiteSpace: 'pre-wrap !important',
+            overflowWrap: 'break-word !important',
+            wordBreak: 'break-word !important',
+          },
+        }}
+        wordBreak="break-word"
+      />
+    );
+  }
+
+  return (
+    <TextPreview content={selectedEntry.content} html={selectedEntry.html} />
+  );
+};
+
+export const DetailsPanel: FC<DetailsPanelProps> = memo(({ selectedEntry }) => {
+  const notice = useNotice({ closeStrategy: 'both', isClosable: true });
 
   const os = useOS();
 
@@ -47,20 +148,26 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
   }
 
   const ocrCopyable =
-    selectedEntry.type === "image" && selectedEntry.content && selectedEntry.content !== "[Extracting text...]";
+    selectedEntry.type === 'image' &&
+    selectedEntry.content &&
+    selectedEntry.content !== '[Extracting text...]';
 
   const handleReloadOCR = async () => {
-    if (selectedEntry.type !== "image" || !selectedEntry.content) return;
+    if (selectedEntry.type !== 'image' || !selectedEntry.content) {
+      return;
+    }
     try {
       background.start();
       // Try to extract base64 from file path if content is a file path
-      const imagePath = isArray(selectedEntry.path) ? selectedEntry.path[0] : selectedEntry.path;
+      const imagePath = isArray(selectedEntry.path)
+        ? selectedEntry.path[0]
+        : selectedEntry.path;
 
       if (!imagePath) {
         notice({
-          status: "error",
-          title: "OCR Reload Failed",
-          description: "No image path found",
+          status: 'error',
+          title: 'OCR Reload Failed',
+          description: 'No image path found',
         });
         background.finish();
         return;
@@ -68,22 +175,25 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
 
       const pictureDirPath = await pictureDir();
 
-      const text = await extractTextFromImage(`${pictureDirPath}/${imagePath}`, os);
-      if (text !== "") {
+      const text = await extractTextFromImage(
+        `${pictureDirPath}/${imagePath}`,
+        os
+      );
+      if (text !== '') {
         await editClipboardEntry(selectedEntry.timestamp, {
           content: text,
         });
         notice({
-          status: "success",
-          title: "OCR Reloaded!",
-          description: "Text re-extracted from image.",
+          status: 'success',
+          title: 'OCR Reloaded!',
+          description: 'Text re-extracted from image.',
         });
       }
       background.finish();
     } catch (_error) {
       notice({
-        status: "error",
-        title: "OCR Reload Failed",
+        status: 'error',
+        title: 'OCR Reload Failed',
         description: String(_error),
       });
       background.finish();
@@ -91,172 +201,118 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
   };
 
   return (
-    <Grid gap="sm" px="sm" w="full" gridTemplateRows="1fr auto">
+    <Grid gap="sm" gridTemplateRows="1fr auto" px="sm" w="full">
       <GridItem position="relative">
-        <ButtonGroup gap="sm" right="xs" position="absolute" top="xs">
+        <ButtonGroup gap="sm" position="absolute" right="xs" top="xs">
           <IconButton
-            size="sm"
-            variant="surface"
-            icon={selectedEntry.type === "image" ? <ImageIcon /> : <CopyIcon />}
+            icon={selectedEntry.type === 'image' ? <ImageIcon /> : <CopyIcon />}
             onClick={async () => {
               await copyClipboardEntry(selectedEntry, notice);
             }}
+            size="sm"
+            variant="surface"
           />
-          {os === "windows" && ocrCopyable && selectedEntry.content !== selectedEntry.path ? (
+          {os === 'windows' &&
+          ocrCopyable &&
+          selectedEntry.content !== selectedEntry.path ? (
             <IconButton
-              size="sm"
               aria-label="Copy OCR Text"
-              variant="surface"
-              title="Copy OCR Text"
               icon={<TextIcon />}
               onClick={async () => {
                 try {
                   await writeText(selectedEntry.content);
                   notice({
-                    status: "success",
-                    title: "OCR text copied!",
-                    description: "OCR text copied!",
+                    status: 'success',
+                    title: 'OCR text copied!',
+                    description: 'OCR text copied!',
                   });
                 } catch (_error) {
                   notice({
-                    status: "error",
-                    title: "Failed to copy OCR text",
-                    description: "Failed to copy OCR text",
+                    status: 'error',
+                    title: 'Failed to copy OCR text',
+                    description: 'Failed to copy OCR text',
                   });
                 }
               }}
+              size="sm"
+              title="Copy OCR Text"
+              variant="surface"
             />
           ) : null}
-          {os === "windows" && selectedEntry.type === "image" && (
+          {os === 'windows' && selectedEntry.type === 'image' && (
             <IconButton
-              size="sm"
               aria-label="Reload OCR"
-              variant="surface"
-              title="Reload OCR Text"
               icon={<RefreshCwIcon />}
               onClick={handleReloadOCR}
+              size="sm"
+              title="Reload OCR Text"
+              variant="surface"
             />
           )}
-          {selectedEntry.type === "html" && (
+          {selectedEntry.type === 'html' && (
             <IconButton
-              size="sm"
               aria-label="Copy Plain Text"
-              variant="surface"
-              title="Copy Plain Text"
               icon={<TextIcon />}
               onClick={async () => {
                 await writeText(selectedEntry.content);
                 notice({
-                  status: "success",
-                  title: "Plain text copied!",
-                  description: "Plain text copied!",
+                  status: 'success',
+                  title: 'Plain text copied!',
+                  description: 'Plain text copied!',
                 });
               }}
+              size="sm"
+              title="Copy Plain Text"
+              variant="surface"
             />
           )}
           <IconButton
-            size="sm"
             aria-label="Delete Entry"
-            variant="surface"
             colorScheme="danger"
             icon={<TrashIcon />}
             onClick={async () => deleteClipboardEntry(selectedEntry.timestamp)}
+            size="sm"
+            variant="surface"
           />
         </ButtonGroup>
-        <ScrollArea maxH="calc(100vh - 70px - 160px)" maxW="calc(100vw - 25px - sm)">
-          {selectedEntry.type === "image" && selectedEntry.path ? (
-            <ImagePreview path={selectedEntry.path} />
-          ) : selectedEntry.type === "color" ? (
-            <Center h="200px">
-              <Box
-                className="group"
-                alignItems="center"
-                bg={selectedEntry.content}
-                display="flex"
-                h="120px"
-                w="120px"
-                borderColor="gray.300"
-                borderRadius="full"
-                borderWidth="2px"
-                boxShadow="md"
-                justifyContent="center"
-                position="relative"
-              >
-                <IconButton
-                  size="lg"
-                  aria-label="Copy Color"
-                  variant="solid"
-                  left="50%"
-                  title="Copy Color"
-                  _groupHover={{
-                    opacity: 1,
-                  }}
-                  colorScheme="blackAlpha"
-                  icon={<CopyIcon />}
-                  onClick={() => {
-                    copyClipboardEntry(selectedEntry, notice);
-                  }}
-                  opacity={0}
-                  position="absolute"
-                  top="50%"
-                  transform="translate(-50%, -50%)"
-                />
-              </Box>
-            </Center>
-          ) : selectedEntry.type === "html" && selectedEntry.html ? (
-            <Box
-              sx={{
-                "& *": {
-                  maxWidth: "100% !important",
-                  whiteSpace: "pre-wrap !important",
-                  overflowWrap: "break-word !important",
-                  wordBreak: "break-word !important",
-                },
-              }}
-              maxH="calc(100vh - 70px - 160px)"
-              maxW="calc(100vw - 25px - sm)"
-              dangerouslySetInnerHTML={{ __html: selectedEntry.html }}
-              overflow="hidden"
-              overflowWrap="break-word"
-              wordBreak="break-word"
-            />
-          ) : (
-            <TextPreview html={selectedEntry.html} content={selectedEntry.content} />
-          )}
+        <ScrollArea
+          maxH="calc(100vh - 70px - 160px)"
+          maxW="calc(100vw - 25px - sm)"
+        >
+          {renderContent(selectedEntry, notice)}
         </ScrollArea>
       </GridItem>
       <GridItem>
-        <DataList w="fit-content" col={2}>
+        <DataList col={2} w="fit-content">
           <DataListItem>
             <DataListTerm>Copy Count</DataListTerm>
-            <DataListDescription>{selectedEntry.count || 1} times</DataListDescription>
+            <DataListDescription>
+              {selectedEntry.count || 1} times
+            </DataListDescription>
           </DataListItem>
           <DataListItem>
             <DataListTerm>Content Type</DataListTerm>
             <DataListDescription>
               <Badge
-                colorScheme={
-                  selectedEntry.type === "text"
-                    ? "purple"
-                    : selectedEntry.type === "image"
-                      ? "blue"
-                      : selectedEntry.type === "color"
-                        ? "yellow"
-                        : "gray"
-                }
+                colorScheme={getContentTypeColorScheme(selectedEntry.type)}
               >
-                {selectedEntry.type.charAt(0).toUpperCase() + selectedEntry.type.slice(1)}
+                {selectedEntry.type.charAt(0).toUpperCase() +
+                  selectedEntry.type.slice(1)}
               </Badge>
             </DataListDescription>
           </DataListItem>
           <DataListItem>
             <DataListTerm>First Copied</DataListTerm>
-            <DataListDescription>{new Date(selectedEntry.timestamp).toLocaleString()}</DataListDescription>
+            <DataListDescription>
+              {new Date(selectedEntry.timestamp).toLocaleString()}
+            </DataListDescription>
           </DataListItem>
           <DataListItem>
             <DataListTerm>Application</DataListTerm>
             <DataListDescription>
-              {selectedEntry.app ? selectedEntry.app.replace(/\\/g, "/") : "Unknown"}
+              {selectedEntry.app
+                ? selectedEntry.app.replace(/\\/g, '/')
+                : 'Unknown'}
             </DataListDescription>
           </DataListItem>
         </DataList>
@@ -265,4 +321,4 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = React.memo(({ selectedE
   );
 });
 
-DetailsPanel.displayName = "DetailsPanel";
+DetailsPanel.displayName = 'DetailsPanel';

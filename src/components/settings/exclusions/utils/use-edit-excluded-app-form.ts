@@ -1,15 +1,18 @@
-import type { SubmitHandler } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
-import { useForm } from "react-hook-form";
-import { getExcludedAppById, updateExcludedApp } from "~/utils/excluded-apps";
+import { useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import { getExcludedAppById, updateExcludedApp } from '~/utils/excluded-apps';
 
 interface EditFormData {
   name: string;
   path: string;
 }
 
-export function useEditExcludedAppForm(appId: string | undefined, onSuccess?: () => void) {
+export function useEditExcludedAppForm(
+  appId: string | undefined,
+  onSuccess?: () => void
+) {
   const {
     handleSubmit,
     register,
@@ -21,16 +24,20 @@ export function useEditExcludedAppForm(appId: string | undefined, onSuccess?: ()
   const { data: app } = useQuery({
     enabled: !!appId,
     queryFn: async () => getExcludedAppById(appId as string),
-    queryKey: ["excluded-app", appId],
+    queryKey: ['excluded-app', appId],
   });
 
   const onSubmit: SubmitHandler<EditFormData> = useCallback(
     async (data) => {
-      if (!app?.id) return;
+      if (!app?.id) {
+        return;
+      }
 
       const { name, path } = data;
 
-      if (!name.trim() || !path.trim()) return;
+      if (!(name.trim() && path.trim())) {
+        return;
+      }
 
       try {
         await updateExcludedApp(app.id, {
@@ -40,7 +47,7 @@ export function useEditExcludedAppForm(appId: string | undefined, onSuccess?: ()
         onSuccess?.();
         reset();
       } catch (error) {
-        console.error("Failed to update excluded app:", error);
+        console.error('Failed to update excluded app:', error);
       }
     },
     [app?.id, onSuccess, reset]

@@ -1,18 +1,25 @@
-export const hexRegex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i;
+export const hexRegex =
+  /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i;
 
 export const hexToRgb = (hex: string): string => {
   const result = hexRegex.exec(hex);
-  if (!result) return "Invalid color";
+  if (!result) {
+    return 'Invalid color';
+  }
   const r = Number.parseInt(result[1], 16);
   const g = Number.parseInt(result[2], 16);
   const b = Number.parseInt(result[3], 16);
   const a = result[4] ? Number.parseInt(result[4], 16) / 255 : undefined;
-  return a !== undefined ? `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})` : `rgb(${r}, ${g}, ${b})`;
+  return a !== undefined
+    ? `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})`
+    : `rgb(${r}, ${g}, ${b})`;
 };
 
 export const hexToHsl = (hex: string): string => {
   const result = hexRegex.exec(hex);
-  if (!result) return "Invalid color";
+  if (!result) {
+    return 'Invalid color';
+  }
 
   const r = Number.parseInt(result[1], 16) / 255;
   const g = Number.parseInt(result[2], 16) / 255;
@@ -39,6 +46,8 @@ export const hexToHsl = (hex: string): string => {
       case b:
         h = (r - g) / d + 4;
         break;
+      default:
+        break;
     }
 
     h /= 6;
@@ -48,5 +57,7 @@ export const hexToHsl = (hex: string): string => {
   s = Math.round(s * 100);
   const lPercent = Math.round(l * 100);
 
-  return a !== undefined ? `hsla(${h}, ${s}%, ${lPercent}%, ${a.toFixed(2)})` : `hsl(${h}, ${s}%, ${lPercent}%)`;
+  return a !== undefined
+    ? `hsla(${h}, ${s}%, ${lPercent}%, ${a.toFixed(2)})`
+    : `hsl(${h}, ${s}%, ${lPercent}%)`;
 };

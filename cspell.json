@@ -32,7 +32,8 @@
     "nonconstructor",
     "rspack",
     "taroj",
-    "iarna"
+    "iarna",
+    "Ultracite"
   ],
   "ignorePaths": [
     "node_modules/**",

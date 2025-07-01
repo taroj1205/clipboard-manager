@@ -1,4 +1,4 @@
-import { Undo2Icon } from "@yamada-ui/lucide";
+import { Undo2Icon } from '@yamada-ui/lucide';
 import {
   Alert,
   AlertDescription,
@@ -13,12 +13,12 @@ import {
   TabPanels,
   Tabs,
   VStack,
-} from "@yamada-ui/react";
-import { Link } from "~/components/ui/link";
+} from '@yamada-ui/react';
+import { Link } from '~/components/ui/link';
 
 export const SettingsLoadingComponent = () => {
   return (
-    <VStack h="100vh" py="0" position="relative">
+    <VStack h="100vh" position="relative" py="0">
       <Tabs h="full" lazyBehavior="unmount" orientation="vertical">
         <TabList pt="md">
           <Tab>General</Tab>
@@ -33,11 +33,12 @@ export const SettingsLoadingComponent = () => {
               <Heading as="h3" fontSize="lg">
                 Clipboard Entries
               </Heading>
-              <Alert variant="subtle" status="warning" colorScheme="danger">
+              <Alert colorScheme="danger" status="warning" variant="subtle">
                 <AlertIcon />
                 <AlertTitle>Warning</AlertTitle>
                 <AlertDescription>
-                  This will delete all clipboard entries. This action cannot be undone.
+                  This will delete all clipboard entries. This action cannot be
+                  undone.
                 </AlertDescription>
               </Alert>
               <Button disabled w="fit-content">
@@ -49,13 +50,13 @@ export const SettingsLoadingComponent = () => {
       </Tabs>
       <IconButton
         aria-label="Back to Home"
-        variant="outline"
         as={Link}
-        right="sm"
         borderColor="border"
         position="fixed"
+        right="sm"
         to="/"
         top="sm"
+        variant="outline"
       >
         <Undo2Icon />
       </IconButton>

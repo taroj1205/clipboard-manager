@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import { CogIcon } from "@yamada-ui/lucide";
+import { Link } from '@tanstack/react-router';
+import { CogIcon } from '@yamada-ui/lucide';
 import {
   Badge,
   DataList,
@@ -16,52 +16,62 @@ import {
   Spacer,
   Text,
   VStack,
-} from "@yamada-ui/react";
+} from '@yamada-ui/react';
 
 export const HomeLoadingComponent = () => {
   return (
-    <VStack gap="sm" h="100vh" p="sm" color="white" separator={<Separator />}>
+    <VStack color="white" gap="sm" h="100vh" p="sm" separator={<Separator />}>
       {/* TopBar skeleton */}
       <HStack gap="0" w="full">
-        <Input disabled borderRight="none" placeholder="Type to search..." roundedRight="none" />
+        <Input
+          borderRight="none"
+          disabled
+          placeholder="Type to search..."
+          roundedRight="none"
+        />
         <IconButton
           aria-label="Settings"
-          variant="outline"
           as={Link}
           borderColor="border"
           borderLeftRadius="none"
           to="/settings"
+          variant="outline"
         >
           <CogIcon />
         </IconButton>
       </HStack>
 
-      <HStack align="stretch" flex={1} gap="xs" separator={<Separator orientation="vertical" />}>
+      <HStack
+        align="stretch"
+        flex={1}
+        gap="xs"
+        separator={<Separator orientation="vertical" />}
+      >
         {/* SidebarList skeleton */}
         <VStack gap="xs" maxH="calc(100vh - 70px)" maxW="sm" minW="sm" w="full">
           {Array.from({ length: 3 }, (_, groupIndex) => (
             <VStack
+              gap="xs"
               key={`group-skeleton--${
                 // biome-ignore lint/suspicious/noArrayIndexKey: Loading skeleton
                 groupIndex
               }`}
-              gap="xs"
             >
               {/* Date group header */}
               <Skeleton>
-                <Text p="sm" fontSize="sm" fontWeight="bold">
+                <Text fontSize="sm" fontWeight="bold" p="sm">
                   Today
                 </Text>
               </Skeleton>
 
               <List>
-                {Array.from({ length: 4 }, (_, itemIndex) => (
+                {Array.from({ length: 4 }, (_i, itemIndex) => (
                   <Skeleton
+                    h="40px"
                     key={`item-skeleton--${groupIndex}-${
-                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                      // biome-ignore lint/suspicious/noArrayIndexKey: Loading skeleton
                       itemIndex
                     }`}
-                    h="40px"
                   />
                 ))}
               </List>
@@ -72,13 +82,17 @@ export const HomeLoadingComponent = () => {
         {/* DetailsPanel skeleton */}
         <VStack gap="sm" px="sm" w="full">
           {/* Content area */}
-          <ScrollArea maxH="calc(100vh - 70px - 160px)" maxW="calc(100vw - 25px - sm)">
+          <ScrollArea
+            maxH="calc(100vh - 70px - 160px)"
+            maxW="calc(100vw - 25px - sm)"
+          >
             <VStack gap="md">
               <Skeleton>
                 <VStack align="stretch" gap="md">
                   <Text whiteSpace="pre-wrap" wordBreak="break-word">
-                    This is sample clipboard content that shows how the text would appear in the details panel. It can
-                    be multiple lines and wraps properly.
+                    This is sample clipboard content that shows how the text
+                    would appear in the details panel. It can be multiple lines
+                    and wraps properly.
                   </Text>
                 </VStack>
               </Skeleton>
@@ -87,7 +101,7 @@ export const HomeLoadingComponent = () => {
 
           <Spacer />
 
-          <DataList w="fit-content" col={2}>
+          <DataList col={2} w="fit-content">
             <DataListItem>
               <DataListTerm>Copy Count</DataListTerm>
               <DataListDescription>
