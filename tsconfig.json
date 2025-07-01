@@ -22,7 +22,18 @@
       "~/*": ["./src/*"]
     }
   },
-  "include": ["src", ".eslint", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "src",
+    ".eslint",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "babel.config.js",
+    "commitlint.config.js",
+    "prettier.config.js",
+    "scripts/*.js"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"
