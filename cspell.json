@@ -29,7 +29,10 @@
     "Tesseract",
     "unlisten",
     "nonoctal",
-    "nonconstructor"
+    "nonconstructor",
+    "rspack",
+    "taroj",
+    "iarna"
   ],
   "ignorePaths": [
     "node_modules/**",

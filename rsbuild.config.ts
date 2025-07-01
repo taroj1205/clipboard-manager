@@ -5,6 +5,18 @@ import { TanStackRouterRspack } from "@tanstack/router-plugin/rspack";
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
+  dev: {
+    client: host
+      ? {
+          host,
+          port: 1421,
+          protocol: "ws",
+        }
+      : undefined,
+    watchFiles: {
+      paths: ["!**/src-tauri/**"],
+    },
+  },
   plugins: [
     pluginReact({
       swcReactOptions: {
@@ -12,6 +24,11 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    host,
+    port: 1420,
+    strictPort: true,
+  },
   tools: {
     rspack: {
       plugins: [TanStackRouterRspack({ target: "react", autoCodeSplitting: true })],
@@ -19,39 +36,39 @@ export default defineConfig({
         rules: [
           {
             test: /\\.jsx?$/,
+            type: "javascript/auto",
             use: [
               {
                 loader: "builtin:swc-loader",
                 options: {
                   jsc: {
                     parser: {
-                      syntax: "ecmascript",
                       jsx: true,
+                      syntax: "ecmascript",
                     },
                   },
                 },
               },
               { loader: "babel-loader" },
             ],
-            type: "javascript/auto",
           },
           {
             test: /\\.tsx?$/,
+            type: "javascript/auto",
             use: [
               {
                 loader: "builtin:swc-loader",
                 options: {
                   jsc: {
                     parser: {
-                      syntax: "typescript",
                       tsx: true,
+                      syntax: "typescript",
                     },
                   },
                 },
               },
               { loader: "babel-loader" },
             ],
-            type: "javascript/auto",
           },
         ],
       },
@@ -62,23 +79,6 @@ export default defineConfig({
           plugins: [["@swc/plugin-emotion", {}]],
         },
       },
-    },
-  },
-  server: {
-    port: 1420,
-    strictPort: true,
-    host,
-  },
-  dev: {
-    client: host
-      ? {
-          protocol: "ws",
-          host,
-          port: 1421,
-        }
-      : undefined,
-    watchFiles: {
-      paths: ["!**/src-tauri/**"],
     },
   },
 });

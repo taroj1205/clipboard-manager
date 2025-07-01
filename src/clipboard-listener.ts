@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { BaseDirectory, pictureDir } from "@tauri-apps/api/path";
 import { writeFile } from "@tauri-apps/plugin-fs";
+import { useOS } from "@yamada-ui/react";
 import {
   hasHTML,
   hasImage,
@@ -81,7 +82,8 @@ export function initClipboardListener() {
           // Extract text asynchronously and update entry
           try {
             const picturePath = await pictureDir();
-            const ocrText = await extractTextFromImage(`${picturePath}/${filename}`, "windows");
+            const os = useOS();
+            const ocrText = await extractTextFromImage(`${picturePath}/${filename}`, os);
             if (ocrText) {
               await editClipboardEntry(now, { content: ocrText });
             }
