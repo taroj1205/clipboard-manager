@@ -106,8 +106,6 @@ jobs:
         task:
           - name: "TypeScript"
             command: "pnpm tsc --noEmit"
-          - name: "Lint and Format"
-            command: "pnpm biome check ."
           - name: "Build"
             command: "pnpm build"
     name: ${{ matrix.task.name }}
@@ -155,13 +153,66 @@ jobs:
       - name: Run ${{ matrix.task.name }}
         run: ${{ matrix.task.command }}
 
+  biome:
+    name: Code Quality (Biome)
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Restore pnpm cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Restore node_modules cache
+        id: cache-node-modules
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+
+      - name: Run Biome
+        run: biome ci .
+
   build:
     name: Build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    needs: [setup, check]
+    needs: [setup, check, biome]
     if: github.event_name == 'workflow_dispatch' && inputs.build == true
     steps:
       - name: Checkout repository
@@ -192,7 +243,7 @@ jobs:
 
   verify:
     name: Verify
-    needs: [check_changes, check]
+    needs: [check_changes, check, biome]
     runs-on: ubuntu-latest
     if: always()
     steps:
