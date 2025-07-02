@@ -1,14 +1,18 @@
-import { BaseDirectory, readFile } from "@tauri-apps/plugin-fs";
-import { uint8ArrayToBase64 } from "./clipboard";
+import { convertFileSrc } from "@tauri-apps/api/core";
+import { pictureDir } from "@tauri-apps/api/path";
 
 export async function getImageDataUrl(
   src: string
 ): Promise<string | undefined> {
   try {
-    const data = await readFile(src, { baseDir: BaseDirectory.Picture });
-    return `data:image/png;base64,${uint8ArrayToBase64(data)}`;
+    // Get the pictures directory path
+    const pictureDirPath = await pictureDir();
+    // Create the full file path (src is relative like "clipboard-manager/timestamp.png")
+    const fullPath = `${pictureDirPath}/${src}`;
+    // Convert to asset URL that can be used directly in img src
+    return convertFileSrc(fullPath);
   } catch (e) {
-    console.error(e);
+    console.error("Failed to convert file src:", e);
+    return;
   }
-  return;
 }

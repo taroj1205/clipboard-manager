@@ -20,9 +20,6 @@ post-checkout:
   commands:
     validate-branch-name:
       run: pnpm validate-branch-name
-    pnpm:
-      glob: "{package.json,pnpm-lock.yaml}"
-      run: pnpm install
 
 post-merge:
   commands:

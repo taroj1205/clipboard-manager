@@ -12,13 +12,16 @@ type ClipboardImageProps = ImageProps & {
 export const ClipboardImage: FC<ClipboardImageProps> = memo((props) => {
   const { src, ...rest } = props;
 
+  console.log(src);
+
   const { data } = useQuery({
     queryFn: async () => getImageDataUrl(src),
     queryKey: ["clipboard-image", src],
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
-  return <Image h="full" objectFit="cover" src={data} w="full" {...rest} />;
+  return <Image h="fit-content" src={data} w="full" {...rest} />;
 });
 
 ClipboardImage.displayName = "ClipboardImage";
