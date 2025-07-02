@@ -109,7 +109,7 @@ jobs:
           - name: "Lint"
             command: "pnpm biome check ."
           - name: "Format"
-            command: "pnpm biome format --check ."
+            command: "pnpm biome format ."
           - name: "Build"
             command: "pnpm build"
     name: ${{ matrix.task.name }}
