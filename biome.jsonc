@@ -6,11 +6,14 @@
       "quoteStyle": "double"
     }
   },
+  "files": {
+    "includes": ["**", "!src/routeTree.gen.ts"]
+  },
   "linter": {
-    "includes": ["**", "!src/routeTree.gen.ts"],
     "rules": {
       "suspicious": {
         "noConsole": {
+          "level": "error",
           "options": {
             "allow": ["error", "warn"]
           }

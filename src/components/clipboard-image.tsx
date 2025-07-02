@@ -12,8 +12,6 @@ type ClipboardImageProps = ImageProps & {
 export const ClipboardImage: FC<ClipboardImageProps> = memo((props) => {
   const { src, ...rest } = props;
 
-  console.log(src);
-
   const { data } = useQuery({
     queryFn: async () => getImageDataUrl(src),
     queryKey: ["clipboard-image", src],
