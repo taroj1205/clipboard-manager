@@ -106,10 +106,8 @@ jobs:
         task:
           - name: "TypeScript"
             command: "pnpm tsc --noEmit"
-          - name: "Lint"
+          - name: "Lint and Format"
             command: "pnpm biome check ."
-          - name: "Format"
-            command: "pnpm biome format ."
           - name: "Build"
             command: "pnpm build"
     name: ${{ matrix.task.name }}
