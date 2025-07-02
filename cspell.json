@@ -39,7 +39,9 @@
     "libappindicator",
     "librsvg",
     "patchelf",
-    "commitlint"
+    "commitlint",
+    "dorny",
+    "elif"
   ],
   "ignorePaths": [
     "node_modules/**",
