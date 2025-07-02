@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { ClipboardEntry } from "~/utils/clipboard";
 import { copyClipboardEntry } from "~/utils/clipboard";
 import { hideWindow } from "~/utils/window";
@@ -28,12 +28,46 @@ export function useKeyboardNavigation({
   inputRef,
   notice,
 }: UseKeyboardNavigationProps) {
+  const isNavigatingRef = useRef(false);
+  const navigationTimeoutRef = useRef<number | null>(null);
+  const lastArrowKeyTime = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleArrowKeys = useCallback(
     (ev: KeyboardEvent) => {
       ev.preventDefault();
       ev.stopPropagation();
       focusInput();
-      handleArrowKey(ev.key === "ArrowUp" ? "up" : "down");
+
+      const now = performance.now();
+      const timeSinceLastKey = now - lastArrowKeyTime.current;
+      lastArrowKeyTime.current = now;
+
+      const isRapidPress = timeSinceLastKey < 80;
+
+      if (isRapidPress) {
+        if (navigationTimeoutRef.current) {
+          clearTimeout(navigationTimeoutRef.current);
+        }
+
+        navigationTimeoutRef.current = window.setTimeout(() => {
+          handleArrowKey(ev.key === "ArrowUp" ? "up" : "down");
+          isNavigatingRef.current = false;
+          navigationTimeoutRef.current = null;
+        }, 8);
+
+        isNavigatingRef.current = true;
+      } else {
+        handleArrowKey(ev.key === "ArrowUp" ? "up" : "down");
+        isNavigatingRef.current = false;
+      }
     },
     [focusInput, handleArrowKey]
   );

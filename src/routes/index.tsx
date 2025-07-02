@@ -60,7 +60,7 @@ function HomeComponent() {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 200); // 200ms debounce for fast feedback
+    }, 50); // 50ms debounce for fast feedback
 
     return () => clearTimeout(timeoutId);
   }, [query]);
@@ -179,18 +179,27 @@ function HomeComponent() {
     inputRef.current?.blur();
   }, []);
 
+  const filteredFlatListRef = useRef(filteredFlatList);
+  filteredFlatListRef.current = filteredFlatList;
+
   const handleArrowKey = useCallback(
     (direction: "down" | "up") => {
       setSelectedIndexRaw((prev) => {
+        const currentList = filteredFlatListRef.current;
         const newIndex =
           direction === "up"
             ? Math.max(0, prev - 1)
-            : Math.min(filteredFlatList.length - 1, prev + 1);
-        handleUpdateSelectedIndex(itemRefs, newIndex);
+            : Math.min(currentList.length - 1, prev + 1);
+
+        // Use requestAnimationFrame to batch the scroll update
+        requestAnimationFrame(() => {
+          handleUpdateSelectedIndex(itemRefs, newIndex);
+        });
+
         return newIndex;
       });
     },
-    [filteredFlatList, handleUpdateSelectedIndex]
+    [handleUpdateSelectedIndex]
   );
 
   listen("clipboard-entry-updated", () => {
