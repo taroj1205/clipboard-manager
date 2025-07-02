@@ -1,5 +1,5 @@
-import type { FC } from "react";
 import { Text } from "@yamada-ui/react";
+import type { FC } from "react";
 import { memo } from "react";
 
 interface TextPreviewProps {

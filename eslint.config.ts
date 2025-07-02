@@ -17,7 +17,13 @@ import {
 
 const ignoresConfig: TSESLint.FlatConfig.Config = {
   name: "eslint/ignores",
-  ignores: ["**/dist/**", "**/node_modules/**", "**/build/**", "src-tauri/gen/**", "src-tauri/target/**"],
+  ignores: [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/build/**",
+    "src-tauri/gen/**",
+    "src-tauri/target/**",
+  ],
 };
 
 const jsLanguageOptionConfig = jsLanguageOptionFactory();

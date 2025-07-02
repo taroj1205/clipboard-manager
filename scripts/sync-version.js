@@ -1,7 +1,7 @@
-import toml from "@iarna/toml";
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import toml from "@iarna/toml";
 
 // Read package.json
 const packageJson = JSON.parse(readFileSync("package.json", "utf8"));

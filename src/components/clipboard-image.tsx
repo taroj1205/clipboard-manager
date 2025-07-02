@@ -1,7 +1,7 @@
-import type { ImageProps } from "@yamada-ui/react";
-import type { FC } from "react";
 import { useQuery } from "@tanstack/react-query";
+import type { ImageProps } from "@yamada-ui/react";
 import { Image } from "@yamada-ui/react";
+import type { FC } from "react";
 import { memo } from "react";
 import { getImageDataUrl } from "~/utils/image";
 
@@ -18,7 +18,7 @@ export const ClipboardImage: FC<ClipboardImageProps> = memo((props) => {
     staleTime: 60 * 1000, // 1 minute
   });
 
-  return <Image src={data} h="full" w="full" objectFit="cover" {...rest} />;
+  return <Image h="full" objectFit="cover" src={data} w="full" {...rest} />;
 });
 
 ClipboardImage.displayName = "ClipboardImage";

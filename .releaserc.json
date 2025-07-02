@@ -33,11 +33,19 @@
             { "type": "revert", "section": "Reverts" },
             { "type": "docs", "section": "Documentation", "hidden": true },
             { "type": "style", "section": "Styles", "hidden": true },
-            { "type": "chore", "section": "Miscellaneous Chores", "hidden": true },
+            {
+              "type": "chore",
+              "section": "Miscellaneous Chores",
+              "hidden": true
+            },
             { "type": "refactor", "section": "Code Refactoring" },
             { "type": "test", "section": "Tests", "hidden": true },
             { "type": "build", "section": "Build System" },
-            { "type": "ci", "section": "Continuous Integration", "hidden": true }
+            {
+              "type": "ci",
+              "section": "Continuous Integration",
+              "hidden": true
+            }
           ]
         }
       }
@@ -58,7 +66,13 @@
     [
       "@semantic-release/git",
       {
-        "assets": ["CHANGELOG.md", "package.json", "pnpm-lock.yaml", "src-tauri/Cargo.toml", "src-tauri/Cargo.lock"],
+        "assets": [
+          "CHANGELOG.md",
+          "package.json",
+          "pnpm-lock.yaml",
+          "src-tauri/Cargo.toml",
+          "src-tauri/Cargo.lock"
+        ],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],

@@ -93,9 +93,9 @@ jobs:
           - name: "TypeScript"
             command: "pnpm tsc --noEmit"
           - name: "Lint"
-            command: "pnpm eslint ."
+            command: "pnpm biome check ."
           - name: "Format"
-            command: "pnpm prettier --check ."
+            command: "pnpm biome format --check ."
           - name: "Build"
             command: "pnpm build"
     name: ${{ matrix.task.name }}

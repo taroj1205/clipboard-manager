@@ -2,15 +2,15 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      glob: "*.{js,ts,tsx}"
-      run: pnpm eslint {staged_files} --fix --max-warnings 0 --cache
+      glob: "*.{js,ts,tsx,json,md,yaml,yml}"
+      run: pnpm lint {staged_files} --fix
       stage_fixed: true
     format:
-      glob: "*.{js,ts,tsx,json,md}"
-      run: pnpm prettier --write {staged_files} --list-different
+      glob: "*.{js,ts,tsx,json,md,yaml,yml}"
+      run: pnpm format {staged_files}
       stage_fixed: true
     spell:
-      glob: "*.{js,ts,tsx,md}"
+      glob: "*.{js,ts,tsx,md,yaml,yml}"
       run: pnpm cspell {staged_files}
       stage_fixed: true
 

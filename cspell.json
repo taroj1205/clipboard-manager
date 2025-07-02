@@ -32,7 +32,14 @@
     "nonconstructor",
     "rspack",
     "taroj",
-    "iarna"
+    "iarna",
+    "Ultracite",
+    "nvmrc",
+    "libwebkit",
+    "libappindicator",
+    "librsvg",
+    "patchelf",
+    "commitlint"
   ],
   "ignorePaths": [
     "node_modules/**",

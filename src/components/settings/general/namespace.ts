@@ -1,4 +1,2 @@
-import { Panel } from "./panel";
-import { Switcher } from "./switcher";
-
-export { Panel, Switcher };
+export { Panel } from "./panel";
+export { Switcher } from "./switcher";

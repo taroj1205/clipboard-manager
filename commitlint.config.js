@@ -8,11 +8,16 @@ export default {
       rules: {
         "scope-no-spaces": (parsed) => {
           const { scope } = parsed;
-          if (!scope) return [true];
+          if (!scope) {
+            return [true];
+          }
 
           // Check if scope contains comma with space
           if (scope.includes(", ")) {
-            return [false, 'Multiple scopes should be separated by comma without space (e.g., "header,footer")'];
+            return [
+              false,
+              'Multiple scopes should be separated by comma without space (e.g., "header,footer")',
+            ];
           }
 
           return [true];
@@ -27,7 +32,19 @@ export default {
     "type-enum": [
       2,
       "always",
-      ["build", "chore", "ci", "docs", "feat", "fix", "perf", "refactor", "revert", "style", "test"],
+      [
+        "build",
+        "chore",
+        "ci",
+        "docs",
+        "feat",
+        "fix",
+        "perf",
+        "refactor",
+        "revert",
+        "style",
+        "test",
+      ],
     ],
     "body-max-line-length": [2, "always", 100],
     "footer-max-line-length": [2, "always", 100],

@@ -39,19 +39,24 @@ export const DeleteAll = memo(() => {
 
   return (
     <VStack>
-      <Alert variant="subtle" status="warning" colorScheme="danger">
+      <Alert colorScheme="danger" status="warning" variant="subtle">
         <AlertIcon />
         <AlertTitle>Warning</AlertTitle>
-        <AlertDescription>This will delete all clipboard entries. This action cannot be undone.</AlertDescription>
+        <AlertDescription>
+          This will delete all clipboard entries. This action cannot be undone.
+        </AlertDescription>
       </Alert>
-      <Button w="fit-content" colorScheme="danger" onClick={onOpen}>
+      <Button colorScheme="danger" onClick={onOpen} w="fit-content">
         Delete All Entries
       </Button>
       <Dialog onClose={onClose} open={open}>
         <DialogHeader>Delete All Entries</DialogHeader>
         <DialogBody>
-          <Text>Are you sure you want to delete all clipboard entries? This action cannot be undone.</Text>
-          <Button w="fit-content" colorScheme="danger" onClick={handleDelete}>
+          <Text>
+            Are you sure you want to delete all clipboard entries? This action
+            cannot be undone.
+          </Text>
+          <Button colorScheme="danger" onClick={handleDelete} w="fit-content">
             Delete All Entries
           </Button>
         </DialogBody>

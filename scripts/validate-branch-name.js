@@ -35,7 +35,14 @@ const CONVENTIONAL_TYPES = [
   "renovate",
 ];
 
-const PROTECTED_BRANCHES = ["main", "master", "develop", "dev", "staging", "production"];
+const PROTECTED_BRANCHES = [
+  "main",
+  "master",
+  "develop",
+  "dev",
+  "staging",
+  "production",
+];
 
 function getCurrentBranch() {
   try {
@@ -54,7 +61,9 @@ function validateBranchName(branchName) {
 
   // Pattern: type/scope or type/scope#issue-number
   // Examples: feat/header, feat/header#32, fix/bug-description#123
-  const pattern = new RegExp(`^(${CONVENTIONAL_TYPES.join("|")})\\/[a-z0-9][a-z0-9\\-]*(?:#\\d+)?$`);
+  const pattern = new RegExp(
+    `^(${CONVENTIONAL_TYPES.join("|")})\\/[a-z0-9][a-z0-9\\-]*(?:#\\d+)?$`
+  );
 
   if (!pattern.test(branchName)) {
     let message = `❌ Invalid branch name: "${branchName}"\n\n`;
