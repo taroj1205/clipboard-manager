@@ -41,7 +41,8 @@
     "patchelf",
     "commitlint",
     "dorny",
-    "elif"
+    "elif",
+    "biomejs"
   ],
   "ignorePaths": [
     "node_modules/**",
