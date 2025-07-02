@@ -1,0 +1,21 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
+  "extends": ["ultracite"],
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "linter": {
+    "includes": ["**", "!src/routeTree.gen.ts"],
+    "rules": {
+      "suspicious": {
+        "noConsole": {
+          "options": {
+            "allow": ["error", "warn"]
+          }
+        }
+      }
+    }
+  }
+}

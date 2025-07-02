@@ -12,7 +12,7 @@ export const Route = createFileRoute("/settings")({
 
 function RouteComponent() {
   return (
-    <VStack h="100vh" py="0" position="relative">
+    <VStack h="100vh" position="relative" py="0">
       <Tabs h="full" lazyBehavior="unmount" orientation="vertical">
         <TabList pt="md">
           <GeneralSettings.Switcher />
@@ -27,13 +27,13 @@ function RouteComponent() {
       </Tabs>
       <IconButton
         aria-label="Back to Home"
-        variant="outline"
         as={Link}
-        right="sm"
         borderColor="border"
         position="fixed"
+        right="sm"
         to="/"
         top="sm"
+        variant="outline"
       >
         <Undo2Icon />
       </IconButton>

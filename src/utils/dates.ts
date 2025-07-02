@@ -5,7 +5,10 @@ export function groupEntriesByDate(entries: ClipboardEntry[]): {
 } {
   const groups: { [key: string]: (ClipboardEntry & { count: number })[] } = {};
   // Deduplicate by content+type, keep latest, and count occurrences
-  const dedupedMap = new Map<string, { entry: ClipboardEntry; count: number }>();
+  const dedupedMap = new Map<
+    string,
+    { entry: ClipboardEntry; count: number }
+  >();
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
@@ -43,7 +46,7 @@ export function groupEntriesByDate(entries: ClipboardEntry[]): {
     groups[groupKey].push({ ...entry, count });
   }
   // Sort each group by timestamp descending
-  for (const key in groups) {
+  for (const key of Object.keys(groups)) {
     groups[key].sort((a, b) => b.timestamp - a.timestamp);
   }
   return groups;

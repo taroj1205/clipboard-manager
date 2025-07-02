@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import { CopyIcon } from "@yamada-ui/lucide";
 import {
   Box,
@@ -12,6 +11,7 @@ import {
   useNotice,
   VStack,
 } from "@yamada-ui/react";
+import type { FC } from "react";
 import { memo, useCallback } from "react";
 import { writeText } from "tauri-plugin-clipboard-api";
 import { useColorConverters } from "~/utils/color";
@@ -22,7 +22,8 @@ interface ColorPreviewProps {
 }
 
 export const ColorPreview: FC<ColorPreviewProps> = memo(({ color, onCopy }) => {
-  const { detectColorFormat, hexToHsl, hexToOklch, hexToRgb, normalizeColor } = useColorConverters();
+  const { detectColorFormat, hexToHsl, hexToOklch, hexToRgb, normalizeColor } =
+    useColorConverters();
 
   const notice = useNotice();
 
@@ -48,25 +49,30 @@ export const ColorPreview: FC<ColorPreviewProps> = memo(({ color, onCopy }) => {
   return (
     <Center as={VStack} flex={1} h="200px" pt="4xl">
       <Box position="relative">
-        <ColorSwatch variant="rounded" h="120px" w="120px" color={normalizedColor} />
+        <ColorSwatch
+          color={normalizedColor}
+          h="120px"
+          variant="rounded"
+          w="120px"
+        />
         <IconButton
-          aria-label="Copy Color"
-          variant="solid"
-          h="full"
-          left="50%"
-          title="Copy Color"
-          w="full"
           _hover={{
             opacity: 1,
           }}
+          aria-label="Copy Color"
           colorScheme="blackAlpha"
+          h="full"
           icon={<CopyIcon />}
+          left="50%"
           onClick={onCopy}
           opacity={0}
           position="absolute"
           rounded="full"
+          title="Copy Color"
           top="50%"
           transform="translate(-50%, -50%)"
+          variant="solid"
+          w="full"
         />
       </Box>
       <DataList alignSelf="flex-start" col={2}>
@@ -75,7 +81,9 @@ export const ColorPreview: FC<ColorPreviewProps> = memo(({ color, onCopy }) => {
           <DataListDescription>{color}</DataListDescription>
         </DataListItem>
         <DataListItem cursor="pointer" onClick={() => handleCopy(hex)}>
-          <DataListTerm>Hex{hex.length === 9 ? " (with Alpha)" : ""}</DataListTerm>
+          <DataListTerm>
+            Hex{hex.length === 9 ? " (with Alpha)" : ""}
+          </DataListTerm>
           <DataListDescription>{hex}</DataListDescription>
         </DataListItem>
         <DataListItem cursor="pointer" onClick={() => handleCopy(rgb)}>
