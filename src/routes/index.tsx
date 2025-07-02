@@ -60,7 +60,7 @@ function HomeComponent() {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 200); // 200ms debounce for fast feedback
+    }, 50); // 50ms debounce for fast feedback
 
     return () => clearTimeout(timeoutId);
   }, [query]);
