@@ -16,6 +16,7 @@ import {
   DataListDescription,
   DataListItem,
   DataListTerm,
+  Flex,
   Grid,
   GridItem,
   IconButton,
@@ -103,22 +104,35 @@ const renderPreviewContent = (
   }
 
   if (selectedEntry.type === "html" && selectedEntry.html) {
+    const htmlWithTransparentBg = `
+      <style>
+        :root {
+          color-scheme: dark;
+        }
+        html, body {
+          background: transparent !important;
+          margin: 0;
+          padding: 8px;
+        }
+        * {
+          max-width: 100% !important;
+          white-space: pre-wrap !important;
+          overflow-wrap: break-word !important;
+          word-break: break-word !important;
+        }
+      </style>
+      ${selectedEntry.html}
+    `;
+
     return (
-      <Box
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: for html preview
-        dangerouslySetInnerHTML={{ __html: selectedEntry.html }}
-        maxH="calc(100vh - 70px - 160px)"
-        maxW="calc(100vw - 25px - sm)"
-        overflow="hidden"
+      <Flex
+        as="iframe"
+        bg="transparent"
+        flex={1}
+        h="100%"
         overflowWrap="break-word"
-        sx={{
-          "& *": {
-            maxWidth: "100% !important",
-            whiteSpace: "pre-wrap !important",
-            overflowWrap: "break-word !important",
-            wordBreak: "break-word !important",
-          },
-        }}
+        srcDoc={htmlWithTransparentBg}
+        w="100%"
         wordBreak="break-word"
       />
     );
@@ -280,6 +294,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
             />
           </ButtonGroup>
           <ScrollArea
+            h="full"
             maxH="calc(100vh - 70px - 160px)"
             maxW="calc(100vw - 25px - sm)"
           >

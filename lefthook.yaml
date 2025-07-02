@@ -3,10 +3,12 @@ pre-commit:
   commands:
     lint:
       glob: "*.{js,ts,tsx,json,md,yaml,yml}"
+      exclude: "src/routeTree.gen.ts"
       run: pnpm lint {staged_files} --fix
       stage_fixed: true
     format:
       glob: "*.{js,ts,tsx,json,md,yaml,yml}"
+      exclude: "src/routeTree.gen.ts"
       run: pnpm format {staged_files}
       stage_fixed: true
     spell:

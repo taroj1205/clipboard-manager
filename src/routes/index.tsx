@@ -5,7 +5,13 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { listen } from "@tauri-apps/api/event";
-import { HStack, Separator, usePrevious, VStack } from "@yamada-ui/react";
+import {
+  HStack,
+  Separator,
+  useNotice,
+  usePrevious,
+  VStack,
+} from "@yamada-ui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DetailsPanel } from "~/components/details-panel";
 import { ErrorComponent } from "~/components/error-component";
@@ -40,6 +46,7 @@ const allowedTypes: TypeFilter["value"][] = [
 function HomeComponent() {
   const queryClient = useQueryClient();
   const loaderData = Route.useLoaderData();
+  const notice = useNotice();
   const [query, setQueryRaw] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [typeFilter, setTypeFilterRaw] = useState<TypeFilter["value"][]>([
@@ -211,6 +218,7 @@ function HomeComponent() {
     handleArrowKey,
     focusInput,
     inputRef,
+    notice,
   });
 
   useEventListener("keydown", handleKeyDown);

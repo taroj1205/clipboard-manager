@@ -11,6 +11,11 @@ interface UseKeyboardNavigationProps {
   handleArrowKey: (direction: "down" | "up") => void;
   focusInput: () => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  notice: (args: {
+    status: "error" | "success";
+    title: string;
+    description: string;
+  }) => void;
 }
 
 export function useKeyboardNavigation({
@@ -21,6 +26,7 @@ export function useKeyboardNavigation({
   handleArrowKey,
   focusInput,
   inputRef,
+  notice,
 }: UseKeyboardNavigationProps) {
   const handleArrowKeys = useCallback(
     (ev: KeyboardEvent) => {
@@ -45,14 +51,23 @@ export function useKeyboardNavigation({
     (ev: KeyboardEvent) => {
       ev.preventDefault();
       ev.stopPropagation();
+
+      if (selectedIndex < 0 || selectedIndex >= filteredFlatList.length) {
+        return;
+      }
+
       const entry = filteredFlatList[selectedIndex];
-      copyClipboardEntry(entry, () => {
-        // Callback for copy completion
-      }).then(() => {
-        hideWindow();
+      if (!entry) {
+        return;
+      }
+
+      hideWindow();
+
+      copyClipboardEntry(entry, notice).catch((error) => {
+        console.error("Copy operation failed:", error);
       });
     },
-    [filteredFlatList, selectedIndex]
+    [filteredFlatList, selectedIndex, notice]
   );
 
   const handleEscape = useCallback(
