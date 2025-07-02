@@ -1,5 +1,13 @@
 # clipboard-manager
 
+## 0.0.10
+
+### Patch Changes
+
+- [#67](https://github.com/taroj1205/clipboard-manager/pull/67) [`8df47df`](https://github.com/taroj1205/clipboard-manager/commit/8df47df166495912a9b49740b6100626d1c7c09e) Thanks [@taroj1205](https://github.com/taroj1205)! - Improve up and down key responsiveness.
+
+- [#65](https://github.com/taroj1205/clipboard-manager/pull/65) [`30415c2`](https://github.com/taroj1205/clipboard-manager/commit/30415c24624edc1a43a1c396fd8011d68a1ec172) Thanks [@taroj1205](https://github.com/taroj1205)! - Improve image display logic.
+
 ## 0.0.9
 
 ### Patch Changes
