@@ -38,7 +38,7 @@
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "labels": ["dependencies", "tooling"],
-      "automerge": true,
+      "automerge": false,
       "automergeType": "pr"
     },
     {
@@ -46,7 +46,7 @@
       "groupName": "minor & patch dependencies",
       "semanticCommitScope": "deps",
       "labels": ["dependencies", "automerge"],
-      "automerge": true,
+      "automerge": false,
       "automergeType": "pr"
     },
     {

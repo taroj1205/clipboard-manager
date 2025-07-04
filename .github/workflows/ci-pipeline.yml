@@ -30,55 +30,52 @@ jobs:
   check_changes:
     name: Check Changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
-      exists: ${{ steps.filter.outputs.exists }}
+      changed: ${{ steps.filter.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Filter Changed Files
+        id: filter
+        uses: taroj1205/check-changes@v1
+        with:
+          include: '**/*'
+          exclude: |
+            **/*.md
+            .gitignore
+            .gitattributes
+            .vscode/**/*
+          summary: true
+
+  biome:
+    name: Code Quality (Biome)
+    needs: check_changes
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Check for changes
-        uses: dorny/paths-filter@v3
-        id: filter
+        
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
         with:
-          filters: |
-            exists:
-              - '!*.md'
-              - '!.gitignore'
-              - '!.gitattributes'
-              - '!.vscode/**'
+          version: latest
+          
+      - name: Run Biome
+        run: biome ci .
 
   setup:
     name: Setup
     runs-on: ubuntu-latest
-    needs: check_changes
+    needs: [check_changes, biome]
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: latest
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Restore pnpm cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Restore node_modules cache
+      - name: Check node_modules cache
         id: cache-node-modules
         uses: actions/cache/restore@v4
         with:
@@ -86,6 +83,37 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-node-modules-
+          lookup-only: true
+
+      - name: Setup Node.js
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup pnpm
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          run_install: false
+
+      - name: Get pnpm store directory
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Restore pnpm cache
+        id: cache-pnpm-store
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+          lookup-only: true
 
       - name: Install dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -98,6 +126,13 @@ jobs:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Save pnpm store cache
+        if: steps.cache-pnpm-store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
   check:
     runs-on: ubuntu-latest
     needs: setup
@@ -106,7 +141,7 @@ jobs:
         task:
           - name: "TypeScript"
             command: "pnpm tsc --noEmit"
-          - name: "Build"
+          - name: "Build Frontend"
             command: "pnpm build"
     name: ${{ matrix.task.name }}
     steps:
@@ -153,61 +188,8 @@ jobs:
       - name: Run ${{ matrix.task.name }}
         run: ${{ matrix.task.command }}
 
-  biome:
-    name: Code Quality (Biome)
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: latest
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Restore pnpm cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Restore node_modules cache
-        id: cache-node-modules
-        uses: actions/cache/restore@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - name: Install dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: pnpm install --frozen-lockfile
-
-      - name: Setup Biome
-        uses: biomejs/setup-biome@v2
-        with:
-          version: latest
-
-      - name: Run Biome
-        run: biome ci .
-
   build:
-    name: Build
+    name: Build Tauri App
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
