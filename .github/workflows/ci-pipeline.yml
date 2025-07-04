@@ -51,6 +51,8 @@ jobs:
 
   biome:
     name: Code Quality (Biome)
+    needs: check_changes
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -66,9 +68,9 @@ jobs:
 
   setup:
     name: Setup
-    if: ${{ needs.check_changes.outputs.changed == 'true' }}
     runs-on: ubuntu-latest
     needs: [check_changes, biome]
+    if: ${{ needs.check_changes.outputs.changed == 'true' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
