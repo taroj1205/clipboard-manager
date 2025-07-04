@@ -30,21 +30,24 @@ jobs:
   check_changes:
     name: Check Changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
-      exists: ${{ steps.filter.outputs.exists }}
+      changed: ${{ steps.filter.outputs.changed }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Check for changes
-        uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v4
+
+      - name: Filter Changed Files
         id: filter
+        uses: taroj1205/check-changes@v1
         with:
-          filters: |
-            exists:
-              - '!*.md'
-              - '!.gitignore'
-              - '!.gitattributes'
-              - '!.vscode/**'
+          include: '**/*'
+          exclude: |
+            **/*.md
+            .gitignore
+            .gitattributes
+            .vscode/**/*
+          summary: true
 
   biome:
     name: Code Quality (Biome)
