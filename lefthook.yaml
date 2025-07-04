@@ -2,12 +2,12 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      glob: "*.{js,ts,tsx,json,md,yaml,yml}"
+      glob: "*.{js,ts,tsx,json,md,yaml,yml,json,jsonc}"
       exclude: "src/routeTree.gen.ts"
       run: pnpm biome check --write
       stage_fixed: true
     spell:
-      glob: "*.{js,ts,tsx,md,yaml,yml}"
+      glob: "*.{js,ts,tsx,md,yaml,yml,json,jsonc}"
       run: pnpm cspell {staged_files}
       stage_fixed: true
 
