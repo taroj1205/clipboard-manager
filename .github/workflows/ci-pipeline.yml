@@ -13,7 +13,7 @@ on:
       build-ubuntu:
         description: "Build for Ubuntu"
         required: false
-        default: true
+        default: false
         type: boolean
       build-windows:
         description: "Build for Windows"
