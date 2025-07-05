@@ -691,7 +691,7 @@ dependencies = [
 
 [[package]]
 name = "clipboard-manager"
-version = "0.0.10"
+version = "0.0.11"
 dependencies = [
  "active-win-pos-rs",
  "base64 0.22.1",
