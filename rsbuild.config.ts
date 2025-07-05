@@ -75,12 +75,5 @@ export default defineConfig({
         ],
       },
     },
-    swc: {
-      jsc: {
-        experimental: {
-          plugins: [["@swc/plugin-emotion", {}]],
-        },
-      },
-    },
   },
 });

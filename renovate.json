@@ -2,15 +2,15 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", "config:js-app"],
   "timezone": "Pacific/Auckland",
-  "schedule": ["before 6am on saturday"],
+  "schedule": ["0 6 * * 6"],
 
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
   "dependencyDashboard": true,
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 6am on saturday"],
-    "semanticCommitScope": "deps,lock"
+    "semanticCommitScope": "deps,lock",
+    "automerge": false
   },
 
   "packageRules": [
