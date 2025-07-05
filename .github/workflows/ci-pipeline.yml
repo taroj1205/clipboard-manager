@@ -53,6 +53,7 @@ jobs:
             .gitignore
             .gitattributes
             .vscode/**/*
+            renovate.json
           summary: true
 
   biome:
