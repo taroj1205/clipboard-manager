@@ -62,11 +62,15 @@
     "Jokagi",
     "freeza",
     "nsis",
-    "appimage"
+    "appimage",
+    "icns",
+    "webkitgtk",
+    "dtolnay",
+    "bunx"
   ],
   "ignorePaths": [
     "node_modules/**",
-    "pnpm-lock.yaml",
+    "bun.lock",
     "package-lock.json",
     "yarn.lock",
     "dist/**",

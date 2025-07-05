@@ -17,7 +17,7 @@ A modern, efficient clipboard manager built with Tauri and React. Keep track of 
 ### Prerequisites
 
 - Node.js (v16 or higher)
-- pnpm
+- Bun
 - Rust (for Tauri development)
 
 ### Installation
@@ -32,19 +32,19 @@ cd clipboard-manager
 2. Install dependencies:
 
 ```bash
-pnpm install
+bun install
 ```
 
 3. Start the development server:
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
 4. Build for production:
 
 ```bash
-pnpm build
+bun run build
 ```
 
 ## 🎯 Usage

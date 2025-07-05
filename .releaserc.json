@@ -69,7 +69,7 @@
         "assets": [
           "CHANGELOG.md",
           "package.json",
-          "pnpm-lock.yaml",
+          "bun.lock",
           "src-tauri/Cargo.toml",
           "src-tauri/Cargo.lock"
         ],

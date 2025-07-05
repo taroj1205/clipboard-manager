@@ -63,13 +63,13 @@ cd clipboard-manager
 2. Install dependencies:
 
 ```bash
-pnpm install
+bun install
 ```
 
 3. Start the development server:
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
 ## 🧪 Testing

@@ -22,19 +22,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version-file: .nvmrc
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-          run_install: false
+          bun-version: latest
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install
 
       - name: Check for changesets
         id: check-changesets
@@ -50,8 +44,8 @@ jobs:
         if: steps.check-changesets.outputs.has_changesets == 'true'
         uses: changesets/action@v1
         with:
-          version: pnpm run version-packages
-          commit: "chore: version packages"
+          version: bun run version-packages
+          commit: "chore(release): version packages"
           title: "Version Packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
