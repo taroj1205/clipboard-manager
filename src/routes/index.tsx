@@ -17,7 +17,6 @@ import {
   HStack,
   Separator,
   useNotice,
-  usePrevious,
   VStack,
 } from "@yamada-ui/react";
 import { useCallback, useEffect, useMemo } from "react";
@@ -93,7 +92,11 @@ function HomeComponent() {
 
   // Use flatList directly (no client-side filtering needed)
   const filteredFlatList = flatList;
-  const previousDataLength = usePrevious(filteredFlatList.length);
+
+  const selectedEntry =
+    selectedIndex !== null && filteredFlatList[selectedIndex]
+      ? filteredFlatList[selectedIndex]
+      : null;
 
   // Sort options configuration
   const sortOptions: SortOption[] = useMemo(
@@ -248,13 +251,14 @@ function HomeComponent() {
         typeFilter={typeFilter}
         typeOptions={typeOptions}
       />
-      {filteredFlatList.length > 0 ? (
-        <HStack
-          align="stretch"
-          flex={1}
-          gap="xs"
-          separator={<Separator orientation="vertical" />}
-        >
+      <HStack
+        alignItems="flex-start"
+        gap="sm"
+        h="full"
+        maxH="calc(100vh - 70px)"
+        w="full"
+      >
+        {filteredFlatList.length > 0 ? (
           <SidebarList
             entries={filteredFlatList}
             fetchNextPage={fetchNextPage}
@@ -262,30 +266,24 @@ function HomeComponent() {
             isFetchingNextPage={isFetchingNextPage}
             isLoading={isLoading}
             itemRefs={itemRefs}
-            previousDataLength={previousDataLength}
             selectedIndex={selectedIndex}
             setSelectedIndex={setSelectedIndex}
-            totalEntries={filteredFlatList.length}
           />
-          {filteredFlatList.length > 0 && (
-            <DetailsPanel selectedEntry={filteredFlatList[selectedIndex]} />
-          )}
-        </HStack>
-      ) : (
-        <Center flex={1} w="full">
-          <EmptyState>
-            <EmptyStateIndicator>
-              <FileIcon fontSize="40px" />
-            </EmptyStateIndicator>
-            <EmptyStateTitle>No clipboard entries</EmptyStateTitle>
-            <EmptyStateDescription>
-              {isLoading
-                ? "Loading your clipboard history..."
-                : "Your clipboard history is empty. Copy something to get started!"}
-            </EmptyStateDescription>
-          </EmptyState>
-        </Center>
-      )}
+        ) : (
+          <Center h="full" w="sm">
+            <EmptyState>
+              <EmptyStateIndicator>
+                <FileIcon />
+              </EmptyStateIndicator>
+              <EmptyStateTitle>No results found</EmptyStateTitle>
+              <EmptyStateDescription>
+                Try searching for something else
+              </EmptyStateDescription>
+            </EmptyState>
+          </Center>
+        )}
+        <DetailsPanel selectedEntry={selectedEntry} />
+      </HStack>
     </VStack>
   );
 }

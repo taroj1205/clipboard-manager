@@ -182,7 +182,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
     };
 
     return (
-      <Grid gap="sm" gridTemplateRows="1fr auto" px="sm" w="full">
+      <Grid gap="sm" gridTemplateRows="1fr auto" h="full" px="sm" w="full">
         <GridItem position="relative">
           <ButtonGroup gap="sm" position="absolute" right="xs" top="xs">
             <IconButton

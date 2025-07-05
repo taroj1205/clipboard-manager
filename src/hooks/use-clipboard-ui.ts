@@ -12,7 +12,6 @@ export function useClipboardUI() {
       const selectedItem = itemRefs.current[index];
       if (selectedItem) {
         selectedItem.scrollIntoView({
-          behavior: "smooth",
           block: "nearest",
         });
       }
@@ -22,6 +21,9 @@ export function useClipboardUI() {
   const handleArrowKey = useCallback(
     (direction: "down" | "up", listLength: number) => {
       setSelectedIndexRaw((prev) => {
+        if (listLength === 0) {
+          return 0;
+        }
         const newIndex =
           direction === "up"
             ? Math.max(0, prev - 1)
@@ -32,7 +34,6 @@ export function useClipboardUI() {
           const selectedItem = itemRefs.current[newIndex];
           if (selectedItem) {
             selectedItem.scrollIntoView({
-              behavior: "smooth",
               block: "nearest",
             });
           }

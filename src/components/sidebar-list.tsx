@@ -29,8 +29,6 @@ interface SidebarListProps {
   selectedIndex: null | number;
   setSelectedIndex: (index: number) => void;
   isLoading: boolean;
-  previousDataLength: number | undefined;
-  totalEntries: number;
 }
 
 const getBadgeColorScheme = (type: ClipboardEntry["type"]) => {
@@ -125,12 +123,11 @@ export const SidebarList = memo(
         entries,
         fetchNextPage,
         hasNextPage,
+        isFetchingNextPage,
         itemRefs,
         selectedIndex,
         setSelectedIndex,
         isLoading,
-        previousDataLength,
-        totalEntries,
       },
       ref
     ) => {
@@ -168,12 +165,12 @@ export const SidebarList = memo(
             loading={<Loading fontSize="lg" />}
             maxH="calc(100vh - 70px)"
             onLoad={({ finish }) => {
-              if (
-                totalEntries % 50 === 0 &&
-                previousDataLength !== totalEntries
-              ) {
+              if (isFetchingNextPage) {
+                return;
+              }
+              if (hasNextPage) {
                 fetchNextPage();
-              } else if (!hasNextPage) {
+              } else {
                 finish();
               }
             }}
@@ -185,11 +182,15 @@ export const SidebarList = memo(
             {Object.entries(grouped).map(([date, groupedEntries]) => (
               <VStack align="stretch" gap="xs" key={date}>
                 <Text
+                  backdropBlur="md"
+                  backdropFilter="auto"
+                  bg="transparentize(gray.900, 95%)"
                   fontSize="sm"
                   fontWeight="bold"
                   p="sm"
-                  roundedTop="md"
+                  position="sticky"
                   top={0}
+                  zIndex="freeza"
                 >
                   {date}
                 </Text>
