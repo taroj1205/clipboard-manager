@@ -10,18 +10,19 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
-      os:
-        description: "The operating system to build for"
-        required: true
-        default: "ubuntu-latest"
-        type: choice
-        options:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
-      build:
-        description: "Build the application"
-        required: true
+      build-ubuntu:
+        description: "Build for Ubuntu"
+        required: false
+        default: true
+        type: boolean
+      build-windows:
+        description: "Build for Windows"
+        required: false
+        default: false
+        type: boolean
+      build-macos:
+        description: "Build for macOS"
+        required: false
         default: false
         type: boolean
 
@@ -158,14 +159,45 @@ jobs:
       - name: Run ${{ matrix.task.name }}
         run: ${{ matrix.task.command }}
 
+  set-matrix:
+    name: Determine Build Matrix
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && 
+        (inputs.build-ubuntu || 
+         inputs.build-windows || 
+         inputs.build-macos))
+    outputs:
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
+    steps:
+      - id: generate-matrix
+        name: Generate Matrix
+        run: |
+          os_list_json=""
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            os_list_json='"ubuntu-latest", "windows-latest", "macos-latest"'
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            declare -a os_array=()
+            if [[ "${{ inputs.build-ubuntu }}" == "true" ]]; then
+              os_array+=('"ubuntu-latest"')
+            fi
+            if [[ "${{ inputs.build-windows }}" == "true" ]]; then
+              os_array+=('"windows-latest"')
+            fi
+            if [[ "${{ inputs.build-macos }}" == "true" ]]; then
+              os_array+=('"macos-latest"')
+            fi
+            os_list_json=$(IFS=,; echo "${os_array[*]}")
+          fi
+          echo "matrix={\"os\":[${os_list_json}]}" >> $GITHUB_OUTPUT
+
   build:
     name: Build Tauri App
     runs-on: ${{ matrix.os }}
     strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    needs: [setup, check, biome]
-    if: (github.event_name == 'workflow_dispatch' && inputs.build == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+    needs: [setup, check, biome, set-matrix]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
