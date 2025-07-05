@@ -29,6 +29,11 @@ export default defineConfig({
     port: 1420,
     strictPort: true,
   },
+  resolve: {
+    alias: {
+      "~": "./src",
+    },
+  },
   tools: {
     rspack: {
       plugins: [
