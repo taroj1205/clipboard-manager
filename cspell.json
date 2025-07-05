@@ -60,7 +60,9 @@
     "Misrefactored",
     "Shintaro",
     "Jokagi",
-    "freeza"
+    "freeza",
+    "nsis",
+    "appimage"
   ],
   "ignorePaths": [
     "node_modules/**",
