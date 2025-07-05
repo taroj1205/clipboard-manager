@@ -139,7 +139,6 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
       }
       try {
         background.start();
-        // Try to extract base64 from file path if content is a file path
         const imagePath = isArray(selectedEntry.path)
           ? selectedEntry.path[0]
           : selectedEntry.path;

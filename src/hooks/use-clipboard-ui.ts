@@ -7,7 +7,6 @@ export function useClipboardUI() {
 
   const setSelectedIndex = useCallback((index: number) => {
     setSelectedIndexRaw(index);
-    // Scroll to the selected item
     requestAnimationFrame(() => {
       const selectedItem = itemRefs.current[index];
       if (selectedItem) {
@@ -29,7 +28,6 @@ export function useClipboardUI() {
             ? Math.max(0, prev - 1)
             : Math.min(listLength - 1, prev + 1);
 
-        // Use requestAnimationFrame to batch the scroll update
         requestAnimationFrame(() => {
           const selectedItem = itemRefs.current[newIndex];
           if (selectedItem) {

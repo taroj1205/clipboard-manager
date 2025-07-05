@@ -32,24 +32,22 @@ export function useScrollManagement() {
       const visibleBottom = parentScroll + parentHeight;
       const offset = 70;
 
-      // Only scroll if the element is not fully visible
+      // if scrolling up
       if (elTop - offset < visibleTop) {
-        // Element is above the visible area
         parent.scrollTo({
           behavior: useSmooth ? "smooth" : "auto",
           top: elTop - offset,
         });
         return;
       }
+      // if scrolling down
       if (elBottom > visibleBottom) {
-        // Element is below the visible area
         parent.scrollTo({
           behavior: useSmooth ? "smooth" : "auto",
-          top: elBottom - parentHeight - 50,
+          top: elBottom - parentHeight,
         });
         return;
       }
-      // Otherwise, do nothing (element is fully visible)
     },
     []
   );

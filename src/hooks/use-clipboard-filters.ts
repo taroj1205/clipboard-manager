@@ -5,7 +5,6 @@ export interface TypeFilter {
   value: string;
 }
 
-// Define regex at top level for performance
 const TYPE_PREFIX_REGEX = /^type:([a-zA-Z,]+)\s*(.*)/;
 
 export function useClipboardFilters() {
@@ -32,7 +31,6 @@ export function useClipboardFilters() {
         const typesStr = typeMatch[1];
         const cleanQuery = typeMatch[2];
         const types = typesStr.split(",").map((t) => t.trim().toLowerCase());
-        // Only include valid types
         const validTypes = types.filter((t) =>
           typeOptions.some((opt) => opt.value === t)
         );

@@ -20,7 +20,6 @@ export function useEditExcludedAppForm(
     formState: { errors },
   } = useForm<EditFormData>();
 
-  // Fetch app data using TanStack Query
   const { data: app } = useQuery({
     enabled: !!appId,
     queryFn: async () => getExcludedAppById(appId as string),

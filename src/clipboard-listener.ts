@@ -87,7 +87,6 @@ async function handleImageClipboard(
       content: filename,
     });
 
-    // Extract text asynchronously and update entry
     try {
       const picturePath = await pictureDir();
       const ocrText = await extractTextFromImage(

@@ -133,10 +133,8 @@ export const SidebarList = memo(
     ) => {
       const notice = useNotice({ closeStrategy: "both", isClosable: true });
 
-      // Group entries by date
       const grouped = useMemo(() => groupEntriesByDate(entries), [entries]);
 
-      // Flat list for index mapping
       const flatList = useMemo(() => {
         const arr: (ClipboardEntry & { count: number; group: string })[] = [];
         for (const [date, items] of Object.entries(grouped)) {
@@ -147,11 +145,9 @@ export const SidebarList = memo(
         return arr;
       }, [grouped]);
 
-      // Initialize refs array with correct length, preserving existing refs
       if (itemRefs.current.length !== flatList.length) {
         const oldRefs = itemRefs.current;
         itemRefs.current = new Array(flatList.length);
-        // Preserve existing refs where possible
         for (let i = 0; i < flatList.length; i++) {
           itemRefs.current[i] = i < oldRefs.length ? oldRefs[i] : null;
         }
@@ -181,28 +177,16 @@ export const SidebarList = memo(
           >
             {Object.entries(grouped).map(([date, groupedEntries]) => (
               <VStack align="stretch" gap="xs" key={date}>
-                <Text
-                  backdropBlur="md"
-                  backdropFilter="auto"
-                  bg="transparentize(gray.900, 95%)"
-                  fontSize="sm"
-                  fontWeight="bold"
-                  p="sm"
-                  position="sticky"
-                  top={0}
-                  zIndex="freeza"
-                >
+                <Text fontSize="sm" fontWeight="bold" p="2">
                   {date}
                 </Text>
                 <List>
                   {groupedEntries.map((entry) => {
-                    // Find the flat index for selection
                     const flatIndex = flatList.findIndex(
                       (e) =>
                         e.timestamp === entry.timestamp &&
                         e.content === entry.content
                     );
-                    // Only render if flatIndex is in range
                     if (flatIndex === -1 || flatIndex >= flatList.length) {
                       return null;
                     }
@@ -227,7 +211,6 @@ export const SidebarList = memo(
             ))}
           </InfiniteScrollArea>
 
-          {/* Subtle refetching indicator */}
           {isLoading && flatList.length > 0 && (
             <Box
               bg="rgba(255, 255, 255, 0.9)"

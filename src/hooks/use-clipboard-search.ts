@@ -21,11 +21,10 @@ export function useClipboardSearch(initialData?: ClipboardEntry[]) {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [typeFilters, setTypeFilters] = useState<string[]>(["all"]);
 
-  // Debounce search query with a shorter delay for better UX
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 50); // 50ms debounce for fast feedback
+    }, 50);
 
     return () => clearTimeout(timeoutId);
   }, [query]);
@@ -51,10 +50,10 @@ export function useClipboardSearch(initialData?: ClipboardEntry[]) {
     isFetchingNextPage,
     isLoading,
   } = useInfiniteQuery<PaginatedClipboardResponse>({
-    gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
+    gcTime: 5 * 60 * 1000,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: 0,
-    maxPages: 10, // Limit to 10 pages in memory
+    maxPages: 10,
     queryFn: async ({ pageParam }) => {
       const result = await getPaginatedClipboardEntries(
         debouncedQuery,
@@ -73,17 +72,15 @@ export function useClipboardSearch(initialData?: ClipboardEntry[]) {
       sortOrder,
       typeFilters,
     ],
-    staleTime: 2 * 60 * 1000, // 2 minutes stale time
+    staleTime: 2 * 60 * 1000,
     placeholderData: keepPreviousData,
   });
 
-  // Flatten paginated results
   const results = useMemo(
     () => (data ? data.pages.flatMap((page) => page.entries) : []),
     [data]
   );
 
-  // Deduplicate and group entries by date, then flatten for selection
   const grouped = useMemo(() => groupEntriesByDate(results), [results]);
   const flatList = useMemo(() => {
     const arr: (ClipboardEntry & { count: number; group: string })[] = [];
