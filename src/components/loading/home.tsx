@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { CogIcon } from "@yamada-ui/lucide";
+import { ArrowDown01Icon, CogIcon } from "@yamada-ui/lucide";
 import {
   Badge,
   DataList,
@@ -10,6 +10,9 @@ import {
   IconButton,
   Input,
   List,
+  Menu,
+  MenuButton,
+  MultiSelect,
   ScrollArea,
   Separator,
   Skeleton,
@@ -21,19 +24,25 @@ import {
 export const HomeLoadingComponent = () => {
   return (
     <VStack color="white" gap="sm" h="100vh" p="sm" separator={<Separator />}>
-      {/* TopBar skeleton */}
-      <HStack gap="0" w="full">
-        <Input
-          borderRight="none"
-          disabled
-          placeholder="Type to search..."
-          roundedRight="none"
-        />
+      {/* TopBar skeleton - matches actual design */}
+      <HStack gap="xs" w="full">
+        <Input disabled placeholder="Type to search..." />
+        <MultiSelect disabled placeholder="Filter types..." w="200px" />
+        <Menu>
+          <MenuButton
+            aria-label="Sort options"
+            as={IconButton}
+            borderColor={["border", "border"]}
+            disabled
+            icon={<ArrowDown01Icon />}
+            variant="outline"
+          />
+        </Menu>
         <IconButton
           aria-label="Settings"
           as={Link}
           borderColor="border"
-          borderLeftRadius="none"
+          disabled
           to="/settings"
           variant="outline"
         >
@@ -60,20 +69,32 @@ export const HomeLoadingComponent = () => {
               {/* Date group header */}
               <Skeleton>
                 <Text fontSize="sm" fontWeight="bold" p="sm">
-                  Today
+                  {(() => {
+                    if (groupIndex === 0) {
+                      return "Today";
+                    }
+                    if (groupIndex === 1) {
+                      return "Yesterday";
+                    }
+                    return "This Week";
+                  })()}
                 </Text>
               </Skeleton>
 
               <List>
-                {Array.from({ length: 4 }, (_date, itemIndex) => (
-                  <Skeleton
-                    h="40px"
-                    key={`item-${groupIndex}-${
-                      // biome-ignore lint/suspicious/noArrayIndexKey: this is skeleton
-                      itemIndex
-                    }`}
-                  />
-                ))}
+                {Array.from(
+                  { length: Math.max(1, 4 - groupIndex) },
+                  (_date, itemIndex) => (
+                    <Skeleton
+                      h="60px"
+                      key={`item-${groupIndex}-${
+                        // biome-ignore lint/suspicious/noArrayIndexKey: this is skeleton
+                        itemIndex
+                      }`}
+                      mb="xs"
+                    />
+                  )
+                )}
               </List>
             </VStack>
           ))}
@@ -92,7 +113,7 @@ export const HomeLoadingComponent = () => {
                   <Text whiteSpace="pre-wrap" wordBreak="break-word">
                     This is sample clipboard content that shows how the text
                     would appear in the details panel. It can be multiple lines
-                    and wraps properly.
+                    and wraps properly. Loading your clipboard history...
                   </Text>
                 </VStack>
               </Skeleton>
@@ -119,13 +140,13 @@ export const HomeLoadingComponent = () => {
             <DataListItem>
               <DataListTerm>First Copied</DataListTerm>
               <DataListDescription>
-                <Skeleton>First Copied</Skeleton>
+                <Skeleton>2 minutes ago</Skeleton>
               </DataListDescription>
             </DataListItem>
             <DataListItem>
               <DataListTerm>Application</DataListTerm>
               <DataListDescription>
-                <Skeleton>Application Skeleton</Skeleton>
+                <Skeleton>VS Code</Skeleton>
               </DataListDescription>
             </DataListItem>
           </DataList>

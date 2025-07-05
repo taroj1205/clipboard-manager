@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -84,13 +87,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules-
           lookup-only: true
-
-      - name: Setup Node.js
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-
+          
       - name: Setup pnpm
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         uses: pnpm/action-setup@v3
@@ -98,22 +95,11 @@ jobs:
           version: latest
           run_install: false
 
-      - name: Get pnpm store directory
+      - name: Setup Node.js
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Restore pnpm cache
-        id: cache-pnpm-store
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        uses: actions/cache/restore@v4
+        uses: actions/setup-node@v4
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-          lookup-only: true
+          node-version-file: .nvmrc
 
       - name: Install dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -125,13 +111,6 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Save pnpm store cache
-        if: steps.cache-pnpm-store.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
   check:
     runs-on: ubuntu-latest
@@ -148,29 +127,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: latest
           run_install: false
 
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Restore pnpm cache
-        uses: actions/cache/restore@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version-file: .nvmrc
 
       - name: Restore node_modules cache
         id: cache-node-modules
@@ -195,7 +161,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     needs: [setup, check, biome]
-    if: github.event_name == 'workflow_dispatch' && inputs.build == true
+    if: (github.event_name == 'workflow_dispatch' && inputs.build == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -206,18 +172,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: latest
           run_install: false
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Restore node_modules cache
+        id: cache-node-modules
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Build
@@ -225,7 +201,7 @@ jobs:
 
   verify:
     name: Verify
-    needs: [check_changes, check, biome]
+    needs: [check_changes, check, biome, build]
     runs-on: ubuntu-latest
     if: always()
     steps:

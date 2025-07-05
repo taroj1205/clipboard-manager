@@ -14,6 +14,16 @@ export interface ClipboardEntry {
   path?: string | string[];
 }
 
+export interface PaginatedClipboardResponse {
+  entries: ClipboardEntry[];
+  nextCursor: number | null;
+  hasMore: boolean;
+  totalCount: number;
+}
+
+export type SortBy = "timestamp" | "relevance" | "type" | "app" | "content";
+export type SortOrder = "asc" | "desc";
+
 const whitespaceRegex = /\s+/;
 
 function serializePath(path: string | string[] | undefined): string | null {
@@ -21,6 +31,37 @@ function serializePath(path: string | string[] | undefined): string | null {
     return null;
   }
   return Array.isArray(path) ? JSON.stringify(path) : path;
+}
+
+function getSortClause(
+  sortBy: SortBy,
+  sortOrder: SortOrder,
+  hasQuery: boolean
+): string {
+  const order = sortOrder === "asc" ? "ASC" : "DESC";
+
+  switch (sortBy) {
+    case "timestamp":
+      return `timestamp ${order}`;
+    case "relevance":
+      return hasQuery ? `relevance ${order}, timestamp DESC` : "timestamp DESC";
+    case "type":
+      return `type ${order}, timestamp DESC`;
+    case "app":
+      return `app ${order}, timestamp DESC`;
+    case "content":
+      return `content ${order}, timestamp DESC`;
+    default:
+      return `timestamp ${order}`;
+  }
+}
+
+function buildTypeFilterClause(typeFilters: string[]) {
+  const hasTypeFilter = !typeFilters.includes("all") && typeFilters.length > 0;
+  const typeClause = hasTypeFilter
+    ? `AND type IN (${typeFilters.map(() => "?").join(", ")})`
+    : "";
+  return { hasTypeFilter, typeClause };
 }
 
 async function copyImageEntry(
@@ -144,11 +185,52 @@ export async function deleteClipboardEntry(timestamp: number): Promise<void> {
 export async function getPaginatedClipboardEntries(
   query: string,
   limit = 50,
-  offset = 0
-): Promise<ClipboardEntry[]> {
-  let result: ClipboardEntry[];
+  offset = 0,
+  sortBy: SortBy = "timestamp",
+  sortOrder: SortOrder = "desc",
+  typeFilters: string[] = ["all"]
+): Promise<PaginatedClipboardResponse> {
+  const { hasTypeFilter, typeClause } = buildTypeFilterClause(typeFilters);
+
+  // Get total count
+  const countResult = (await getCountForQuery(
+    query,
+    typeClause,
+    hasTypeFilter,
+    typeFilters
+  )) as { count: number }[];
+  const totalCount = countResult[0].count;
+
+  // Get results
+  const result = await getResultsForQuery(
+    query,
+    typeClause,
+    hasTypeFilter,
+    typeFilters,
+    sortBy,
+    sortOrder,
+    limit,
+    offset
+  );
+
+  const hasMore = offset + limit < totalCount;
+  const nextCursor = hasMore ? offset + limit : null;
+
+  return {
+    entries: result,
+    nextCursor,
+    hasMore,
+    totalCount,
+  };
+}
+
+function getCountForQuery(
+  query: string,
+  typeClause: string,
+  hasTypeFilter: boolean,
+  typeFilters: string[]
+) {
   if (query) {
-    // Multi-word (tokenized) search: all words must be present in content, path, or app, case-insensitive
     const words = query.trim().split(whitespaceRegex);
     const likeClauses = words
       .map(
@@ -161,45 +243,103 @@ export async function getPaginatedClipboardEntries(
       `%${word}%`,
       `%${word}%`,
     ]);
-    // For relevance, boost if all words match exactly, then if any word is a prefix, then if all are substrings
-    // (Simple: just use the first word for exact/prefix, rest for AND substrings)
-    const firstWord = words[0];
-    const startsWithQuery = `${firstWord}%`;
-    const likeQuery = `%${firstWord}%`;
-    result = (await db.select(
-      `SELECT *,
-        (CASE
-          WHEN content = ? COLLATE NOCASE OR path = ? COLLATE NOCASE OR app = ? COLLATE NOCASE THEN 3
-          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE THEN 2
-          WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE THEN 1
-          ELSE 0
-        END) AS relevance
-      FROM clipboard_entries
-      WHERE ${likeClauses}
-      ORDER BY relevance DESC, timestamp DESC
-      LIMIT ? OFFSET ?`,
-      [
-        firstWord,
-        firstWord,
-        firstWord,
-        startsWithQuery,
-        startsWithQuery,
-        startsWithQuery,
-        likeQuery,
-        likeQuery,
-        likeQuery,
-        ...likeParams,
-        limit,
-        offset,
-      ]
-    )) as ClipboardEntry[];
-  } else {
-    result = (await db.select(
-      "SELECT * FROM clipboard_entries ORDER BY timestamp DESC LIMIT ? OFFSET ?",
-      [limit, offset]
-    )) as ClipboardEntry[];
+    return db.select(
+      `SELECT COUNT(*) as count FROM clipboard_entries WHERE ${likeClauses} ${typeClause}`,
+      [...likeParams, ...(hasTypeFilter ? typeFilters : [])]
+    );
   }
-  return result;
+  return db.select(
+    `SELECT COUNT(*) as count FROM clipboard_entries ${hasTypeFilter ? `WHERE ${typeClause.slice(4)}` : ""}`,
+    hasTypeFilter ? typeFilters : []
+  );
+}
+
+function getResultsForQuery(
+  query: string,
+  typeClause: string,
+  hasTypeFilter: boolean,
+  typeFilters: string[],
+  sortBy: SortBy,
+  sortOrder: SortOrder,
+  limit: number,
+  offset: number
+): Promise<ClipboardEntry[]> {
+  if (query) {
+    return getSearchResults(
+      query,
+      typeClause,
+      hasTypeFilter,
+      typeFilters,
+      sortBy,
+      sortOrder,
+      limit,
+      offset
+    );
+  }
+
+  const sortClause = getSortClause(sortBy, sortOrder, false);
+  return db.select(
+    `SELECT * FROM clipboard_entries ${hasTypeFilter ? `WHERE ${typeClause.slice(4)}` : ""} ORDER BY ${sortClause} LIMIT ? OFFSET ?`,
+    [...(hasTypeFilter ? typeFilters : []), limit, offset]
+  ) as Promise<ClipboardEntry[]>;
+}
+
+async function getSearchResults(
+  query: string,
+  typeClause: string,
+  hasTypeFilter: boolean,
+  typeFilters: string[],
+  sortBy: SortBy,
+  sortOrder: SortOrder,
+  limit: number,
+  offset: number
+): Promise<ClipboardEntry[]> {
+  const words = query.trim().split(whitespaceRegex);
+  const likeClauses = words
+    .map(
+      () =>
+        "(content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE)"
+    )
+    .join(" AND ");
+  const likeParams = words.flatMap((word) => [
+    `%${word}%`,
+    `%${word}%`,
+    `%${word}%`,
+  ]);
+
+  const firstWord = words[0];
+  const startsWithQuery = `${firstWord}%`;
+  const likeQuery = `%${firstWord}%`;
+  const sortClause = getSortClause(sortBy, sortOrder, true);
+
+  return (await db.select(
+    `SELECT *,
+      (CASE
+        WHEN content = ? COLLATE NOCASE OR path = ? COLLATE NOCASE OR app = ? COLLATE NOCASE THEN 3
+        WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE THEN 2
+        WHEN content LIKE ? COLLATE NOCASE OR path LIKE ? COLLATE NOCASE OR app LIKE ? COLLATE NOCASE THEN 1
+        ELSE 0
+      END) AS relevance
+    FROM clipboard_entries
+    WHERE ${likeClauses} ${typeClause}
+    ORDER BY ${sortClause}
+    LIMIT ? OFFSET ?`,
+    [
+      firstWord,
+      firstWord,
+      firstWord,
+      startsWithQuery,
+      startsWithQuery,
+      startsWithQuery,
+      likeQuery,
+      likeQuery,
+      likeQuery,
+      ...likeParams,
+      ...(hasTypeFilter ? typeFilters : []),
+      limit,
+      offset,
+    ]
+  )) as ClipboardEntry[];
 }
 
 export async function getAllClipboardEntries(

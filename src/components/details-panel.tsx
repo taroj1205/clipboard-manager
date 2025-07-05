@@ -9,7 +9,6 @@ import {
 } from "@yamada-ui/lucide";
 import {
   Badge,
-  Box,
   ButtonGroup,
   Center,
   DataList,
@@ -35,7 +34,7 @@ import {
   editClipboardEntry,
   extractTextFromImage,
 } from "~/utils/clipboard";
-import { ImagePreview, TextPreview } from "./preview";
+import { ColorPreview, ImagePreview, TextPreview } from "./preview";
 
 interface DetailsPanelProps {
   selectedEntry: (ClipboardEntry & { count?: number }) | null;
@@ -64,42 +63,10 @@ const renderPreviewContent = (
 
   if (selectedEntry.type === "color") {
     return (
-      <Center h="200px">
-        <Box
-          alignItems="center"
-          bg={selectedEntry.content}
-          borderColor="gray.300"
-          borderRadius="full"
-          borderWidth="2px"
-          boxShadow="md"
-          className="group"
-          display="flex"
-          h="120px"
-          justifyContent="center"
-          position="relative"
-          w="120px"
-        >
-          <IconButton
-            _groupHover={{
-              opacity: 1,
-            }}
-            aria-label="Copy Color"
-            colorScheme="blackAlpha"
-            icon={<CopyIcon />}
-            left="50%"
-            onClick={() => {
-              copyClipboardEntry(selectedEntry, notice);
-            }}
-            opacity={0}
-            position="absolute"
-            size="lg"
-            title="Copy Color"
-            top="50%"
-            transform="translate(-50%, -50%)"
-            variant="solid"
-          />
-        </Box>
-      </Center>
+      <ColorPreview
+        color={selectedEntry.content}
+        onCopy={() => copyClipboardEntry(selectedEntry, notice)}
+      />
     );
   }
 
@@ -172,7 +139,6 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
       }
       try {
         background.start();
-        // Try to extract base64 from file path if content is a file path
         const imagePath = isArray(selectedEntry.path)
           ? selectedEntry.path[0]
           : selectedEntry.path;
@@ -215,7 +181,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
     };
 
     return (
-      <Grid gap="sm" gridTemplateRows="1fr auto" px="sm" w="full">
+      <Grid gap="sm" gridTemplateRows="1fr auto" h="full" px="sm" w="full">
         <GridItem position="relative">
           <ButtonGroup gap="sm" position="absolute" right="xs" top="xs">
             <IconButton

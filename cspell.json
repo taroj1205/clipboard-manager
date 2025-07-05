@@ -59,7 +59,8 @@
     "Instantiator",
     "Misrefactored",
     "Shintaro",
-    "Jokagi"
+    "Jokagi",
+    "freeza"
   ],
   "ignorePaths": [
     "node_modules/**",

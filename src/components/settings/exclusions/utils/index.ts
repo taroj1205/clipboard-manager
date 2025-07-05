@@ -1,4 +1,3 @@
-// Utility exports for excluded applications
 export * from "./columns";
 export * from "./use-add-excluded-app-form";
 export * from "./use-edit-excluded-app-form";

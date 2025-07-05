@@ -6,8 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "rsbuild start",
-    "build": "tsc && rsbuild build",
+    "build": "rsbuild build",
     "preview": "rsbuild preview",
+    "typecheck": "tsc --noEmit",
     "tauri": "tauri",
     "lint": "biome check",
     "lint:fix": "biome check --write",
@@ -35,7 +36,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "7.56.4",
-    "tauri-plugin-clipboard-api": "2.1.11"
+    "tauri-plugin-clipboard-api": "2.1.11",
+    "zod": "^3.25.74"
   },
   "devDependencies": {
     "@babel/core": "7.27.1",
