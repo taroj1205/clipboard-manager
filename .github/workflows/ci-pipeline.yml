@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -97,7 +100,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
 
       - name: Install dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -135,7 +137,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
 
       - name: Restore node_modules cache
         id: cache-node-modules
@@ -160,7 +161,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     needs: [setup, check, biome]
-    if: github.event_name == 'workflow_dispatch' && inputs.build == true
+    if: (github.event_name == 'workflow_dispatch' && inputs.build == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -181,9 +182,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
+
+      - name: Restore node_modules cache
+        id: cache-node-modules
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
 
       - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Build
@@ -191,7 +201,7 @@ jobs:
 
   verify:
     name: Verify
-    needs: [check_changes, check, biome]
+    needs: [check_changes, check, biome, build]
     runs-on: ubuntu-latest
     if: always()
     steps:
