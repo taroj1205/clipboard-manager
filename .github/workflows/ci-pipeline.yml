@@ -235,6 +235,18 @@ jobs:
       - name: Build
         run: pnpm run tauri build
 
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: clipboard-manager-${{ runner.os }}
+          path: |
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/appimage/*.AppImage
+            src-tauri/target/release/bundle/deb/*.deb
+          if-no-files-found: warn
+
   verify:
     name: Verify
     needs: [check_changes, check, biome, build]
