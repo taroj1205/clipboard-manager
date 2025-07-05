@@ -6,8 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "rsbuild start",
-    "build": "tsc && rsbuild build",
+    "build": "rsbuild build",
     "preview": "rsbuild preview",
+    "typecheck": "tsc --noEmit",
     "tauri": "tauri",
     "lint": "biome check",
     "lint:fix": "biome check --write",
