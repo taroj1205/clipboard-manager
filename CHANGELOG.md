@@ -1,5 +1,11 @@
 # clipboard-manager
 
+## 0.0.11
+
+### Patch Changes
+
+- [#76](https://github.com/taroj1205/clipboard-manager/pull/76) [`967fe62`](https://github.com/taroj1205/clipboard-manager/commit/967fe628219a178edf48367909fbdd8ad8379105) Thanks [@taroj1205](https://github.com/taroj1205)! - Added filter and sort feature. I have also added better color preview with a color conversion.
+
 ## 0.0.10
 
 ### Patch Changes
