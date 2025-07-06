@@ -1143,6 +1143,10 @@ packages:
     resolution: {integrity: sha512-WpxgG5qbaCNZpmobobB9AWfH18jBD5g1lyFKyHUuPnbUZ19QhmKdEUIto2IDeS/vrSpx2BX7zZnZ/5C2Eg7bkw==}
     engines: {node: '>=12'}
 
+  '@tanstack/router-core@1.125.3':
+    resolution: {integrity: sha512-Nz4mcVqRJR7O9A1+/l9RZJV/bFVjWNEajtg6ZzlXomeZ+Dqo5vNBf5zzkmG2bAi1iibcQDAgt8T2LjCEn1JsGg==}
+    engines: {node: '>=12'}
+
   '@tanstack/router-generator@1.124.2':
     resolution: {integrity: sha512-VjrnZM25sXu0Tgb4StMFNeYjiiYVQNqhq4TjQlVkxLU4RUjmjAC1iIT2OpyLvcYqno0et7OMO8h2mLWG2Z83Eg==}
     engines: {node: '>=12'}
@@ -4623,9 +4627,18 @@ snapshots:
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
 
+  '@tanstack/router-core@1.125.3':
+    dependencies:
+      '@tanstack/history': 1.121.34
+      '@tanstack/store': 0.7.1
+      cookie-es: 1.2.2
+      jsesc: 3.1.0
+      tiny-invariant: 1.3.3
+      tiny-warning: 1.0.3
+
   '@tanstack/router-generator@1.124.2':
     dependencies:
-      '@tanstack/router-core': 1.124.2
+      '@tanstack/router-core': 1.125.3
       '@tanstack/router-utils': 1.121.21
       '@tanstack/virtual-file-routes': 1.121.21
       prettier: 3.6.2
@@ -4644,7 +4657,7 @@ snapshots:
       '@babel/template': 7.27.2
       '@babel/traverse': 7.28.0
       '@babel/types': 7.28.0
-      '@tanstack/router-core': 1.124.2
+      '@tanstack/router-core': 1.125.3
       '@tanstack/router-generator': 1.124.2
       '@tanstack/router-utils': 1.121.21
       '@tanstack/virtual-file-routes': 1.121.21
