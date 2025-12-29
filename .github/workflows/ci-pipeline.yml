@@ -222,9 +222,9 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: Restore node_modules cache
+      - name: Setup node_modules cache
         id: cache-node-modules
-        uses: actions/cache/restore@v4
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
