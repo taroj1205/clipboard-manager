@@ -1,3 +1,5 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { listen } from "@tauri-apps/api/event";
 import {
   Alert,
   AlertDescription,
@@ -12,12 +14,33 @@ import {
   useNotice,
   VStack,
 } from "@yamada-ui/react";
-import { memo, useCallback } from "react";
-import { deleteAllClipboardEntries } from "~/db/clipboard-entries";
+import { memo, useCallback, useEffect } from "react";
+import {
+  deleteAllClipboardEntries,
+  getClipboardEntriesCount,
+} from "~/db/clipboard-entries";
 
 export const DeleteAll = memo(() => {
   const { onClose, onOpen, open } = useDisclosure();
   const notice = useNotice();
+  const queryClient = useQueryClient();
+
+  const { data: entriesCount = 0 } = useQuery({
+    queryFn: async () => getClipboardEntriesCount(),
+    queryKey: ["clipboard-entry-count"],
+  });
+
+  useEffect(() => {
+    const unlistenPromise = listen("clipboard-entry-updated", () => {
+      queryClient.invalidateQueries({ queryKey: ["clipboard-entry-count"] });
+    });
+
+    return () => {
+      unlistenPromise.then((unlisten) => {
+        unlisten();
+      });
+    };
+  }, [queryClient]);
 
   const handleDelete = useCallback(async () => {
     try {
@@ -37,13 +60,16 @@ export const DeleteAll = memo(() => {
     onClose();
   }, [onClose, notice]);
 
+  const entriesCountLabel = entriesCount.toLocaleString();
+
   return (
     <VStack>
       <Alert colorScheme="danger" status="warning" variant="subtle">
         <AlertIcon />
         <AlertTitle>Warning</AlertTitle>
         <AlertDescription>
-          This will delete all clipboard entries. This action cannot be undone.
+          This will delete all {entriesCountLabel} clipboard entries. This
+          action cannot be undone.
         </AlertDescription>
       </Alert>
       <Button colorScheme="danger" onClick={onOpen} w="fit-content">

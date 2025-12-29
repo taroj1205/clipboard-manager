@@ -48,6 +48,7 @@ export function useClipboardSearch(initialData?: ClipboardEntry[]) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetching,
     isLoading,
   } = useInfiniteQuery<PaginatedClipboardResponse>({
     gcTime: 5 * 60 * 1000,
@@ -142,6 +143,7 @@ export function useClipboardSearch(initialData?: ClipboardEntry[]) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetching,
     isLoading,
     invalidateQueries,
   };

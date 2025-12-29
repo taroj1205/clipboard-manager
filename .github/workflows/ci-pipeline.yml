@@ -18,7 +18,7 @@ on:
       build-windows:
         description: "Build for Windows"
         required: false
-        default: false
+        default: true
         type: boolean
       build-macos:
         description: "Build for macOS"
@@ -65,12 +65,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
-          version: latest
-          
+          version: 2.0.6
+
       - name: Run Biome
         run: biome ci .
 
@@ -92,7 +92,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules-
           lookup-only: true
-          
+
       - name: Setup pnpm
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         uses: pnpm/action-setup@v3
@@ -164,9 +164,10 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && 
-        (inputs.build-ubuntu || 
-         inputs.build-windows || 
+      (github.event_name == 'pull_request') ||
+      (github.event_name == 'workflow_dispatch' &&
+        (inputs.build-ubuntu ||
+         inputs.build-windows ||
          inputs.build-macos))
     outputs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
@@ -177,6 +178,8 @@ jobs:
           os_list_json=""
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             os_list_json='"ubuntu-latest", "windows-latest", "macos-latest"'
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            os_list_json='"windows-latest"'
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             declare -a os_array=()
             if [[ "${{ inputs.build-ubuntu }}" == "true" ]]; then
@@ -218,19 +221,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+          cache: 'pnpm'
 
-      - name: Restore node_modules cache
-        id: cache-node-modules
-        uses: actions/cache/restore@v4
+      - name: Setup Cargo cache
+        uses: actions/cache@v4
+        if: runner.os == 'Windows' || github.event_name == 'pull_request'
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-node-modules-
+            ${{ runner.os }}-cargo-
 
       - name: Install dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build
         run: pnpm run tauri build
