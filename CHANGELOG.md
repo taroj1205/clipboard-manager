@@ -1,5 +1,13 @@
 # clipboard-manager
 
+## 0.0.12
+
+### Patch Changes
+
+- [#86](https://github.com/taroj1205/clipboard-manager/pull/86) [`a7ee09a`](https://github.com/taroj1205/clipboard-manager/commit/a7ee09add72a02bd23d6858f56903b0a8de71de0) Thanks [@taroj1205](https://github.com/taroj1205)! - Added a entry count and improve fetching indicator, and image display. Fixed color conversion display.
+
+- [#88](https://github.com/taroj1205/clipboard-manager/pull/88) [`fb871ac`](https://github.com/taroj1205/clipboard-manager/commit/fb871acc02e599cc2e78302ac56fe2d6cad51903) Thanks [@taroj1205](https://github.com/taroj1205)! - Added a smart search for converting or calculating things.
+
 ## 0.0.11
 
 ### Patch Changes
