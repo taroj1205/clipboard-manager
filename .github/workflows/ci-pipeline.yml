@@ -164,6 +164,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request') ||
       (github.event_name == 'workflow_dispatch' &&
         (inputs.build-ubuntu ||
          inputs.build-windows ||
@@ -177,6 +178,8 @@ jobs:
           os_list_json=""
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             os_list_json='"ubuntu-latest", "windows-latest", "macos-latest"'
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            os_list_json='"windows-latest"'
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             declare -a os_array=()
             if [[ "${{ inputs.build-ubuntu }}" == "true" ]]; then
