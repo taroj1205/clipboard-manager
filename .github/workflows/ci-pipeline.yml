@@ -231,7 +231,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules-
 
-      - name: Restore Cargo cache
+      - name: Setup Cargo cache
         uses: actions/cache@v4
         with:
           path: |
