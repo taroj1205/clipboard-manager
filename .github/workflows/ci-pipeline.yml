@@ -65,12 +65,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
-          version: latest
-          
+          version: 2.0.6
+
       - name: Run Biome
         run: biome ci .
 
@@ -92,7 +92,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules-
           lookup-only: true
-          
+
       - name: Setup pnpm
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         uses: pnpm/action-setup@v3
@@ -164,9 +164,9 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && 
-        (inputs.build-ubuntu || 
-         inputs.build-windows || 
+      (github.event_name == 'workflow_dispatch' &&
+        (inputs.build-ubuntu ||
+         inputs.build-windows ||
          inputs.build-macos))
     outputs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}

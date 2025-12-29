@@ -62,7 +62,8 @@
     "Jokagi",
     "freeza",
     "nsis",
-    "appimage"
+    "appimage",
+    "EDITMSG"
   ],
   "ignorePaths": [
     "node_modules/**",
@@ -74,7 +75,8 @@
     "src-tauri/target/**",
     "*.min.js",
     "*.min.css",
-    "src/routeTree.gen.ts"
+    "src/routeTree.gen.ts",
+    ".gitignore"
   ],
   "ignoreRegExpList": ["Email", "password", "hash", "base64"]
 }
