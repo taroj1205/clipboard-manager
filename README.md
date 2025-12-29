@@ -23,5 +23,5 @@ pnpm tauri dev
 ## Build
 
 ```bash
-pnpm build
+pnpm tauri build
 ```
