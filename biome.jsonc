@@ -785,6 +785,7 @@
     "defaultBranch": "main"
   },
   "files": {
-    "includes": ["**", "!src-tauri/target/*", "!src/routeTree.gen.ts"]
+    "includes": ["**", "!src-tauri/target/**", "!src/routeTree.gen.ts"],
+    "ignoreUnknown": true
   }
 }
