@@ -14,7 +14,7 @@
     "lint:fix": "biome check --write",
     "format": "biome format --write",
     "format:check": "biome format --check",
-    "spell": "cspell \"**/*.{ts,tsx,js,jsx,md}\"",
+    "spell": "cspell \"**/*.{ts,tsx,js,jsx,md}\" --gitignore --cache",
     "commitlint": "commitlint",
     "lefthook:install": "lefthook install",
     "lefthook:uninstall": "lefthook uninstall",

@@ -12,6 +12,7 @@ import type {
 } from "~/utils/clipboard";
 import { getPaginatedClipboardEntries } from "~/utils/clipboard";
 import { groupEntriesByDate } from "~/utils/dates";
+import { buildSmartEntry } from "~/utils/smart-search";
 
 export function useClipboardSearch(initialData?: ClipboardEntry[]) {
   const queryClient = useQueryClient();
@@ -77,10 +78,33 @@ export function useClipboardSearch(initialData?: ClipboardEntry[]) {
     placeholderData: keepPreviousData,
   });
 
-  const results = useMemo(
-    () => (data ? data.pages.flatMap((page) => page.entries) : []),
-    [data]
-  );
+  const smartEntry = useMemo(() => {
+    if (!debouncedQuery.trim()) {
+      return null;
+    }
+    const entry = buildSmartEntry(debouncedQuery, Date.now());
+    if (!entry) {
+      return null;
+    }
+    const isAllTypes = typeFilters.length === 0 || typeFilters.includes("all");
+    if (!(isAllTypes || typeFilters.includes(entry.type))) {
+      return null;
+    }
+    return entry;
+  }, [debouncedQuery, typeFilters]);
+
+  const results = useMemo(() => {
+    const entries = data ? data.pages.flatMap((page) => page.entries) : [];
+    if (!smartEntry) {
+      return entries;
+    }
+    return [smartEntry, ...entries];
+  }, [data, smartEntry]);
+
+  const isHistoryLoading =
+    Boolean(smartEntry) &&
+    isLoading &&
+    (!data || data.pages.every((page) => page.entries.length === 0));
 
   const grouped = useMemo(() => groupEntriesByDate(results), [results]);
   const flatList = useMemo(() => {
@@ -145,6 +169,7 @@ export function useClipboardSearch(initialData?: ClipboardEntry[]) {
     isFetchingNextPage,
     isFetching,
     isLoading,
+    isHistoryLoading,
     invalidateQueries,
   };
 }

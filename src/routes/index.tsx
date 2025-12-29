@@ -77,6 +77,7 @@ function HomeComponent() {
     isFetchingNextPage,
     isFetching,
     isLoading,
+    isHistoryLoading,
     invalidateQueries,
   } = useClipboardSearch(loaderData);
 
@@ -265,6 +266,7 @@ function HomeComponent() {
             fetchNextPage={fetchNextPage}
             hasNextPage={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
+            isHistoryLoading={isHistoryLoading}
             isLoading={isLoading}
             itemRefs={itemRefs}
             selectedIndex={selectedIndex}

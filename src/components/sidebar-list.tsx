@@ -1,4 +1,4 @@
-import { FileIcon, ImageIcon } from "@yamada-ui/lucide";
+import { FileIcon, ImageIcon, StarIcon } from "@yamada-ui/lucide";
 import {
   Badge,
   Box,
@@ -26,6 +26,7 @@ interface SidebarListProps {
   fetchNextPage: () => void;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  isHistoryLoading: boolean;
   itemRefs: React.RefObject<(HTMLLIElement | null)[]>;
   selectedIndex: null | number;
   setSelectedIndex: (index: number) => void;
@@ -54,6 +55,23 @@ interface SidebarListItemProps {
   refProp: (el: HTMLLIElement | null) => void;
 }
 
+const SidebarEntryIcon = ({ entry }: { entry: ClipboardEntry }) => {
+  const { normalizeColor } = useColorConverters();
+  const swatchColor =
+    entry.type === "color" ? normalizeColor(entry.content) : "";
+
+  if (entry.app === "Smart Search") {
+    return <StarIcon fontSize="16px" />;
+  }
+  if (entry.type === "image") {
+    return <ImageIcon fontSize="16px" />;
+  }
+  if (entry.type === "color") {
+    return <ColorSwatch color={swatchColor} h="16px" w="16px" />;
+  }
+  return null;
+};
+
 const SidebarListItem = memo(
   ({
     entry,
@@ -63,9 +81,7 @@ const SidebarListItem = memo(
     notice,
     refProp,
   }: SidebarListItemProps) => {
-    const { normalizeColor } = useColorConverters();
-    const swatchColor =
-      entry.type === "color" ? normalizeColor(entry.content) : "";
+    const isSmartEntry = entry.app === "Smart Search";
 
     return (
       <ListItem
@@ -83,13 +99,7 @@ const SidebarListItem = memo(
         transitionProperty="background"
       >
         <HStack gap="sm">
-          {entry.type === "image" ? (
-            <ImageIcon fontSize="16px" />
-          ) : (
-            entry.type === "color" && (
-              <ColorSwatch color={swatchColor} h="16px" w="16px" />
-            )
-          )}
+          <SidebarEntryIcon entry={entry} />
           {entry.type !== "color" && <FileIcon fontSize="16px" />}
           {entry.type === "image" && entry.path ? (
             <ClipboardImage
@@ -106,6 +116,11 @@ const SidebarListItem = memo(
           {entry.count > 1 && (
             <Badge colorScheme="red" fontSize="xs" title="Copy count">
               x{entry.count}
+            </Badge>
+          )}
+          {isSmartEntry && (
+            <Badge colorScheme="green" fontSize="xs" title="Smart result">
+              Smart
             </Badge>
           )}
           <Badge colorScheme={getBadgeColorScheme(entry.type)}>
@@ -129,6 +144,7 @@ export const SidebarList = memo(
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
+        isHistoryLoading,
         itemRefs,
         selectedIndex,
         setSelectedIndex,
@@ -214,6 +230,16 @@ export const SidebarList = memo(
                 </List>
               </VStack>
             ))}
+            {isHistoryLoading && (
+              <Box
+                alignItems="center"
+                display="flex"
+                justifyContent="center"
+                p="4"
+              >
+                <Loading fontSize="lg" />
+              </Box>
+            )}
           </InfiniteScrollArea>
 
           {isLoading && flatList.length > 0 && (

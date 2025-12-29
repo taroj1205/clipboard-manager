@@ -22,5 +22,6 @@ post-checkout:
 post-merge:
   commands:
     pnpm:
+      files: git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD
       glob: "{package.json,pnpm-lock.yaml}"
       run: pnpm install
