@@ -233,6 +233,7 @@ jobs:
 
       - name: Setup Cargo cache
         uses: actions/cache@v4
+        if: runner.os == 'Windows' || github.event_name == 'pull_request'
         with:
           path: |
             ~/.cargo/registry
