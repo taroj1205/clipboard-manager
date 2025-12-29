@@ -250,7 +250,8 @@ const flushUntilLeftParen = (
   operators: Array<Operator | "(">,
   output: MathToken[]
 ): boolean => {
-  while (operators.length > 0 && operators.at(-1) !== "(") {
+  // biome-ignore lint/style/useAtIndex: .at() requires newer lib target.
+  while (operators.length > 0 && operators[operators.length - 1] !== "(") {
     output.push({ kind: "operator", value: operators.pop() as Operator });
   }
   if (operators.length === 0) {
@@ -266,11 +267,12 @@ const pushOperator = (
   output: MathToken[]
 ) => {
   while (operators.length > 0) {
-    const top = operators.at(-1);
-    if (
-      top === "(" ||
-      operatorPrecedence[top] < operatorPrecedence[token.value]
-    ) {
+    // biome-ignore lint/style/useAtIndex: .at() requires newer lib target.
+    const top = operators[operators.length - 1];
+    if (top === "(") {
+      break;
+    }
+    if (operatorPrecedence[top] < operatorPrecedence[token.value]) {
       break;
     }
     output.push({ kind: "operator", value: operators.pop() as Operator });
@@ -357,7 +359,7 @@ const toRpn = (tokens: MathToken[]): MathToken[] | null => {
 
   while (operators.length > 0) {
     const top = operators.pop();
-    if (top === "(") {
+    if (!top || top === "(") {
       return null;
     }
     output.push({ kind: "operator", value: top });
@@ -381,6 +383,10 @@ const evaluateRpn = (tokens: MathToken[]): number | null => {
     if (token.kind === "number") {
       stack.push(token.value);
       continue;
+    }
+
+    if (token.kind !== "operator") {
+      return null;
     }
 
     const right = stack.pop();

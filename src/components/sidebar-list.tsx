@@ -26,6 +26,7 @@ interface SidebarListProps {
   fetchNextPage: () => void;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  isHistoryLoading: boolean;
   itemRefs: React.RefObject<(HTMLLIElement | null)[]>;
   selectedIndex: null | number;
   setSelectedIndex: (index: number) => void;
@@ -143,6 +144,7 @@ export const SidebarList = memo(
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
+        isHistoryLoading,
         itemRefs,
         selectedIndex,
         setSelectedIndex,
@@ -228,6 +230,16 @@ export const SidebarList = memo(
                 </List>
               </VStack>
             ))}
+            {isHistoryLoading && (
+              <Box
+                alignItems="center"
+                display="flex"
+                justifyContent="center"
+                p="4"
+              >
+                <Loading fontSize="lg" />
+              </Box>
+            )}
           </InfiniteScrollArea>
 
           {isLoading && flatList.length > 0 && (

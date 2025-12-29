@@ -101,6 +101,11 @@ export function useClipboardSearch(initialData?: ClipboardEntry[]) {
     return [smartEntry, ...entries];
   }, [data, smartEntry]);
 
+  const isHistoryLoading =
+    Boolean(smartEntry) &&
+    isLoading &&
+    (!data || data.pages.every((page) => page.entries.length === 0));
+
   const grouped = useMemo(() => groupEntriesByDate(results), [results]);
   const flatList = useMemo(() => {
     const arr: (ClipboardEntry & { count: number; group: string })[] = [];
@@ -164,6 +169,7 @@ export function useClipboardSearch(initialData?: ClipboardEntry[]) {
     isFetchingNextPage,
     isFetching,
     isLoading,
+    isHistoryLoading,
     invalidateQueries,
   };
 }
