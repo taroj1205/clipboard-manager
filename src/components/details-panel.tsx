@@ -128,6 +128,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
       );
     }
 
+    const isSmartEntry = selectedEntry.app === "Smart Search";
     const ocrCopyable =
       selectedEntry.type === "image" &&
       selectedEntry.content &&
@@ -259,14 +260,31 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
               variant="surface"
             />
           </ButtonGroup>
-          <ScrollArea
-            h="full"
-            maxH="calc(100vh - 70px - 160px)"
-            overflowX="hidden"
-            w="full"
-          >
-            {renderPreviewContent(selectedEntry, notice)}
-          </ScrollArea>
+          {isSmartEntry ? (
+            <>
+              <Badge
+                colorScheme="green"
+                left="xs"
+                position="absolute"
+                title="Smart result"
+                top="xs"
+              >
+                Smart Result
+              </Badge>
+              <Center fontSize="4xl" h="full" maxH="calc(100vh - 70px - 160px)">
+                {renderPreviewContent(selectedEntry, notice)}
+              </Center>
+            </>
+          ) : (
+            <ScrollArea
+              h="full"
+              maxH="calc(100vh - 70px - 160px)"
+              overflowX="hidden"
+              w="full"
+            >
+              {renderPreviewContent(selectedEntry, notice)}
+            </ScrollArea>
+          )}
         </GridItem>
         <GridItem>
           <DataList col={2} w="fit-content">

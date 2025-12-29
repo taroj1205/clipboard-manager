@@ -63,7 +63,8 @@
     "freeza",
     "nsis",
     "appimage",
-    "EDITMSG"
+    "EDITMSG",
+    "Dedup"
   ],
   "ignorePaths": [
     "node_modules/**",
