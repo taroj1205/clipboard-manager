@@ -75,6 +75,7 @@ function HomeComponent() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetching,
     isLoading,
     invalidateQueries,
   } = useClipboardSearch(loaderData);
@@ -240,7 +241,7 @@ function HomeComponent() {
   return (
     <VStack color="white" gap="sm" h="100vh" p="sm" separator={<Separator />}>
       <TopBar
-        isLoading={isLoading || isFetchingNextPage}
+        isLoading={isLoading || isFetching || isFetchingNextPage}
         query={query}
         ref={inputRef}
         setQuery={handleSearch}

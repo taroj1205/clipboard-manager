@@ -37,8 +37,8 @@ export const SettingsLoadingComponent = () => {
                 <AlertIcon />
                 <AlertTitle>Warning</AlertTitle>
                 <AlertDescription>
-                  This will delete all clipboard entries. This action cannot be
-                  undone.
+                  This will delete all ... clipboard entries. This action cannot
+                  be undone.
                 </AlertDescription>
               </Alert>
               <Button disabled w="fit-content">

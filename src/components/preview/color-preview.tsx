@@ -41,7 +41,7 @@ export const ColorPreview: FC<ColorPreviewProps> = memo(({ color, onCopy }) => {
 
   const normalizedColor = normalizeColor(color);
   const originalFormat = detectColorFormat(color);
-  const hex = hexToRgb(normalizedColor);
+  const hex = normalizedColor;
   const hsl = hexToHsl(normalizedColor);
   const oklch = hexToOklch(normalizedColor);
   const rgb = hexToRgb(normalizedColor);

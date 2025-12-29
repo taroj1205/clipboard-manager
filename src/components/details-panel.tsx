@@ -182,7 +182,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
 
     return (
       <Grid gap="sm" gridTemplateRows="1fr auto" h="full" px="sm" w="full">
-        <GridItem position="relative">
+        <GridItem minW={0} position="relative">
           <ButtonGroup gap="sm" position="absolute" right="xs" top="xs">
             <IconButton
               icon={
@@ -262,7 +262,8 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
           <ScrollArea
             h="full"
             maxH="calc(100vh - 70px - 160px)"
-            maxW="calc(100vw - 25px - sm)"
+            overflowX="hidden"
+            w="full"
           >
             {renderPreviewContent(selectedEntry, notice)}
           </ScrollArea>

@@ -17,6 +17,7 @@ import {
 import { forwardRef, memo, useMemo } from "react";
 import type { ClipboardEntry } from "~/utils/clipboard";
 import { copyClipboardEntry } from "~/utils/clipboard";
+import { useColorConverters } from "~/utils/color";
 import { groupEntriesByDate } from "~/utils/dates";
 import { ClipboardImage } from "./clipboard-image";
 
@@ -62,6 +63,10 @@ const SidebarListItem = memo(
     notice,
     refProp,
   }: SidebarListItemProps) => {
+    const { normalizeColor } = useColorConverters();
+    const swatchColor =
+      entry.type === "color" ? normalizeColor(entry.content) : "";
+
     return (
       <ListItem
         _hover={{ bg: "whiteAlpha.400" }}
@@ -82,7 +87,7 @@ const SidebarListItem = memo(
             <ImageIcon fontSize="16px" />
           ) : (
             entry.type === "color" && (
-              <ColorSwatch color={entry.content} h="16px" w="16px" />
+              <ColorSwatch color={swatchColor} h="16px" w="16px" />
             )
           )}
           {entry.type !== "color" && <FileIcon fontSize="16px" />}
