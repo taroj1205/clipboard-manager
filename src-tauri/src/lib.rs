@@ -41,6 +41,12 @@ pub fn run() {
         );
     #[cfg(desktop)]
     {
+        use tauri_plugin_autostart::MacosLauncher;
+
+        builder = builder.plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            None,
+        ));
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             let _ = app
                 .get_webview_window("popup")
@@ -56,13 +62,6 @@ pub fn run() {
                 use tauri_plugin_global_shortcut::{Code, Modifiers, ShortcutState};
 
                 let _ = api::clipboard::start_monitor(app.handle().clone());
-
-                use tauri_plugin_autostart::MacosLauncher;
-
-                let _ = app.handle().plugin(tauri_plugin_autostart::init(
-                    MacosLauncher::LaunchAgent,
-                    Some(vec![]),
-                ));
 
                 api::window::center_webview_window(&app.get_webview_window("popup").unwrap());
 
@@ -91,35 +90,14 @@ pub fn run() {
             apply_acrylic(&window, Some((255, 255, 255, 125)))
                 .expect("Unsupported platform! 'apply_acrylic' is only supported on Windows");
 
-            let app_handle = Arc::new(Mutex::new(app.handle().clone()));
-            let autostart_i =
-                MenuItem::with_id(app, "autostart", "Enable Autostart", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&autostart_i, &quit_i])?;
+            let menu = Menu::with_items(app, &[&quit_i])?;
 
             let _tray = TrayIconBuilder::new()
                 .on_menu_event(move |menu_app, event| {
-                    let app_handle = app_handle.lock().unwrap();
                     match event.id.as_ref() {
                         "quit" => {
                             menu_app.exit(0);
-                        }
-                        "autostart" => {
-                            use tauri_plugin_autostart::ManagerExt;
-                            let autostart_manager = app_handle.autolaunch();
-                            match autostart_manager.is_enabled() {
-                                Ok(true) => {
-                                    let _ = autostart_manager.disable();
-                                    let _ = autostart_i.set_text("Enable Autostart");
-                                }
-                                Ok(false) => {
-                                    let _ = autostart_manager.enable();
-                                    let _ = autostart_i.set_text("Disable Autostart");
-                                }
-                                Err(e) => {
-                                    eprintln!("Error checking autostart status: {:?}", e);
-                                }
-                            }
                         }
                         _ => {}
                     }
