@@ -1,5 +1,11 @@
 # clipboard-manager
 
+## 0.0.13
+
+### Patch Changes
+
+- [#91](https://github.com/taroj1205/clipboard-manager/pull/91) [`3c1c0bf`](https://github.com/taroj1205/clipboard-manager/commit/3c1c0bffd6c77c33698e12667dc7f5ade5872606) Thanks [@taroj1205](https://github.com/taroj1205)! - Added autostart settings.
+
 ## 0.0.12
 
 ### Patch Changes
