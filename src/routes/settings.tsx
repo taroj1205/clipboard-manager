@@ -2,7 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Undo2Icon } from "@yamada-ui/lucide";
 import { IconButton, TabList, TabPanels, Tabs, VStack } from "@yamada-ui/react";
 import { SettingsLoadingComponent } from "~/components/loading/settings";
-import { ExclusionSettings, GeneralSettings } from "~/components/settings";
+import {
+  ExclusionSettings,
+  GeneralSettings,
+  MaintenanceSettings,
+} from "~/components/settings";
 import { Link } from "~/components/ui/link";
 
 export const Route = createFileRoute("/settings")({
@@ -18,11 +22,13 @@ function RouteComponent() {
           <GeneralSettings.Switcher />
           {/* <AppSettings.Switcher /> */}
           <ExclusionSettings.Switcher />
+          <MaintenanceSettings.Switcher />
         </TabList>
         <TabPanels pt="xs">
           <GeneralSettings.Panel />
           {/* <AppSettings.Panel /> */}
           <ExclusionSettings.Panel />
+          <MaintenanceSettings.Panel />
         </TabPanels>
       </Tabs>
       <IconButton

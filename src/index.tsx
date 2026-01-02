@@ -19,8 +19,11 @@ if (rootEl) {
   const theme = extendTheme({
     styles: {
       globalStyle: {
-        body: {
+        html: {
           bg: "blackAlpha.600",
+        },
+        body: {
+          bg: "transparent",
           overflow: "clip",
         },
       },

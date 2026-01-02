@@ -52,17 +52,17 @@ pub const MIGRATION_3: Migration = Migration {
             created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
             updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         );
-        
+
         -- Copy data from old table (created_at will be preserved, added_date will be dropped, updated_at will be set to created_at)
         INSERT INTO excluded_applications_new (id, name, path, created_at, updated_at)
         SELECT id, name, path, created_at, created_at FROM excluded_applications;
-        
+
         -- Drop old table
         DROP TABLE excluded_applications;
-        
+
         -- Rename new table
         ALTER TABLE excluded_applications_new RENAME TO excluded_applications;
-        
+
         -- Recreate indexes
         CREATE INDEX IF NOT EXISTS idx_excluded_apps_name ON excluded_applications (name);
         CREATE INDEX IF NOT EXISTS idx_excluded_apps_path ON excluded_applications (path);

@@ -1,16 +1,18 @@
 import { Heading, TabPanel, VStack } from "@yamada-ui/react";
 import { memo } from "react";
-import { AutostartToggle } from "./autostart-toggle";
+import { DeleteAll } from "./delete-all";
 
 export const Panel = memo(() => {
   return (
     <TabPanel>
       <VStack>
         <Heading as="h2" fontSize="xl">
-          General Settings
+          Maintenance Settings
         </Heading>
-
-        <AutostartToggle />
+        <Heading as="h3" fontSize="lg">
+          Clipboard Entries
+        </Heading>
+        <DeleteAll />
       </VStack>
     </TabPanel>
   );

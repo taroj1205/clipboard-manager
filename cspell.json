@@ -17,6 +17,8 @@
     "lefthook",
     "clipboard",
     "automerge",
+    "AUTOINCREMENT",
+    "strftime",
     "renovate",
     "clipboardmanager",
     "typesafety",
