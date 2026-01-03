@@ -9,7 +9,6 @@ import {
 } from "@yamada-ui/lucide";
 import {
   Badge,
-  ButtonGroup,
   Center,
   DataList,
   DataListDescription,
@@ -22,9 +21,11 @@ import {
   isArray,
   ScrollArea,
   Text,
+  Tooltip,
   useLoading,
   useNotice,
   useOS,
+  VStack,
 } from "@yamada-ui/react";
 import { memo } from "react";
 import type { ClipboardEntry } from "~/utils/clipboard";
@@ -99,6 +100,7 @@ const renderPreviewContent = (
         h="100%"
         overflowWrap="break-word"
         srcDoc={htmlWithTransparentBg}
+        title="Clipboard HTML preview"
         w="100%"
         wordBreak="break-word"
       />
@@ -183,108 +185,135 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
 
     return (
       <Grid gap="sm" gridTemplateRows="1fr auto" h="full" px="sm" w="full">
-        <GridItem minW={0} position="relative">
-          <ButtonGroup gap="sm" position="absolute" right="xs" top="xs">
-            <IconButton
-              icon={
-                selectedEntry.type === "image" ? <ImageIcon /> : <CopyIcon />
-              }
-              onClick={async () => {
-                await copyClipboardEntry(selectedEntry, notice);
-              }}
-              size="sm"
-              variant="surface"
-            />
-            {os === "windows" &&
-            ocrCopyable &&
-            selectedEntry.content !== selectedEntry.path ? (
-              <IconButton
-                aria-label="Copy OCR Text"
-                icon={<TextIcon />}
-                onClick={async () => {
-                  try {
-                    await writeText(selectedEntry.content);
-                    notice({
-                      status: "success",
-                      title: "OCR text copied!",
-                      description: "OCR text copied!",
-                    });
-                  } catch (_error) {
-                    notice({
-                      status: "error",
-                      title: "Failed to copy OCR text",
-                      description: "Failed to copy OCR text",
-                    });
-                  }
-                }}
-                size="sm"
-                title="Copy OCR Text"
-                variant="surface"
-              />
-            ) : null}
-            {os === "windows" && selectedEntry.type === "image" && (
-              <IconButton
-                aria-label="Reload OCR"
-                icon={<RefreshCwIcon />}
-                onClick={handleReloadOCR}
-                size="sm"
-                title="Reload OCR Text"
-                variant="surface"
-              />
-            )}
-            {selectedEntry.type === "html" && (
-              <IconButton
-                aria-label="Copy Plain Text"
-                icon={<TextIcon />}
-                onClick={async () => {
-                  await writeText(selectedEntry.content);
-                  notice({
-                    status: "success",
-                    title: "Plain text copied!",
-                    description: "Plain text copied!",
-                  });
-                }}
-                size="sm"
-                title="Copy Plain Text"
-                variant="surface"
-              />
-            )}
-            <IconButton
-              aria-label="Delete Entry"
-              colorScheme="danger"
-              icon={<TrashIcon />}
-              onClick={async () =>
-                deleteClipboardEntry(selectedEntry.timestamp)
-              }
-              size="sm"
-              variant="surface"
-            />
-          </ButtonGroup>
-          {isSmartEntry ? (
-            <>
-              <Badge
-                colorScheme="green"
-                left="xs"
-                position="absolute"
-                title="Smart result"
-                top="xs"
-              >
-                Smart Result
-              </Badge>
-              <Center fontSize="4xl" h="full" maxH="calc(100vh - 70px - 160px)">
-                {renderPreviewContent(selectedEntry, notice)}
-              </Center>
-            </>
-          ) : (
-            <ScrollArea
-              h="full"
-              maxH="calc(100vh - 70px - 160px)"
-              overflowX="hidden"
-              w="full"
-            >
-              {renderPreviewContent(selectedEntry, notice)}
-            </ScrollArea>
-          )}
+        <GridItem minW={0}>
+          <Grid columnGap="sm" h="full" templateColumns="minmax(0, 1fr) auto">
+            <GridItem minW={0} position="relative">
+              {isSmartEntry ? (
+                <>
+                  <Badge
+                    colorScheme="green"
+                    left="xs"
+                    position="absolute"
+                    title="Smart result"
+                    top="xs"
+                  >
+                    Smart Result
+                  </Badge>
+                  <Center
+                    fontSize="4xl"
+                    h="full"
+                    maxH="calc(100vh - 70px - 160px)"
+                  >
+                    {renderPreviewContent(selectedEntry, notice)}
+                  </Center>
+                </>
+              ) : (
+                <ScrollArea
+                  h="full"
+                  maxH="calc(100vh - 70px - 160px)"
+                  overflowX="hidden"
+                  w="full"
+                >
+                  {renderPreviewContent(selectedEntry, notice)}
+                </ScrollArea>
+              )}
+            </GridItem>
+            <GridItem>
+              <VStack gap="sm" position="sticky" top="xs">
+                <Tooltip label="Copy entry">
+                  <IconButton
+                    aria-label="Copy entry"
+                    icon={
+                      selectedEntry.type === "image" ? (
+                        <ImageIcon />
+                      ) : (
+                        <CopyIcon />
+                      )
+                    }
+                    onClick={async () => {
+                      await copyClipboardEntry(selectedEntry, notice);
+                    }}
+                    size="sm"
+                    type="button"
+                    variant="surface"
+                  />
+                </Tooltip>
+                {os === "windows" &&
+                ocrCopyable &&
+                selectedEntry.content !== selectedEntry.path ? (
+                  <Tooltip label="Copy OCR text">
+                    <IconButton
+                      aria-label="Copy OCR Text"
+                      icon={<TextIcon />}
+                      onClick={async () => {
+                        try {
+                          await writeText(selectedEntry.content);
+                          notice({
+                            status: "success",
+                            title: "OCR text copied!",
+                            description: "OCR text copied!",
+                          });
+                        } catch (_error) {
+                          notice({
+                            status: "error",
+                            title: "Failed to copy OCR text",
+                            description: "Failed to copy OCR text",
+                          });
+                        }
+                      }}
+                      size="sm"
+                      type="button"
+                      variant="surface"
+                    />
+                  </Tooltip>
+                ) : null}
+                {os === "windows" && selectedEntry.type === "image" && (
+                  <Tooltip label="Reload OCR text">
+                    <IconButton
+                      aria-label="Reload OCR"
+                      icon={<RefreshCwIcon />}
+                      onClick={handleReloadOCR}
+                      size="sm"
+                      type="button"
+                      variant="surface"
+                    />
+                  </Tooltip>
+                )}
+                {selectedEntry.type === "html" && (
+                  <Tooltip label="Copy plain text">
+                    <IconButton
+                      aria-label="Copy Plain Text"
+                      icon={<TextIcon />}
+                      onClick={async () => {
+                        await writeText(selectedEntry.content);
+                        notice({
+                          status: "success",
+                          title: "Plain text copied!",
+                          description: "Plain text copied!",
+                        });
+                      }}
+                      size="sm"
+                      type="button"
+                      variant="surface"
+                    />
+                  </Tooltip>
+                )}
+                <Tooltip label="Delete entry">
+                  <IconButton
+                    aria-label="Delete Entry"
+                    colorScheme="danger"
+                    icon={<TrashIcon />}
+                    onClick={async () =>
+                      deleteClipboardEntry(selectedEntry.timestamp)
+                    }
+                    size="sm"
+                    type="button"
+                    variant="surface"
+                  />
+                </Tooltip>
+              </VStack>
+            </GridItem>
+          </Grid>
         </GridItem>
         <GridItem>
           <DataList col={2} w="fit-content">
