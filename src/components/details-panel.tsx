@@ -9,6 +9,7 @@ import {
 } from "@yamada-ui/lucide";
 import {
   Badge,
+  ButtonGroup,
   Center,
   DataList,
   DataListDescription,
@@ -25,7 +26,6 @@ import {
   useLoading,
   useNotice,
   useOS,
-  VStack,
 } from "@yamada-ui/react";
 import { memo } from "react";
 import type { ClipboardEntry } from "~/utils/clipboard";
@@ -219,8 +219,14 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
               )}
             </GridItem>
             <GridItem>
-              <VStack gap="sm" position="sticky" top="xs">
-                <Tooltip label="Copy entry">
+              <ButtonGroup
+                attached
+                flexDirection="column"
+                gap="sm"
+                position="sticky"
+                top="xs"
+              >
+                <Tooltip label="Copy entry" placement="left">
                   <IconButton
                     aria-label="Copy entry"
                     icon={
@@ -241,7 +247,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
                 {os === "windows" &&
                 ocrCopyable &&
                 selectedEntry.content !== selectedEntry.path ? (
-                  <Tooltip label="Copy OCR text">
+                  <Tooltip label="Copy OCR text" placement="left">
                     <IconButton
                       aria-label="Copy OCR Text"
                       icon={<TextIcon />}
@@ -268,7 +274,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
                   </Tooltip>
                 ) : null}
                 {os === "windows" && selectedEntry.type === "image" && (
-                  <Tooltip label="Reload OCR text">
+                  <Tooltip label="Reload OCR text" placement="left">
                     <IconButton
                       aria-label="Reload OCR"
                       icon={<RefreshCwIcon />}
@@ -280,7 +286,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
                   </Tooltip>
                 )}
                 {selectedEntry.type === "html" && (
-                  <Tooltip label="Copy plain text">
+                  <Tooltip label="Copy plain text" placement="left">
                     <IconButton
                       aria-label="Copy Plain Text"
                       icon={<TextIcon />}
@@ -298,7 +304,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
                     />
                   </Tooltip>
                 )}
-                <Tooltip label="Delete entry">
+                <Tooltip label="Delete entry" placement="left">
                   <IconButton
                     aria-label="Delete Entry"
                     colorScheme="danger"
@@ -311,7 +317,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = memo(
                     variant="surface"
                   />
                 </Tooltip>
-              </VStack>
+              </ButtonGroup>
             </GridItem>
           </Grid>
         </GridItem>
