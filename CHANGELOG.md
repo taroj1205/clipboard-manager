@@ -1,5 +1,13 @@
 # clipboard-manager
 
+## 0.0.14
+
+### Patch Changes
+
+- [#95](https://github.com/taroj1205/clipboard-manager/pull/95) [`b15641e`](https://github.com/taroj1205/clipboard-manager/commit/b15641e55a7a885687f6ed6bdcc31f9be1202061) Thanks [@taroj1205](https://github.com/taroj1205)! - Made icon button vertically listed on right side to prevent blocking content.
+
+- [#93](https://github.com/taroj1205/clipboard-manager/pull/93) [`350099d`](https://github.com/taroj1205/clipboard-manager/commit/350099d20f13c6d4fde95c83afba59ce097ba170) Thanks [@taroj1205](https://github.com/taroj1205)! - Added a custom database for development.
+
 ## 0.0.13
 
 ### Patch Changes
