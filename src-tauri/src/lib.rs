@@ -2,7 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::env;
-use std::sync::{Arc, Mutex};
 use tauri::Manager;
 use tauri::{
     menu::{Menu, MenuItem},
@@ -30,13 +29,18 @@ fn message(message: String) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let migrations = vec![MIGRATION_1, MIGRATION_2, MIGRATION_3];
+    let database_url = if cfg!(debug_assertions) {
+        "sqlite:clipboard.dev.db"
+    } else {
+        "sqlite:clipboard.db"
+    };
 
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
-                .add_migrations("sqlite:clipboard.db", migrations)
+                .add_migrations(database_url, migrations)
                 .build(),
         );
     #[cfg(desktop)]

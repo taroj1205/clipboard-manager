@@ -1,5 +1,5 @@
 import { emit } from "@tauri-apps/api/event";
-import Database from "@tauri-apps/plugin-sql";
+import { db } from "../db";
 
 export interface ExcludedApp {
   id: string;
@@ -9,8 +9,6 @@ export interface ExcludedApp {
   updatedAt: number;
   empty?: boolean;
 }
-
-const db = await Database.load("sqlite:clipboard.db");
 
 export async function addExcludedApp(
   app: Omit<ExcludedApp, "createdAt" | "id" | "updatedAt">
